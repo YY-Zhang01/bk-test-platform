@@ -1,0 +1,6 @@
+- generic [ref=e3]:
+  - heading [level=1] [ref=e4]:
+    - img "logo" [ref=e5]
+  - textbox "用户名" [ref=e9]
+  - textbox "密码" [ref=e12]
+  - button "登录" [ref=e13] [cursor=pointer]

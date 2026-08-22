@@ -1,0 +1,181 @@
+- generic [active] [ref=f1e1]:
+  - generic [ref=f1e2]:
+    - banner [ref=f1e3]:
+      - link "蓝鲸配置平台" [ref=f1e5] [cursor=pointer]:
+        - /url: "#/index"
+      - navigation [ref=f1e6]:
+        - link "首页" [ref=f1e7] [cursor=pointer]:
+          - /url: "#/index"
+        - link "业务" [ref=f1e8] [cursor=pointer]:
+          - /url: "#/business/3/index"
+        - link "资源" [ref=f1e9] [cursor=pointer]:
+          - /url: "#/resource"
+        - link "模型" [ref=f1e10] [cursor=pointer]:
+          - /url: "#/model"
+        - link "运营分析" [ref=f1e11] [cursor=pointer]:
+          - /url: "#/analysis"
+        - link "平台管理" [ref=f1e12] [cursor=pointer]:
+          - /url: "#/platform-management"
+      - generic [ref=f1e13]:
+        - generic [ref=f1e14] [cursor=pointer]: 
+        - generic [ref=f1e17] [cursor=pointer]: 
+        - generic [ref=f1e22] [cursor=pointer]:
+          - generic [ref=f1e23]: bk-cmdb
+          - generic [ref=f1e24]: 
+    - generic [ref=f1e25]:
+      - navigation [ref=f1e197]:
+        - generic [ref=f1e198]:
+          - generic [ref=f1e204]:
+            - link [ref=f1e1214] [cursor=pointer]:
+              - /url: "#/resource/index"
+              - heading " 资源目录" [level=3] [ref=f1e1215]:
+                - generic [ref=f1e207]: 
+                - generic [ref=f1e208]: 资源目录
+            - link [ref=f1e1216] [cursor=pointer]:
+              - /url: "#/resource/project"
+              - heading " 项目" [level=3] [ref=f1e1217]:
+                - generic [ref=f1e211]: 
+                - generic [ref=f1e212]: 项目
+            - link [ref=f1e1218] [cursor=pointer]:
+              - /url: "#/resource/business-set"
+              - heading " 业务集" [level=3] [ref=f1e1219]:
+                - generic [ref=f1e215]: 
+                - generic [ref=f1e216]: 业务集
+            - link [ref=f1e1220] [cursor=pointer]:
+              - /url: "#/resource/business"
+              - heading " 业务" [level=3] [ref=f1e1221]:
+                - generic [ref=f1e219]: 
+                - generic [ref=f1e220]: 业务
+            - link [ref=f1e1222] [cursor=pointer]:
+              - /url: "#/resource/host"
+              - heading " 主机" [level=3] [ref=f1e1223]:
+                - generic [ref=f1e223]: 
+                - generic [ref=f1e224]: 主机
+            - link [ref=f1e1224] [cursor=pointer]:
+              - /url: "#/resource/cloud-area"
+              - heading " 管控区域" [level=3] [ref=f1e1225]:
+                - generic [ref=f1e227]: 
+                - generic [ref=f1e228]: 管控区域
+            - link [ref=f1e1226] [cursor=pointer]:
+              - /url: "#/resource/cloud-account"
+              - heading " 云账户" [level=3] [ref=f1e1227]:
+                - generic [ref=f1e231]: 
+                - generic [ref=f1e232]: 云账户
+            - link [ref=f1e1228] [cursor=pointer]:
+              - /url: "#/resource/cloud-resource"
+              - heading " 云资源发现" [level=3] [ref=f1e1229]:
+                - generic [ref=f1e1230]: 
+                - generic [ref=f1e1231]: 云资源发现
+          - generic "收起导航" [ref=f1e234] [cursor=pointer]: 
+      - generic [ref=f1e235]:
+        - generic [ref=f1e1232] [cursor=pointer]: 
+        - heading "主机" [level=1] [ref=f1e1233]
+      - generic [ref=f1e1234]:
+        - list [ref=f1e1238]:
+          - listitem [ref=f1e1239] [cursor=pointer]:
+            - generic [ref=f1e1240]: 未分配
+          - listitem [ref=f1e1241] [cursor=pointer]:
+            - generic [ref=f1e1242]: 已分配
+          - listitem [ref=f1e1243]:
+            - generic [ref=f1e1244]: 全部
+        - generic [ref=f1e1265]:
+          - generic [ref=f1e1266]:
+            - generic [ref=f1e1267]:
+              - button "导入主机" [ref=f1e1504] [cursor=pointer]
+              - generic [ref=f1e1272] [cursor=pointer]:
+                - generic: 
+                - generic "分配到" [ref=f1e1275]
+              - button "编辑 " [ref=f1e1279] [cursor=pointer]:
+                - generic [ref=f1e1281]:
+                  - text: 编辑
+                  - generic [ref=f1e1282]: 
+              - button "复制 " [ref=f1e1287] [cursor=pointer]:
+                - generic [ref=f1e1289]:
+                  - text: 复制
+                  - generic [ref=f1e1290]: 
+              - button "更多 " [ref=f1e1294] [cursor=pointer]:
+                - generic [ref=f1e1296]:
+                  - text: 更多
+                  - generic [ref=f1e1297]: 
+            - generic [ref=f1e1299]:
+              - textbox "请输入IP或固资编号" [ref=f1e1302]
+              - button "" [ref=f1e1303] [cursor=pointer]
+              - button "" [ref=f1e1305] [cursor=pointer]
+          - generic [ref=f1e1307]:
+            - table [ref=f1e1309]:
+              - rowgroup [ref=f1e1313]:
+                - row [ref=f1e1364]:
+                  - columnheader [ref=f1e1315]
+                  - columnheader [ref=f1e1365] [cursor=pointer]
+                  - columnheader "内网IPv4" [ref=f1e1366] [cursor=pointer]
+                  - columnheader "内网IPv6" [ref=f1e1372] [cursor=pointer]
+                  - columnheader "管控区域" [ref=f1e1378]
+                  - columnheader "业务拓扑" [ref=f1e1381]
+                  - columnheader "云主机状态" [ref=f1e1384] [cursor=pointer]
+                  - columnheader [ref=f1e1316]
+                  - columnheader [ref=f1e1564]
+            - table [ref=f1e1565]:
+              - rowgroup [ref=f1e1575]:
+                - row [ref=f1e1576]:
+                  - cell [ref=f1e1577]
+                  - cell "1" [ref=f1e1578] [cursor=pointer]
+                  - cell "10.0.0.101" [ref=f1e1579]
+                  - cell "--" [ref=f1e1582]
+                  - cell "Default Area[0]" [ref=f1e1585]
+                  - cell "资源池 / 空闲机池 / 空闲机" [ref=f1e1588]
+                  - cell "--" [ref=f1e1592]
+            - generic [ref=f1e1329]:
+              - table [ref=f1e1331]:
+                - rowgroup [ref=f1e1335]:
+                  - row "ID" [ref=f1e1396]:
+                    - columnheader [ref=f1e1337]:
+                      - generic [ref=f1e1340] [cursor=pointer]
+                    - columnheader "ID" [ref=f1e1397] [cursor=pointer]
+                    - columnheader [ref=f1e1403] [cursor=pointer]
+                    - columnheader [ref=f1e1404] [cursor=pointer]
+                    - columnheader [ref=f1e1405]
+                    - columnheader [ref=f1e1406]
+                    - columnheader [ref=f1e1407] [cursor=pointer]
+                    - columnheader [ref=f1e1342]
+              - table [ref=f1e1596]:
+                - rowgroup [ref=f1e1606]:
+                  - row "1" [ref=f1e1607]:
+                    - cell [ref=f1e1608]:
+                      - generic [ref=f1e1610] [cursor=pointer]
+                    - cell "1" [ref=f1e1612] [cursor=pointer]
+                    - cell [ref=f1e1615]
+                    - cell [ref=f1e1616]
+                    - cell [ref=f1e1617]
+                    - cell [ref=f1e1618]
+                    - cell [ref=f1e1619]
+            - table [ref=f1e1345]:
+              - rowgroup [ref=f1e1349]:
+                - row [ref=f1e1350]:
+                  - columnheader [ref=f1e1351]
+                  - columnheader [ref=f1e1414] [cursor=pointer]
+                  - columnheader [ref=f1e1415] [cursor=pointer]
+                  - columnheader [ref=f1e1416] [cursor=pointer]
+                  - columnheader [ref=f1e1417]
+                  - columnheader [ref=f1e1418]
+                  - columnheader [ref=f1e1419] [cursor=pointer]
+                  - columnheader "" [ref=f1e1352]
+            - generic [ref=f1e1622]:
+              - generic [ref=f1e1623]: 共计1条
+              - generic [ref=f1e1624]:
+                - generic [ref=f1e1625]: 每页
+                - generic [ref=f1e1626] [cursor=pointer]:
+                  - generic: 
+                  - generic "10" [ref=f1e1629]
+                - generic [ref=f1e1630]: 条
+              - generic [ref=f1e1631]: 已选择1条
+              - list [ref=f1e1633]:
+                - listitem [ref=f1e1634]:
+                  - link "" [ref=f1e1635]:
+                    - /url: javascript:void(0);
+                - listitem [ref=f1e1637]:
+                  - link "1" [ref=f1e1638] [cursor=pointer]:
+                    - /url: javascript:void(0);
+                - listitem [ref=f1e1639]:
+                  - link "" [ref=f1e1640]:
+                    - /url: javascript:void(0);
+  - generic: 

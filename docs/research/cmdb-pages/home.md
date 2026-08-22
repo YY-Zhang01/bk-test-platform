@@ -1,0 +1,173 @@
+- generic [active] [ref=f1e1]:
+  - generic [ref=f1e2]:
+    - banner [ref=f1e3]:
+      - link "蓝鲸配置平台" [ref=f1e5] [cursor=pointer]:
+        - /url: "#/index"
+      - navigation [ref=f1e6]:
+        - link "首页" [ref=f1e7] [cursor=pointer]:
+          - /url: "#/index"
+        - link "业务" [ref=f1e8] [cursor=pointer]:
+          - /url: "#/business/index"
+        - link "资源" [ref=f1e9] [cursor=pointer]:
+          - /url: "#/resource"
+        - link "模型" [ref=f1e10] [cursor=pointer]:
+          - /url: "#/model"
+        - link "运营分析" [ref=f1e11] [cursor=pointer]:
+          - /url: "#/analysis"
+        - link "平台管理" [ref=f1e12] [cursor=pointer]:
+          - /url: "#/platform-management"
+      - generic [ref=f1e13]:
+        - generic [ref=f1e14] [cursor=pointer]: 
+        - generic [ref=f1e17] [cursor=pointer]: 
+        - generic [ref=f1e22] [cursor=pointer]:
+          - generic [ref=f1e23]: bk-cmdb
+          - generic [ref=f1e24]: 
+    - generic [ref=f1e25]:
+      - text: 
+      - generic [ref=f1e28]:
+        - generic [ref=f1e33]:
+          - generic [ref=f1e34]: 请输入IP、管控区域和IP、固资编号进行搜索，使用 Shift + Enter 换行。
+          - button " 搜索" [ref=f1e36] [cursor=pointer]:
+            - generic [ref=f1e38]:
+              - generic [ref=f1e39]: 
+              - text: 搜索
+          - generic [ref=f1e40] [cursor=pointer]: 高级筛选
+        - generic [ref=f1e43]:
+          - paragraph [ref=f1e44]:
+            - link "技术支持" [ref=f1e45] [cursor=pointer]:
+              - /url: https://wpa1.qq.com/KziXGWJs?_type=wpa&qidian=true
+            - text: "|"
+            - link "社区论坛" [ref=f1e46] [cursor=pointer]:
+              - /url: https://bk.tencent.com/s-mart/community/
+            - text: "|"
+            - link "产品官网" [ref=f1e47] [cursor=pointer]:
+              - /url: https://bk.tencent.com/index/
+          - paragraph [ref=f1e48]: Copyright © 2012-2026 Tencent BlueKing. All Rights Reserved. v3.13.7
+  - generic [ref=f1e58]:
+    - generic [ref=f1e61]:
+      - list [ref=f1e64]:
+        - listitem [ref=f1e65]:
+          - generic [ref=f1e66]: v3.13.7
+          - generic [ref=f1e67]: 2024-05-23
+          - generic [ref=f1e68]: 当前版本
+        - listitem [ref=f1e69]:
+          - generic [ref=f1e70]: v3.13.6
+          - generic [ref=f1e71]: 2024-04-30
+        - listitem [ref=f1e72]:
+          - generic [ref=f1e73]: v3.13.5
+          - generic [ref=f1e74]: 2024-03-29
+        - listitem [ref=f1e75]:
+          - generic [ref=f1e76]: v3.13.4
+          - generic [ref=f1e77]: 2024-03-12
+        - listitem [ref=f1e78]:
+          - generic [ref=f1e79]: v3.13.3
+          - generic [ref=f1e80]: 2024-02-28
+        - listitem [ref=f1e81]:
+          - generic [ref=f1e82]: v3.13.2
+          - generic [ref=f1e83]: 2024-01-12
+        - listitem [ref=f1e84]:
+          - generic [ref=f1e85]: v3.13.1
+          - generic [ref=f1e86]: 2023-12-27
+        - listitem [ref=f1e87]:
+          - generic [ref=f1e88]: v3.12.4
+          - generic [ref=f1e89]: 2023-12-18
+        - listitem [ref=f1e90]:
+          - generic [ref=f1e91]: v3.12.3
+          - generic [ref=f1e92]: 2023-11-06
+        - listitem [ref=f1e93]:
+          - generic [ref=f1e94]: v3.12.2
+          - generic [ref=f1e95]: 2023-10-30
+        - listitem [ref=f1e96]:
+          - generic [ref=f1e97]: v3.12.1
+          - generic [ref=f1e98]: 2023-10-10
+        - listitem [ref=f1e99]:
+          - generic [ref=f1e100]: v3.11.3
+          - generic [ref=f1e101]: 2023-12-18
+        - listitem [ref=f1e102]:
+          - generic [ref=f1e103]: v3.11.2
+          - generic [ref=f1e104]: 2023-09-12
+        - listitem [ref=f1e105]:
+          - generic [ref=f1e106]: v3.11.1
+          - generic [ref=f1e107]: 2023-07-31
+        - listitem [ref=f1e108]:
+          - generic [ref=f1e109]: v3.10.22
+          - generic [ref=f1e110]: 2022-11-10
+        - listitem [ref=f1e111]:
+          - generic [ref=f1e112]: v3.10.21
+          - generic [ref=f1e113]: 2022-09-28
+        - listitem [ref=f1e114]:
+          - generic [ref=f1e115]: v3.10.20
+          - generic [ref=f1e116]: 2022-09-28
+        - listitem [ref=f1e117]:
+          - generic [ref=f1e118]: v3.10.19
+          - generic [ref=f1e119]: 2022-09-27
+        - listitem [ref=f1e120]:
+          - generic [ref=f1e121]: v3.10.18
+          - generic [ref=f1e122]: 2022-07-26
+        - listitem [ref=f1e123]:
+          - generic [ref=f1e124]: v3.10.15
+          - generic [ref=f1e125]: 2022-04-25
+        - listitem [ref=f1e126]:
+          - generic [ref=f1e127]: v3.10.14
+          - generic [ref=f1e128]: 2022-04-13
+        - listitem [ref=f1e129]:
+          - generic [ref=f1e130]: v3.10.13
+          - generic [ref=f1e131]: 2022-03-16
+        - listitem [ref=f1e132]:
+          - generic [ref=f1e133]: v3.10.12
+          - generic [ref=f1e134]: 2022-03-02
+        - listitem [ref=f1e135]:
+          - generic [ref=f1e136]: v3.10.11
+          - generic [ref=f1e137]: 2022-02-28
+        - listitem [ref=f1e138]:
+          - generic [ref=f1e139]: v3.10.10
+          - generic [ref=f1e140]: 2021-12-24
+        - listitem [ref=f1e141]:
+          - generic [ref=f1e142]: v3.10.9
+          - generic [ref=f1e143]: 2021-11-22
+        - listitem [ref=f1e144]:
+          - generic [ref=f1e145]: v3.10.8
+          - generic [ref=f1e146]: 2021-11-04
+        - listitem [ref=f1e147]:
+          - generic [ref=f1e148]: v3.10.7
+          - generic [ref=f1e149]: 2021-10-27
+        - listitem [ref=f1e150]:
+          - generic [ref=f1e151]: v3.10.6
+          - generic [ref=f1e152]: 2021-10-11
+        - listitem [ref=f1e153]:
+          - generic [ref=f1e154]: v3.10.5
+          - generic [ref=f1e155]: 2021-08-06
+        - listitem [ref=f1e156]:
+          - generic [ref=f1e157]: v3.10.4
+          - generic [ref=f1e158]: 2021-08-02
+        - listitem [ref=f1e159]:
+          - generic [ref=f1e160]: v3.10.3
+          - generic [ref=f1e161]: 2021-07-20
+        - listitem [ref=f1e162]:
+          - generic [ref=f1e163]: v3.10.2
+          - generic [ref=f1e164]: 2021-07-01
+        - listitem [ref=f1e165]:
+          - generic [ref=f1e166]: v3.10.1
+          - generic [ref=f1e167]: 2021-06-17
+        - listitem
+      - generic [ref=f1e172]:
+        - heading "v3.13.7 版本日志" [level=2] [ref=f1e173]
+        - generic [ref=f1e174]:
+          - heading "新增" [level=3] [ref=f1e175]
+          - list [ref=f1e176]:
+            - listitem [ref=f1e177]:
+              - text: "[新增] 主机模型新增"
+              - code [ref=f1e178]: 云地域
+              - text: 、
+              - code [ref=f1e179]: 云可用区
+              - text: 字段
+            - listitem [ref=f1e180]: "[新增] 资源实例的表格页面支持shift连选功能"
+            - listitem [ref=f1e181]: "[新增] 编辑资源实例时，支持展示该字段默认值及填入的功能"
+          - heading "优化" [level=3] [ref=f1e182]
+          - list [ref=f1e183]:
+            - listitem [ref=f1e184]: "[优化] 优化了当用户登录态失效时，将提示用户重新登录的功能"
+            - listitem [ref=f1e185]: "[优化] 优化了一些前端的显示问题"
+          - heading "修复" [level=3] [ref=f1e186]
+          - list [ref=f1e187]:
+            - listitem [ref=f1e188]: "[修复] 修复了一些动态分组、字段组合模板的已知问题"
+    - generic [ref=f1e196] [cursor=pointer]: 

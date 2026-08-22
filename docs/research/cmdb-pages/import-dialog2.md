@@ -1,0 +1,194 @@
+- generic [active] [ref=f1e1]:
+  - generic [ref=f1e2]:
+    - banner [ref=f1e3]:
+      - link "蓝鲸配置平台" [ref=f1e5] [cursor=pointer]:
+        - /url: "#/index"
+      - navigation [ref=f1e6]:
+        - link "首页" [ref=f1e7] [cursor=pointer]:
+          - /url: "#/index"
+        - link "业务" [ref=f1e8] [cursor=pointer]:
+          - /url: "#/business/3/index"
+        - link "资源" [ref=f1e9] [cursor=pointer]:
+          - /url: "#/resource"
+        - link "模型" [ref=f1e10] [cursor=pointer]:
+          - /url: "#/model"
+        - link "运营分析" [ref=f1e11] [cursor=pointer]:
+          - /url: "#/analysis"
+        - link "平台管理" [ref=f1e12] [cursor=pointer]:
+          - /url: "#/platform-management"
+      - generic [ref=f1e13]:
+        - generic [ref=f1e14] [cursor=pointer]: 
+        - generic [ref=f1e17] [cursor=pointer]: 
+        - generic [ref=f1e22] [cursor=pointer]:
+          - generic [ref=f1e23]: bk-cmdb
+          - generic [ref=f1e24]: 
+    - generic [ref=f1e25]:
+      - navigation [ref=f1e197]:
+        - generic [ref=f1e198]:
+          - generic [ref=f1e204]:
+            - link [ref=f1e1214] [cursor=pointer]:
+              - /url: "#/resource/index"
+              - heading " 资源目录" [level=3] [ref=f1e1215]:
+                - generic [ref=f1e207]: 
+                - generic [ref=f1e208]: 资源目录
+            - link [ref=f1e1216] [cursor=pointer]:
+              - /url: "#/resource/project"
+              - heading " 项目" [level=3] [ref=f1e1217]:
+                - generic [ref=f1e211]: 
+                - generic [ref=f1e212]: 项目
+            - link [ref=f1e1218] [cursor=pointer]:
+              - /url: "#/resource/business-set"
+              - heading " 业务集" [level=3] [ref=f1e1219]:
+                - generic [ref=f1e215]: 
+                - generic [ref=f1e216]: 业务集
+            - link [ref=f1e1220] [cursor=pointer]:
+              - /url: "#/resource/business"
+              - heading " 业务" [level=3] [ref=f1e1221]:
+                - generic [ref=f1e219]: 
+                - generic [ref=f1e220]: 业务
+            - link [ref=f1e1222] [cursor=pointer]:
+              - /url: "#/resource/host"
+              - heading " 主机" [level=3] [ref=f1e1223]:
+                - generic [ref=f1e223]: 
+                - generic [ref=f1e224]: 主机
+            - link [ref=f1e1224] [cursor=pointer]:
+              - /url: "#/resource/cloud-area"
+              - heading " 管控区域" [level=3] [ref=f1e1225]:
+                - generic [ref=f1e227]: 
+                - generic [ref=f1e228]: 管控区域
+            - link [ref=f1e1226] [cursor=pointer]:
+              - /url: "#/resource/cloud-account"
+              - heading " 云账户" [level=3] [ref=f1e1227]:
+                - generic [ref=f1e231]: 
+                - generic [ref=f1e232]: 云账户
+            - link [ref=f1e1228] [cursor=pointer]:
+              - /url: "#/resource/cloud-resource"
+              - heading " 云资源发现" [level=3] [ref=f1e1229]:
+                - generic [ref=f1e1230]: 
+                - generic [ref=f1e1231]: 云资源发现
+          - generic "收起导航" [ref=f1e234] [cursor=pointer]: 
+      - generic [ref=f1e235]:
+        - generic [ref=f1e1232] [cursor=pointer]: 
+        - heading "主机" [level=1] [ref=f1e1233]
+      - generic [ref=f1e1234]:
+        - list [ref=f1e1238]:
+          - listitem [ref=f1e1239]:
+            - generic [ref=f1e1240]: 未分配
+          - listitem [ref=f1e1241] [cursor=pointer]:
+            - generic [ref=f1e1242]: 已分配
+          - listitem [ref=f1e1243] [cursor=pointer]:
+            - generic [ref=f1e1244]: 全部
+        - generic [ref=f1e1245]:
+          - generic [ref=f1e1246]:
+            - generic [ref=f1e1247]:
+              - generic [ref=f1e1248]:
+                - generic [ref=f1e1249]:
+                  - textbox "分组目录" [ref=f1e1251]
+                  - generic [ref=f1e1252]: 
+                - generic [ref=f1e1254] [cursor=pointer]: 
+              - list [ref=f1e1255]:
+                - listitem [ref=f1e1256] [cursor=pointer]:
+                  - generic "主机池" [ref=f1e1257]
+                  - generic [ref=f1e1258]: "0"
+                - listitem [ref=f1e1259] [cursor=pointer]:
+                  - generic [ref=f1e1260]: 
+                  - generic "空闲机" [ref=f1e1261]
+                  - generic [ref=f1e1262]: "0"
+            - generic [ref=f1e1263] [cursor=pointer]: 
+          - generic [ref=f1e1265]:
+            - generic [ref=f1e1266]:
+              - generic [ref=f1e1267]:
+                - button "导入主机" [ref=f1e1269] [cursor=pointer]
+                - generic [ref=f1e1272]:
+                  - generic: 
+                  - generic "分配到" [ref=f1e1275]
+                - button "编辑 " [ref=f1e1279] [cursor=pointer]:
+                  - generic [ref=f1e1281]:
+                    - text: 编辑
+                    - generic [ref=f1e1282]: 
+                - button "复制 " [disabled] [ref=f1e1287]:
+                  - generic [ref=f1e1289]:
+                    - text: 复制
+                    - generic [ref=f1e1290]: 
+                - button "更多 " [ref=f1e1294] [cursor=pointer]:
+                  - generic [ref=f1e1296]:
+                    - text: 更多
+                    - generic [ref=f1e1297]: 
+              - generic [ref=f1e1299]:
+                - textbox "请输入IP或固资编号" [ref=f1e1302]
+                - button "" [ref=f1e1303] [cursor=pointer]
+                - button "" [ref=f1e1305] [cursor=pointer]
+            - generic [ref=f1e1307]:
+              - table [ref=f1e1309]:
+                - rowgroup [ref=f1e1313]:
+                  - row [ref=f1e1364]:
+                    - columnheader [ref=f1e1315]
+                    - columnheader [ref=f1e1365] [cursor=pointer]
+                    - columnheader "内网IPv4" [ref=f1e1366] [cursor=pointer]
+                    - columnheader "内网IPv6" [ref=f1e1372] [cursor=pointer]
+                    - columnheader "管控区域" [ref=f1e1378]
+                    - columnheader "业务拓扑" [ref=f1e1381]
+                    - columnheader "云主机状态" [ref=f1e1384] [cursor=pointer]
+                    - columnheader [ref=f1e1316]
+              - generic [ref=f1e1317]:
+                - table:
+                  - rowgroup
+                - generic [ref=f1e1324]:
+                  - img "empty" [ref=f1e1326]
+                  - paragraph [ref=f1e1328]: 暂无数据
+              - generic [ref=f1e1329]:
+                - table [ref=f1e1331]:
+                  - rowgroup [ref=f1e1335]:
+                    - row [ref=f1e1396]:
+                      - columnheader [ref=f1e1337]:
+                        - generic [ref=f1e1340] [cursor=pointer]
+                      - columnheader "ID" [ref=f1e1397] [cursor=pointer]
+                      - columnheader [ref=f1e1403] [cursor=pointer]
+                      - columnheader [ref=f1e1404] [cursor=pointer]
+                      - columnheader [ref=f1e1405]
+                      - columnheader [ref=f1e1406]
+                      - columnheader [ref=f1e1407] [cursor=pointer]
+                      - columnheader [ref=f1e1342]
+                - generic:
+                  - table:
+                    - rowgroup
+              - table [ref=f1e1345]:
+                - rowgroup [ref=f1e1349]:
+                  - row [ref=f1e1350]:
+                    - columnheader [ref=f1e1351]
+                    - columnheader [ref=f1e1414] [cursor=pointer]
+                    - columnheader [ref=f1e1415] [cursor=pointer]
+                    - columnheader [ref=f1e1416] [cursor=pointer]
+                    - columnheader [ref=f1e1417]
+                    - columnheader [ref=f1e1418]
+                    - columnheader [ref=f1e1419] [cursor=pointer]
+                    - columnheader "" [ref=f1e1352]
+  - generic: 
+  - article [ref=f1e1420]:
+    - generic [ref=f1e1422]:
+      - generic [ref=f1e1423]:
+        - generic [ref=f1e1424] [cursor=pointer]: 
+        - generic "导入主机" [ref=f1e1427] [cursor=pointer]
+      - generic [ref=f1e1429]:
+        - generic [ref=f1e1430]:
+          - generic [ref=f1e1431]:
+            - generic [ref=f1e1432]: "1"
+            - generic [ref=f1e1434]: 上传文件
+          - generic [ref=f1e1436]:
+            - generic [ref=f1e1437]: "2"
+            - generic [ref=f1e1439]: 选择关联模型
+        - generic [ref=f1e1441]:
+          - generic [ref=f1e1442]:
+            - generic [ref=f1e1443]: 
+            - paragraph [ref=f1e1444]: 说明：导入编辑需要先导出需要修改的实例，并完成编辑修改后才能进行导入编辑操作
+          - generic [ref=f1e1445]:
+            - button "Choose File" [ref=f1e1446] [cursor=pointer]
+            - generic [ref=f1e1447]: 
+            - generic [ref=f1e1448]: 将文件拖到此处或点击上传
+          - paragraph [ref=f1e1449]:
+            - text: 20M 以内的 xlsx 文件
+            - link "下载模板" [ref=f1e1450] [cursor=pointer]:
+              - /url: javascript:void(0);
+          - generic [ref=f1e1452]:
+            - button "下一步" [disabled] [ref=f1e1453]
+            - button "取消" [ref=f1e1455] [cursor=pointer]

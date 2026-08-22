@@ -1,0 +1,116 @@
+- generic [active] [ref=f1e1]:
+  - generic [ref=f1e2]:
+    - banner [ref=f1e3]:
+      - link "蓝鲸配置平台" [ref=f1e5] [cursor=pointer]:
+        - /url: "#/index"
+      - navigation [ref=f1e6]:
+        - link "首页" [ref=f1e7] [cursor=pointer]:
+          - /url: "#/index"
+        - link "业务" [ref=f1e8] [cursor=pointer]:
+          - /url: "#/business/2/index"
+        - link "资源" [ref=f1e9] [cursor=pointer]:
+          - /url: "#/resource"
+        - link "模型" [ref=f1e10] [cursor=pointer]:
+          - /url: "#/model"
+        - link "运营分析" [ref=f1e11] [cursor=pointer]:
+          - /url: "#/analysis"
+        - link "平台管理" [ref=f1e12] [cursor=pointer]:
+          - /url: "#/platform-management"
+      - generic [ref=f1e13]:
+        - generic [ref=f1e14] [cursor=pointer]: 
+        - generic [ref=f1e17] [cursor=pointer]: 
+        - generic [ref=f1e22] [cursor=pointer]:
+          - generic [ref=f1e23]: bk-cmdb
+          - generic [ref=f1e24]: 
+    - generic [ref=f1e25]:
+      - navigation [ref=f1e197]:
+        - generic [ref=f1e198]:
+          - generic [ref=f1e204]:
+            - link [ref=f1e451] [cursor=pointer]:
+              - /url: "#/resource/index"
+              - heading " 资源目录" [level=3] [ref=f1e452]:
+                - generic [ref=f1e207]: 
+                - generic [ref=f1e208]: 资源目录
+            - link [ref=f1e453] [cursor=pointer]:
+              - /url: "#/resource/project"
+              - heading " 项目" [level=3] [ref=f1e454]:
+                - generic [ref=f1e211]: 
+                - generic [ref=f1e212]: 项目
+            - link [ref=f1e455] [cursor=pointer]:
+              - /url: "#/resource/business-set"
+              - heading " 业务集" [level=3] [ref=f1e456]:
+                - generic [ref=f1e215]: 
+                - generic [ref=f1e216]: 业务集
+            - link [ref=f1e457] [cursor=pointer]:
+              - /url: "#/resource/business"
+              - heading " 业务" [level=3] [ref=f1e458]:
+                - generic [ref=f1e219]: 
+                - generic [ref=f1e220]: 业务
+            - link [ref=f1e459] [cursor=pointer]:
+              - /url: "#/resource/host"
+              - heading " 主机" [level=3] [ref=f1e460]:
+                - generic [ref=f1e223]: 
+                - generic [ref=f1e224]: 主机
+            - link [ref=f1e461] [cursor=pointer]:
+              - /url: "#/resource/cloud-area"
+              - heading " 管控区域" [level=3] [ref=f1e462]:
+                - generic [ref=f1e227]: 
+                - generic [ref=f1e228]: 管控区域
+            - link [ref=f1e463] [cursor=pointer]:
+              - /url: "#/resource/cloud-account"
+              - heading " 云账户" [level=3] [ref=f1e464]:
+                - generic [ref=f1e231]: 
+                - generic [ref=f1e232]: 云账户
+            - link [ref=f1e465] [cursor=pointer]:
+              - /url: "#/resource/cloud-resource"
+              - heading " 云资源发现" [level=3] [ref=f1e466]:
+                - generic [ref=f1e467]: 
+                - generic [ref=f1e468]: 云资源发现
+          - generic "收起导航" [ref=f1e234] [cursor=pointer]: 
+      - heading "资源目录" [level=1] [ref=f1e469]
+      - generic [ref=f1e470]:
+        - generic [ref=f1e472]:
+          - textbox "请输入关键字" [ref=f1e474]
+          - generic [ref=f1e475]: 
+        - generic:
+          - generic [ref=f1e478]:
+            - heading "主机管理" [level=4] [ref=f1e479]
+            - generic "主机" [ref=f1e482] [cursor=pointer]:
+              - generic [ref=f1e483]: 
+              - generic [ref=f1e485]: 
+              - generic [ref=f1e486]: "0"
+          - generic [ref=f1e489]:
+            - heading "组织架构" [level=4] [ref=f1e490]
+            - generic [ref=f1e492]:
+              - generic "业务" [ref=f1e493] [cursor=pointer]:
+                - generic [ref=f1e494]: 
+                - generic [ref=f1e496]: 
+                - generic [ref=f1e497]: "3"
+              - generic "业务集" [ref=f1e499] [cursor=pointer]:
+                - generic [ref=f1e500]: 
+                - generic [ref=f1e502]: 
+                - generic [ref=f1e503]: "2"
+              - generic "项目" [ref=f1e505] [cursor=pointer]:
+                - generic [ref=f1e506]: 
+                - generic [ref=f1e508]: 
+                - generic [ref=f1e509]: "0"
+          - generic [ref=f1e512]:
+            - heading "网络" [level=4] [ref=f1e513]
+            - generic [ref=f1e515]:
+              - generic "交换机" [ref=f1e516] [cursor=pointer]:
+                - generic [ref=f1e517]: 
+                - text: 
+                - generic [ref=f1e519]: "0"
+              - generic "路由器" [ref=f1e521] [cursor=pointer]:
+                - generic [ref=f1e522]: 
+                - text: 
+                - generic [ref=f1e524]: "0"
+              - generic "负载均衡" [ref=f1e526] [cursor=pointer]:
+                - generic [ref=f1e527]: 
+                - text: 
+                - generic [ref=f1e529]: "0"
+              - generic "防火墙" [ref=f1e531] [cursor=pointer]:
+                - generic [ref=f1e532]: 
+                - text: 
+                - generic [ref=f1e534]: "0"
+  - generic: 
