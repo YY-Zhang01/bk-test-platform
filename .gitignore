@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+
+# 测试产物
+reports/
+data/
+.run_*.log
+results_history.jsonl
+results_history.jsonl.bak
+latest.html
+gen_cases/
+
+# 本地凭证（绝不提交真实 ESB 三件套，模块名不能带点故用下划线）
+job_config_local.py
+
+# IDE
+.idea/
+.vscode/
+*.iml

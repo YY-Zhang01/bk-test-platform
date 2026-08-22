@@ -1,0 +1,19 @@
+# -*- coding: utf-8 -*-
+# CI：每次推送跑 L1 层（unit，不依赖体验环境凭证）。
+# 环境层用例在 CI 里因凭证缺失诚实 skip，不造假绿——
+# 拿到体验账号后可在 GitLab 项目设置里配 CI 变量
+# （ESB_HOST/BK_APP_CODE/...）注入 job_config_local.py 后解锁全量。
+
+stages:
+  - test
+
+unit-test:
+  stage: test
+  image: python:3.11-slim
+  script:
+    - pip install -r requirements.txt -q
+    - python -m pytest -m unit -q --junitxml=junit.xml
+  artifacts:
+    when: always
+    reports:
+      junit: junit.xml

@@ -1,0 +1,18 @@
+[
+  {
+    "name": "jobv3-confapis",
+    "path": "docs/apidoc/esb/jobv3-confapis",
+    "sha": "8fda0143da23218f764fbaa71d9f34663cdf033d",
+    "size": 0,
+    "url": "https://api.github.com/repos/TencentBlueKing/bk-job/contents/docs/apidoc/esb/jobv3-confapis?ref=master",
+    "html_url": "https://github.com/TencentBlueKing/bk-job/tree/master/docs/apidoc/esb/jobv3-confapis",
+    "git_url": "https://api.github.com/repos/TencentBlueKing/bk-job/git/trees/8fda0143da23218f764fbaa71d9f34663cdf033d",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/TencentBlueKing/bk-job/contents/docs/apidoc/esb/jobv3-confapis?ref=master",
+      "git": "https://api.github.com/repos/TencentBlueKing/bk-job/git/trees/8fda0143da23218f764fbaa71d9f34663cdf033d",
+      "html": "https://github.com/TencentBlueKing/bk-job/tree/master/docs/apidoc/esb/jobv3-confapis"
+    }
+  }
+]

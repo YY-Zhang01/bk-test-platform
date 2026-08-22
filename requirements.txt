@@ -1,0 +1,17 @@
+# -*- coding: utf-8 -*-
+# 蓝鲸双系统端到端测试平台 依赖清单
+# 安装：pip install -r requirements.txt
+
+# ── Web 平台 ──────────────────────────────
+fastapi==0.141.1
+uvicorn==0.52.1
+
+# ── 测试框架 ──────────────────────────────
+pytest==9.1.1
+pytest-html==4.2.0
+
+# ── ESB 接口调用 ──────────────────────────
+requests==2.34.2
+
+# ── 性能压测（可选，scripts/locustfile.py）──
+locust==2.46.3

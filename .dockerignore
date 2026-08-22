@@ -1,0 +1,11 @@
+# Docker 构建上下文排除清单（镜像要小、要干净）
+.git/
+.venv/
+.pytest_cache/
+__pycache__/
+reports/
+data/
+gen_cases/
+.run_*.log
+*.py[cod]
+job_config_local.py

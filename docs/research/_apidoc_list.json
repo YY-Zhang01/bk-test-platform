@@ -1,0 +1,66 @@
+[
+  {
+    "name": "README.md",
+    "path": "docs/apidoc/README.md",
+    "sha": "6648669f1dfeed697316103fbb6b7e1881bfdba7",
+    "size": 11619,
+    "url": "https://api.github.com/repos/TencentBlueKing/bk-job/contents/docs/apidoc/README.md?ref=master",
+    "html_url": "https://github.com/TencentBlueKing/bk-job/blob/master/docs/apidoc/README.md",
+    "git_url": "https://api.github.com/repos/TencentBlueKing/bk-job/git/blobs/6648669f1dfeed697316103fbb6b7e1881bfdba7",
+    "download_url": "https://raw.githubusercontent.com/TencentBlueKing/bk-job/master/docs/apidoc/README.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/TencentBlueKing/bk-job/contents/docs/apidoc/README.md?ref=master",
+      "git": "https://api.github.com/repos/TencentBlueKing/bk-job/git/blobs/6648669f1dfeed697316103fbb6b7e1881bfdba7",
+      "html": "https://github.com/TencentBlueKing/bk-job/blob/master/docs/apidoc/README.md"
+    }
+  },
+  {
+    "name": "README_en.md",
+    "path": "docs/apidoc/README_en.md",
+    "sha": "43bce80e2c03d9a29eec8e6df82954f699f4c4f4",
+    "size": 15289,
+    "url": "https://api.github.com/repos/TencentBlueKing/bk-job/contents/docs/apidoc/README_en.md?ref=master",
+    "html_url": "https://github.com/TencentBlueKing/bk-job/blob/master/docs/apidoc/README_en.md",
+    "git_url": "https://api.github.com/repos/TencentBlueKing/bk-job/git/blobs/43bce80e2c03d9a29eec8e6df82954f699f4c4f4",
+    "download_url": "https://raw.githubusercontent.com/TencentBlueKing/bk-job/master/docs/apidoc/README_en.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/TencentBlueKing/bk-job/contents/docs/apidoc/README_en.md?ref=master",
+      "git": "https://api.github.com/repos/TencentBlueKing/bk-job/git/blobs/43bce80e2c03d9a29eec8e6df82954f699f4c4f4",
+      "html": "https://github.com/TencentBlueKing/bk-job/blob/master/docs/apidoc/README_en.md"
+    }
+  },
+  {
+    "name": "bk-api-gateway",
+    "path": "docs/apidoc/bk-api-gateway",
+    "sha": "abc1e61df86d87534af1c48b9d1030083f707930",
+    "size": 0,
+    "url": "https://api.github.com/repos/TencentBlueKing/bk-job/contents/docs/apidoc/bk-api-gateway?ref=master",
+    "html_url": "https://github.com/TencentBlueKing/bk-job/tree/master/docs/apidoc/bk-api-gateway",
+    "git_url": "https://api.github.com/repos/TencentBlueKing/bk-job/git/trees/abc1e61df86d87534af1c48b9d1030083f707930",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/TencentBlueKing/bk-job/contents/docs/apidoc/bk-api-gateway?ref=master",
+      "git": "https://api.github.com/repos/TencentBlueKing/bk-job/git/trees/abc1e61df86d87534af1c48b9d1030083f707930",
+      "html": "https://github.com/TencentBlueKing/bk-job/tree/master/docs/apidoc/bk-api-gateway"
+    }
+  },
+  {
+    "name": "esb",
+    "path": "docs/apidoc/esb",
+    "sha": "e4a848d17fbe3cdc465ea9881098b952746de3c1",
+    "size": 0,
+    "url": "https://api.github.com/repos/TencentBlueKing/bk-job/contents/docs/apidoc/esb?ref=master",
+    "html_url": "https://github.com/TencentBlueKing/bk-job/tree/master/docs/apidoc/esb",
+    "git_url": "https://api.github.com/repos/TencentBlueKing/bk-job/git/trees/e4a848d17fbe3cdc465ea9881098b952746de3c1",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/TencentBlueKing/bk-job/contents/docs/apidoc/esb?ref=master",
+      "git": "https://api.github.com/repos/TencentBlueKing/bk-job/git/trees/e4a848d17fbe3cdc465ea9881098b952746de3c1",
+      "html": "https://github.com/TencentBlueKing/bk-job/tree/master/docs/apidoc/esb"
+    }
+  }
+]
