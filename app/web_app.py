@@ -320,6 +320,16 @@ INDEX_HTML = r"""<!DOCTYPE html>
   .l3 { width: 36%; background: linear-gradient(135deg, #fbbf5c, #f79009); }
   .l2 { width: 68%; background: linear-gradient(135deg, #5b9bf8, #2f54eb); }
   .l1 { width: 100%; background: linear-gradient(135deg, #26408f, #0f1c4d); }
+  .dims { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+          gap: 12px; }
+  .dim { border: 1px solid var(--line); border-radius: 10px; padding: 14px 14px 12px;
+         position: relative; background: #fafbff; }
+  .d-t { font-weight: 600; font-size: 15px; margin-bottom: 4px; color: var(--ink); }
+  .d-s { font-size: 12px; color: var(--sub); line-height: 1.5; }
+  .tag { position: absolute; top: 12px; right: 12px; font-size: 11px;
+         padding: 2px 8px; border-radius: 10px; }
+  .tag.ok { background: #e7f9f0; color: #12b76a; }
+  .tag.wait { background: #fff4e5; color: #f79009; }
   .btns { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
   button { border: none; border-radius: 8px; padding: 10px 20px;
            font-size: 14px; cursor: pointer; color: #fff; font-weight: 500;
@@ -398,6 +408,17 @@ INDEX_HTML = r"""<!DOCTYPE html>
       <div class="layer l3">L3 场景层 integration：契约 / 联动 / 反向（跨系统）</div>
       <div class="layer l2">L2 用例层：JOB 六链路 + CMDB 独立链路（单系统分开测）</div>
       <div class="layer l1">L1 API 层 unit：客户端封装与拼参自洽（不依赖环境）</div>
+    </div>
+  </section>
+
+  <section>
+    <h2>全方位测试五大维度（性能 / 安全 / 边界 / 交互 / 端到端）</h2>
+    <div class="dims">
+      <div class="dim"><div class="d-t">功能</div><div class="d-s">JOB 6 链路 + CMDB · 91 用例</div><span class="tag ok">已落地</span></div>
+      <div class="dim"><div class="d-t">边界</div><div class="d-s">等价类 / 边界值 / 非法值</div><span class="tag ok">已落地</span></div>
+      <div class="dim"><div class="d-t">端到端</div><div class="d-s">数据契约 · 场景矩阵</div><span class="tag wait">待账号</span></div>
+      <div class="dim"><div class="d-t">性能</div><div class="d-s">Locust 只读压测</div><span class="tag wait">待账号</span></div>
+      <div class="dim"><div class="d-t">安全</div><div class="d-s">鉴权 / 越权 / 注入 / 高危</div><span class="tag wait">待账号</span></div>
     </div>
   </section>
 

@@ -1,7 +1,8 @@
 # 蓝鲸双系统端到端测试平台
 
-> CMDB（配置管理）+ JOB（作业平台）双系统的分层自动化测试平台：
-> pytest 分层用例 + FastAPI Web 平台 + SQLite 历史留痕 + Locust 只读压测。
+> CMDB（配置管理）+ JOB（作业平台）双系统的全方位测试平台：
+> pytest 分层用例 + FastAPI Web 平台 + SQLite 历史留痕 + Locust 只读压测，
+> 覆盖功能 / 性能 / 安全 / 边界 / 端到端五个维度，另有 AI 用例生成。
 
 ![Python](https://img.shields.io/badge/Python-3.10%2B-3776ab?logo=python)
 ![FastAPI](https://img.shields.io/badge/Web-FastAPI-009688)
@@ -20,6 +21,10 @@
 
 1. **JOB 的每条链路单独工作正常吗？** —— 分层用例，故障隔离
 2. **两个系统连起来数据对得上吗？** —— 场景矩阵，按契约组织
+
+在这两个核心问题之上，按"全方位测试"要求覆盖五个维度：
+**功能 / 性能 / 安全 / 边界 / 端到端**，全收在一个 Web 平台入口下
+（详见 `docs/2026-08-23-全方位测试方案.md`）。
 
 ## 架构
 
