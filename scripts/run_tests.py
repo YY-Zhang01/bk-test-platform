@@ -7,7 +7,9 @@
     python run_tests.py -m script    # 只跑链路1
     python run_tests.py --no-report  # 只跑不生成报告
 
-链路标签在 pytest.ini 里注册：unit/script/fast_exec/plan/cron/account/integration。
+链路标签在 pytest.ini 里注册：unit/script/fast_exec/plan/cron/account/file/
+cmdb/integration/boundary/platform；冒烟建议 -m "unit and not platform"
+（排除 platform 防"跑测试"自引用）。
 报告落在 reports/ 目录，按时间戳归档；latest.html 永远是最新一份。
 """
 import argparse
@@ -24,7 +26,8 @@ REPORT_DIR = ROOT / 'reports'
 def main():
     parser = argparse.ArgumentParser(description='蓝鲸 JOB 测试平台统一入口')
     parser.add_argument('-m', '--marker', default='',
-                        help='按链路标签筛选，如 unit/script/fast_exec/plan/cron/account/e2e')
+                        help='按链路标签筛选，如 unit/script/integration；'
+                             '冒烟用 -m "unit and not platform"')
     parser.add_argument('--no-report', action='store_true', help='不生成 HTML 报告')
     args = parser.parse_args()
 

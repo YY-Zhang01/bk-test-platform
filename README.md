@@ -79,7 +79,7 @@ job-test/
 │   └── job_config.py       #   配置（凭证填这里，不提交）
 ├── tests/                  # 测试代码（pytest，无包模式）
 │   ├── conftest.py         #   客户端 fixture（凭证缺失诚实 skip）
-│   └── test_*.py           #   分层用例 77 个
+│   └── test_*.py           #   分层用例 91 个
 ├── scripts/                # 工具脚本
 │   ├── run_tests.py        #   统一测试入口（全量/链路 + 报告）
 │   └── locustfile.py       #   只读接口压测
@@ -100,8 +100,9 @@ pip install -r requirements.txt
 #    在 local 文件里填三件套（模板入库、真凭证不入库，见 docs/申请指引）
 
 # 3. 跑测试
-python scripts/run_tests.py -m unit        # 不等账号，18 个纯函数用例
-python scripts/run_tests.py                # 全量 77 用例 + HTML 报告
+python scripts/run_tests.py -m "unit and not platform"  # 冒烟 25 个，不等账号秒出
+python scripts/run_tests.py -m unit                     # unit 层 32 个（含 7 个 Web 层）
+python scripts/run_tests.py                             # 全量 91 用例 + HTML 报告
 
 # 4. 启动 Web 平台
 python app/web_app.py                      # → http://127.0.0.1:8000
@@ -111,7 +112,7 @@ locust -f scripts/locustfile.py --host <ESB_HOST>
 ```
 
 **未配置凭证时**：环境层用例全部诚实 skip（不造假绿），
-unit 层 18 个用例正常跑，平台统计与报告照常出。
+unit 层 32 个用例正常跑，平台统计与报告照常出。
 
 ## Web 平台能力
 

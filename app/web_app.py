@@ -202,6 +202,8 @@ def _save_history(task_id: str):
     if not m:
         return
     passed, failed, skipped = (int(m.group(i) or 0) for i in (1, 2, 3))
+    # 通过率口径 = 已执行用例（passed+failed）的通过率，skip 不进分母。
+    # 前端趋势图用橙点标注"有跳过"的执行，避免 skip 被误读成 100% 全绿。
     total = passed + failed
     summary = m.group(0)
     storage.save_run(t['plan'], passed, failed, skipped,
@@ -386,7 +388,7 @@ INDEX_HTML = r"""<!DOCTYPE html>
   </div>
 
   <section>
-    <h2>执行趋势（通过率，最近 20 次）</h2>
+    <h2>执行趋势（已执行用例通过率 · 橙点=有跳过 · 最近 20 次）</h2>
     <canvas id="trend" width="900" height="220"></canvas>
   </section>
 
@@ -498,9 +500,16 @@ function drawTrend(items) {
   items.forEach((it, i) => {
     const x = ox + i * step, y = oy + h * (1 - it.rate);
     ctx.beginPath(); ctx.arc(x, y, 4, 0, 7);
-    ctx.fillStyle = it.failed > 0 ? '#e5484d' : '#2e9e5b';
+    ctx.fillStyle = it.failed > 0 ? '#e5484d' : (it.skipped > 0 ? '#f79009' : '#2e9e5b');
     ctx.fill();
-    if (i % 2 === 0) { ctx.fillStyle = '#666'; ctx.fillText(it.passed, x - 6, y - 8); }
+    if (i % 2 === 0) {
+      ctx.fillStyle = '#666';
+      ctx.fillText(it.passed, x - 6, y - 8);
+      if (it.skipped > 0) {
+        ctx.fillStyle = '#f79009';
+        ctx.fillText('+'+it.skipped+'跳过', x + 6, y - 8);
+      }
+    }
   });
   ctx.fillStyle = '#999';
   ctx.fillText(items[0].ts, ox, H - 6);

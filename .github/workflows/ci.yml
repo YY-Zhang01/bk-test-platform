@@ -9,6 +9,10 @@ on:
   pull_request:
     branches: [ master ]
 
+# 覆盖率徽章要回写仓库，需给 GITHUB_TOKEN 写权限
+permissions:
+  contents: write
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -32,6 +36,12 @@ jobs:
         uses: tj-actions/coverage-badge-py@v2
         with:
           output: badge.svg
+
+      - name: Commit coverage badge back to repo
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "docs: update coverage badge [skip ci]"
+          file_pattern: badge.svg
 
       - name: Upload coverage report
         uses: actions/upload-artifact@v4
