@@ -7,7 +7,9 @@
 ![FastAPI](https://img.shields.io/badge/Web-FastAPI-009688)
 ![pytest](https://img.shields.io/badge/Framework-pytest-0a9edc)
 ![SQLite](https://img.shields.io/badge/Storage-SQLite-003b57?logo=sqlite)
-![Cases](https://img.shields.io/badge/Cases-77-blue)
+![Cases](https://img.shields.io/badge/Cases-91-blue)
+![CI](https://github.com/{GITHUB_USER}/job-test/actions/workflows/ci.yml/badge.svg)
+![Coverage](badge.svg)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
 ## 它解决什么问题

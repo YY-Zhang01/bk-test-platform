@@ -36,7 +36,7 @@ storage.migrate_jsonl(BASE_DIR / 'results_history.jsonl')
 
 # 测试计划：预设 marker 组合（借鉴 MeterSphere 的"测试计划"概念）
 PLANS = {
-    'smoke': 'unit',                                      # 冒烟：不等账号秒出
+    'smoke': 'unit and not platform',  # 冒烟：不等账号秒出（排除 Web层测试防自引用）
     'regression': 'unit or cmdb or integration',          # 回归：全链路
     'job-only': 'script or fast_exec or plan or cron or account or file',
     'e2e': 'integration',                                 # 只跑连块测
