@@ -8,30 +8,71 @@
 ![FastAPI](https://img.shields.io/badge/Web-FastAPI-009688)
 ![pytest](https://img.shields.io/badge/Framework-pytest-0a9edc)
 ![SQLite](https://img.shields.io/badge/Storage-SQLite-003b57?logo=sqlite)
-![Cases](https://img.shields.io/badge/Cases-91-blue)
+![Cases](https://img.shields.io/badge/Cases-98-blue)
 ![CI](https://github.com/{GITHUB_USER}/job-test/actions/workflows/ci.yml/badge.svg)
 ![Coverage](badge.svg)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
-## 它解决什么问题
+## 一、项目定位
 
 面试作业背景：蓝鲸 JOB 提供 40+ ESB 接口，CMDB 提供配套查询接口，
 两个系统通过业务 ID、主机 ID、动态分组 ID 三个数据契约耦合。
-本平台回答两个问题：
+
+本平台回答两个核心问题：
 
 1. **JOB 的每条链路单独工作正常吗？** —— 分层用例，故障隔离
 2. **两个系统连起来数据对得上吗？** —— 场景矩阵，按契约组织
 
-在这两个核心问题之上，按"全方位测试"要求覆盖五个维度：
+在这两个问题之上，按"全方位测试"覆盖五个维度：
 **功能 / 性能 / 安全 / 边界 / 端到端**，全收在一个 Web 平台入口下
 （详见 `docs/2026-08-23-全方位测试方案.md`）。
 
-## 架构
+一句话定位：**一台给蓝鲸 CMDB 和 JOB 做自动化体检的机器**——98 个检查项目，
+一键跑、出报告，检查两套系统各自好不好、连起来数据对不对得上。
+
+## 二、目录结构
+
+```text
+job-test/
+├── app/                          产品代码（测试内核的"手"和"操作台"）
+│   ├── api_client.py             JOB ESB 客户端（38 个接口封装，三件套认证）
+│   ├── cmdb_client.py            CMDB ESB 客户端（业务/主机/拓扑/模型/分组查询）
+│   ├── storage.py                SQLite 存储层（执行记录 runs + 探针日志 probe_logs）
+│   ├── web_app.py                Web 平台（FastAPI 单文件，内嵌 HTML，含测试计划 PLANS）
+│   ├── gen_cases.py              AI 用例生成器（调 DeepSeek，需 LLM_API_KEY）
+│   └── job_config.py             环境/凭证配置（真凭证走 job_config_local.py，已 gitignore）
+├── tests/                        测试用例（98 个，按 marker 分层）
+│   ├── conftest.py               公共 fixture（job_client/cmdb_client，凭证缺失诚实 skip）
+│   ├── test_job_script.py        JOB 链路 1：脚本管理
+│   ├── test_job_fast_exec.py     JOB 链路 2：快速执行
+│   ├── test_job_plan.py          JOB 链路 3：作业编排
+│   ├── test_job_cron.py          JOB 链路 4：定时任务
+│   ├── test_job_account.py       JOB 链路 5：账号与高危命令检测
+│   ├── test_job_file_sql.py      JOB 链路 6：文件分发与 SQL
+│   ├── test_cmdb_core.py         CMDB 独立链路
+│   ├── test_integration.py       跨系统联调（数据契约）
+│   ├── test_job_boundary.py      参数边界
+│   ├── test_security.py          安全（鉴权/越权/注入/高危命令）
+│   ├── test_storage.py           存储层
+│   └── test_webapp.py            Web 平台层（冒烟计划排除，防自引用）
+├── scripts/                      工具脚本
+│   ├── run_tests.py              统一测试入口（全量/链路 + HTML 报告）
+│   └── locustfile.py             只读接口压测（Locust）
+├── docs/                         策略文档 + 接口文档（apidoc/ 38 份）+ 面试问答卡
+├── reports/                      HTML 报告（gitignore）
+├── data/                         SQLite 数据库（gitignore）
+├── .github/workflows/ci.yml      GitHub Actions（push 跑测试 + 回写覆盖率徽章）
+├── pytest.ini                    12 个 marker 注册
+├── badge.svg                     覆盖率徽章（CI 自动回写）
+└── requirements.txt              依赖清单
+```
+
+## 三、架构
 
 ```mermaid
 flowchart TB
     subgraph UI["Web 平台（FastAPI）"]
-        DASH["首页仪表盘<br/>金字塔 / 趋势图"]
+        DASH["首页仪表盘<br/>金字塔 / 趋势图 / 五维"]
         RUN["一键跑测试<br/>subprocess + 轮询"]
         PROBE["接口调试<br/>只读白名单"]
         REP["报告中心<br/>HTML 归档"]
@@ -56,7 +97,34 @@ flowchart TB
     ESB["蓝鲸 ESB 网关<br/>JOB + CMDB 组件"] -.凭证.-> L1
 ```
 
-## 测试分层（金字塔）
+## 四、工作流程
+
+```text
+启动 Web 平台（app/web_app.py）
+    │
+    ▼
+浏览器打开 http://127.0.0.1:8000
+    │
+    ▼
+选测试计划（冒烟 / 回归 / 只JOB / 只连块测）
+    │
+    ▼
+后台 subprocess 跑 pytest
+    ├── 用例调 JobClient / CmdbClient
+    ├── 客户端拼 URL + 认证三件套 → 请求蓝鲸 ESB 网关
+    ├── 蓝鲸返回 {result, code, data} → 客户端检查结果
+    └── 断言对答案：通过 / 失败 / 跳过
+    │
+    ▼
+落库 SQLite（runs）+ 生成 HTML 报告（latest.html）
+    │
+    ▼
+首页趋势图 + 报告中心展示结果
+```
+
+## 五、测试体系
+
+### 1. 测试分层（金字塔）
 
 | 层 | 对齐术语 | 内容 | 触发 |
 |----|---------|------|------|
@@ -68,34 +136,25 @@ flowchart TB
 
 - **契约一致性**（只读）：JOB 的 `bk_scope_id` == CMDB 的 `bk_biz_id`，
   `host_id` == `bk_host_id`，`dynamic_group_list[].id` == CMDB 分组 ID
-- **业务联动**：CMDB 圈人（动态分组）→ JOB 干活（快速执行/文件分发）
-- **隔离反向**（负面）：CMDB 不存在的幽灵主机/幽灵分组，JOB 必须拒绝
+- **业务联动**：CMDB 圈人（动态分组）→ JOB 干活（快速执行 / 文件分发）
+- **隔离反向**（负面）：CMDB 不存在的幽灵主机 / 幽灵分组，JOB 必须拒绝
 
-## 目录结构
+### 2. 五个测试维度
 
-```
-job-test/
-├── app/                    # 产品代码
-│   ├── api_client.py       #   JOB ESB 客户端（40+ 接口封装）
-│   ├── cmdb_client.py      #   CMDB ESB 客户端
-│   ├── storage.py          #   SQLite 存储层
-│   ├── web_app.py          #   Web 平台（单文件 FastAPI）
-│   ├── gen_cases.py        #   AI 用例生成器（DeepSeek）
-│   └── job_config.py       #   配置（凭证填这里，不提交）
-├── tests/                  # 测试代码（pytest，无包模式）
-│   ├── conftest.py         #   客户端 fixture（凭证缺失诚实 skip）
-│   └── test_*.py           #   分层用例 91 个
-├── scripts/                # 工具脚本
-│   ├── run_tests.py        #   统一测试入口（全量/链路 + 报告）
-│   └── locustfile.py       #   只读接口压测
-├── docs/                   # 策略文档 + 接口文档（apidoc/）
-├── reports/                # HTML 报告（gitignore）
-├── data/                   # SQLite 数据库（gitignore）
-├── pytest.ini              # 分层 marker 注册
-└── requirements.txt
-```
+| 维度 | 大白话问什么 | 载体 |
+|------|-------------|------|
+| 功能 | 对不对？ | 98 个分层用例 |
+| 性能 | 快不快？ | `scripts/locustfile.py` 只读压测 |
+| 安全 | 漏不漏？ | `tests/test_security.py`（鉴权/越权/注入/高危） |
+| 边界 | 临界点崩不崩？ | `tests/test_job_boundary.py`（等价类/边界值/非法值） |
+| 端到端 | 连起来对不对？ | `tests/test_integration.py`（数据契约） |
 
-## 快速开始
+### 3. 诚实原则
+
+未配置凭证时，环境层用例全部诚实 skip（不造假绿）：
+35 个 unit 用例正常跑，63 个环境层用例等账号激活。
+
+## 六、快速开始
 
 ```bash
 # 1. 安装依赖（Python 3.10+）
@@ -105,9 +164,9 @@ pip install -r requirements.txt
 #    在 local 文件里填三件套（模板入库、真凭证不入库，见 docs/申请指引）
 
 # 3. 跑测试
-python scripts/run_tests.py -m "unit and not platform"  # 冒烟 25 个，不等账号秒出
-python scripts/run_tests.py -m unit                     # unit 层 32 个（含 7 个 Web 层）
-python scripts/run_tests.py                             # 全量 91 用例 + HTML 报告
+python scripts/run_tests.py -m "unit and not platform"  # 冒烟 28 个，不等账号秒出
+python scripts/run_tests.py -m unit                     # unit 层 35 个（含 7 个 Web 层）
+python scripts/run_tests.py                             # 全量 98 用例 + HTML 报告
 
 # 4. 启动 Web 平台
 python app/web_app.py                      # → http://127.0.0.1:8000
@@ -116,18 +175,15 @@ python app/web_app.py                      # → http://127.0.0.1:8000
 locust -f scripts/locustfile.py --host <ESB_HOST>
 ```
 
-**未配置凭证时**：环境层用例全部诚实 skip（不造假绿），
-unit 层 32 个用例正常跑，平台统计与报告照常出。
+## 七、Web 平台能力
 
-## Web 平台能力
-
-- **仪表盘**：金字塔用例统计（实时 collect）、通过率趋势折线图
+- **仪表盘**：金字塔用例统计（实时 collect）、通过率趋势折线图、五大测试维度
 - **测试计划**：冒烟 / 回归 / 只 JOB / 只连块测，一键组合执行
 - **接口调试**：Postman 式在线调 JOB/CMDB 只读接口（写操作白名单拒绝）
 - **报告中心**：每次运行 HTML 报告归档，latest.html 永远最新
 - **历史留痕**：SQLite 落库（runs + probe_logs），可审计可扩展
 
-## 设计取舍
+## 八、设计取舍
 
 - **为什么 FastAPI 单文件**：阶段 0 定位"有脸可用"，内嵌 HTML + 原生 JS，
   零前端工程、零构建、断网可演示
