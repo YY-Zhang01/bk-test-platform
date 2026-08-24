@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import MainLayout from '@/layouts/MainLayout.vue'
 
 const routes = [
+  { path: '/login', name: 'login', component: () => import('@/views/Login.vue'), meta: { title: '登录' } },
   {
     path: '/',
     component: MainLayout,

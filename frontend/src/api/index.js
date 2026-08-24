@@ -1,20 +1,47 @@
 import axios from 'axios'
 
+const TOKEN_KEY = 'bk_auth_token'
+
+export function getToken() {
+  return localStorage.getItem(TOKEN_KEY) || ''
+}
+
+export function setToken(token) {
+  if (token) localStorage.setItem(TOKEN_KEY, token)
+  else localStorage.removeItem(TOKEN_KEY)
+}
+
 const http = axios.create({
   baseURL: '/',
   timeout: 180000,
 })
 
-// 统一处理错误，返回 {data} 或抛出带 message 的错误
+// 请求拦截器：带上登录 token
+http.interceptors.request.use((config) => {
+  const token = getToken()
+  if (token) config.headers.Authorization = `Bearer ${token}`
+  return config
+})
+
+// 响应拦截器：统一返回 data；401 时清 token 并跳登录页
 http.interceptors.response.use(
   (res) => res.data,
   (err) => {
+    if (err.response?.status === 401) {
+      setToken('')
+      if (!location.pathname.startsWith('/login')) {
+        location.href = '/login'
+      }
+      return Promise.reject(new Error('未登录'))
+    }
     const msg = err.response?.data?.detail || err.message || '请求失败'
     return Promise.reject(new Error(msg))
   },
 )
 
 export const api = {
+  // 登录
+  login: (username, password) => http.post('/api/login', { username, password }),
   // 总览
   stats: () => http.get('/api/stats'),
   trend: () => http.get('/api/trend'),

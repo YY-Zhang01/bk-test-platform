@@ -17,6 +17,7 @@ import base64
 import json
 import os
 import re
+import secrets
 import subprocess
 import sys
 import time
@@ -64,20 +65,44 @@ if (DIST_DIR / 'assets').exists():
 
 # 公网访问密码：部署到服务器时设置环境变量 PLATFORM_PASSWORD 启用；
 # 本地/测试不设置则完全放行，不影响现有用例。
+PLATFORM_USER = os.environ.get('PLATFORM_USER', 'jwkj')
 PLATFORM_PASSWORD = os.environ.get('PLATFORM_PASSWORD', '')
 
 
+# 会话 token 表（登录后签发，内存级，服务重启失效）
+_SESSION_TOKENS = set()
+
+
 @app.middleware('http')
-async def 密码拦截(request: Request, call_next):
-    """简单密码验证（HTTP Basic Auth）：设了 PLATFORM_PASSWORD 才生效。"""
+async def 登录拦截(request: Request, call_next):
+    """token 认证：设了 PLATFORM_PASSWORD 才生效。
+    放行：/api/login（登录接口）、/assets/*（静态资源）、非 API 路径（前端 SPA 自己判断登录态）。
+    拦截：其他 /api/* 和 /report/*（需要 Bearer token）。"""
     if not PLATFORM_PASSWORD:
         return await call_next(request)
-    expected = 'Basic ' + base64.b64encode(
-        f'admin:{PLATFORM_PASSWORD}'.encode('utf-8')).decode('utf-8')
-    if request.headers.get('Authorization') == expected:
+    path = request.url.path
+    if path == '/api/login' or path.startswith('/assets/'):
         return await call_next(request)
-    return JSONResponse(status_code=401, content={'detail': '需要密码'},
-                        headers={'WWW-Authenticate': 'Basic realm="bk-test-platform"'})
+    if path.startswith('/api/') or path.startswith('/report/'):
+        auth = request.headers.get('Authorization', '')
+        token = auth[7:] if auth.startswith('Bearer ') else ''
+        if token in _SESSION_TOKENS:
+            return await call_next(request)
+        return JSONResponse(status_code=401, content={'detail': '未登录'})
+    return await call_next(request)
+
+
+@app.post('/api/login')
+async def login(req: Request):
+    """登录：校验账号密码，签发会话 token。"""
+    body = await req.json()
+    username = body.get('username') or ''
+    pwd = body.get('password') or ''
+    if PLATFORM_PASSWORD and username == PLATFORM_USER and pwd == PLATFORM_PASSWORD:
+        token = secrets.token_hex(16)
+        _SESSION_TOKENS.add(token)
+        return {'ok': True, 'token': token}
+    raise HTTPException(401, '账号或密码错误')
 
 # 后台任务表：task_id -> {'proc': Popen, 'output': str, 'done': bool}
 TASKS = {}
