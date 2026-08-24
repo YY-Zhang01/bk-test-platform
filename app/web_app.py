@@ -294,13 +294,9 @@ INDEX_HTML = r"""<!DOCTYPE html>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
          background: var(--bg); color: var(--ink); }
-  header { background: linear-gradient(135deg, #0f1c4d, #1d4ed8 130%);
-           color: #fff; padding: 28px 40px 42px; position: relative;
-           overflow: hidden; }
-  header::after { content: ''; position: absolute; right: -70px; top: -90px;
-           width: 300px; height: 300px; border-radius: 50%;
-           background: rgba(255,255,255,.07); }
-  header h1 { font-size: 23px; letter-spacing: 1px; }
+  header { background: #0f1c4d; color: #fff; padding: 16px 24px;
+           display: flex; align-items: baseline; gap: 16px; }
+  header h1 { font-size: 20px; letter-spacing: 1px; }
   .badge { display: inline-block; margin-left: 14px; font-size: 12px;
            background: rgba(255,255,255,.16); border-radius: 20px;
            padding: 4px 13px; vertical-align: 4px; font-weight: 400;
@@ -309,8 +305,7 @@ INDEX_HTML = r"""<!DOCTYPE html>
          background: #34d399; margin-right: 6px;
          animation: pulse 2s ease-in-out infinite; }
   @keyframes pulse { 50% { opacity: .3; } }
-  header .sub { margin-top: 8px; opacity: .78; font-size: 13px; }
-  main { max-width: 1000px; margin: 0 auto 44px; padding: 0 16px; }
+  header .sub { margin-top: 0; opacity: .7; font-size: 13px; }
   .cards { display: flex; gap: 14px; flex-wrap: wrap;
            position: relative; }
   .card { flex: 1; min-width: 180px; background: var(--card);
@@ -384,17 +379,18 @@ INDEX_HTML = r"""<!DOCTYPE html>
   a:hover { text-decoration: underline; }
   .hint { color: var(--weak); font-size: 12px; margin-top: 8px; }
   canvas { width: 100%; }
-  .layout { max-width: 1200px; margin: -26px auto 44px; padding: 0 16px;
-            display: flex; gap: 16px; align-items: flex-start; }
-  .sidebar { width: 150px; flex-shrink: 0; display: flex; flex-direction: column;
-             gap: 6px; position: sticky; top: 20px; }
-  .nav-item { text-align: left; background: var(--card); color: var(--sub);
-              border: 1px solid var(--line); border-radius: 10px; padding: 12px 16px;
-              font-size: 14px; cursor: pointer; font-weight: 500; }
-  .nav-item:hover:not(:disabled) { filter: none; background: #f0f4ff; }
-  .nav-item.active { background: var(--blue); color: #fff; font-weight: 600;
-                     box-shadow: var(--shadow); }
-  .content { flex: 1; min-width: 0; }
+  .layout { max-width: 1440px; margin: 0 auto; display: flex; align-items: stretch; }
+  .sidebar { width: 200px; flex-shrink: 0; background: #0f1c4d;
+             padding: 16px 0; display: flex; flex-direction: column; gap: 2px; }
+  .nav-item { text-align: left; background: transparent; color: rgba(255,255,255,.72);
+              border: none; border-radius: 8px; margin: 0 10px; padding: 12px 16px;
+              font-size: 14px; cursor: pointer; font-weight: 500;
+              display: flex; align-items: center; gap: 10px; }
+  .nav-item:hover:not(:disabled) { filter: none; background: rgba(255,255,255,.1);
+                                   color: #fff; }
+  .nav-item.active { background: var(--blue); color: #fff; font-weight: 600; }
+  .nav-item .ico { font-size: 16px; }
+  .content { flex: 1; min-width: 0; padding: 20px 24px 44px; }
   .tab-panel.hidden { display: none; }
 </style>
 </head>
@@ -406,10 +402,10 @@ INDEX_HTML = r"""<!DOCTYPE html>
 </header>
 <div class="layout">
 <aside class="sidebar">
-  <button class="nav-item active" data-tab="overview">总览</button>
-  <button class="nav-item" data-tab="run">跑测试</button>
-  <button class="nav-item" data-tab="probe">接口调试</button>
-  <button class="nav-item" data-tab="reports">报告</button>
+  <button class="nav-item active" data-tab="overview"><span class="ico">▦</span>总览</button>
+  <button class="nav-item" data-tab="run"><span class="ico">▶</span>跑测试</button>
+  <button class="nav-item" data-tab="probe"><span class="ico">⌘</span>接口调试</button>
+  <button class="nav-item" data-tab="reports"><span class="ico">▤</span>报告</button>
 </aside>
 <main class="content">
   <div class="tab-panel" id="tab-overview">
