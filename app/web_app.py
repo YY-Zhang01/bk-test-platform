@@ -502,7 +502,8 @@ INDEX_HTML = r"""<!DOCTYPE html>
   input:focus { border-color: var(--blue); }
   .case-group { margin-bottom: 18px; }
   .case-group-title { font-size: 14px; font-weight: 600; margin-bottom: 8px;
-                      color: var(--ink); }
+                      color: var(--ink); cursor: pointer; user-select: none; }
+  .case-group-title:hover { color: var(--blue); }
   .case-item { border: 1px solid var(--line); border-radius: 8px;
                padding: 10px 14px; margin-bottom: 6px; background: #fafbff; }
   .case-name { font-size: 13px; font-weight: 500; color: var(--ink); }
@@ -657,8 +658,15 @@ INDEX_HTML = r"""<!DOCTYPE html>
 
   <div class="tab-panel hidden" id="tab-cases">
   <section>
-    <h2>用例库（<span id="case-total">-</span> 个用例，按四层分类）</h2>
-    <p class="hint">每个用例的名字 + 作用 + 是否等账号，点开就能看清"98 个用例各测什么"。</p>
+    <h2>用例库（<span id="case-total">-</span> 个用例）</h2>
+    <div class="btns" style="margin-bottom:14px;">
+      <input type="text" id="case-search" placeholder="搜索用例名 / 作用" style="flex:1;min-width:200px;">
+      <select id="case-filter" style="min-width:140px;">
+        <option value="all">全部</option>
+        <option value="可跑">只看可跑</option>
+        <option value="等账号">只看等账号</option>
+      </select>
+    </div>
     <div id="case-groups"></div>
   </section>
   </div>
@@ -781,17 +789,37 @@ async function refreshGen() {
     ? '✅ 已配置默认 key，可直接生成；也可在下方粘贴你自己的 key'
     : '⚠️ 默认 key 未配置：请在下方粘贴你的大模型密钥后生成';
 }
+let caseData = [];
 async function refreshCases() {
-  const r = await fetch('/api/cases').then(x => x.json());
-  $('case-total').textContent = r.total;
-  $('case-groups').innerHTML = r.groups.map(g => {
-    const items = g.cases.map(c =>
+  caseData = await fetch('/api/cases').then(x => x.json());
+  $('case-total').textContent = caseData.total;
+  renderCases();
+}
+function renderCases() {
+  const kw = ($('case-search').value || '').trim().toLowerCase();
+  const filter = $('case-filter').value;
+  $('case-groups').innerHTML = caseData.groups.map(g => {
+    const cases = g.cases.filter(c => {
+      const okKw = !kw || c.name.toLowerCase().includes(kw) || (c.desc || '').toLowerCase().includes(kw);
+      const okFilter = filter === 'all' || (filter === '可跑' ? c.env === '否' : c.env === '是');
+      return okKw && okFilter;
+    });
+    if (cases.length === 0) return '';
+    const items = cases.map(c =>
       `<div class="case-item"><div class="case-name">${c.name} ` +
       (c.env === '是' ? '<span class="tag wait">等账号</span>' : '<span class="tag ok">可跑</span>') +
       `</div><div class="case-desc">${c.desc || ''}</div></div>`).join('');
-    return `<div class="case-group"><div class="case-group-title">${g.group}（${g.cases.length}）</div>${items}</div>`;
+    return `<div class="case-group"><div class="case-group-title" onclick="toggleGroup(this)">▸ ${g.group}（${cases.length}）</div><div class="case-group-body" style="display:none">${items}</div></div>`;
   }).join('');
 }
+function toggleGroup(el) {
+  const body = el.nextElementSibling;
+  const open = body.style.display === 'none';
+  body.style.display = open ? 'block' : 'none';
+  el.textContent = (open ? '▾ ' : '▸ ') + el.textContent.replace(/^[▸▾] /, '');
+}
+$('case-search').oninput = renderCases;
+$('case-filter').onchange = renderCases;
 let genLastApi = '';
 let genValidated = false;
 $('gen-go').onclick = async () => {
