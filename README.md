@@ -224,7 +224,7 @@ PLATFORM_USER=jwkj PLATFORM_PASSWORD=jwkj nohup python3 -m uvicorn app.web_app:a
 账号密码由 `PLATFORM_USER` / `PLATFORM_PASSWORD` 决定。不设置则完全放行（适合本地开发）。
 默认账号密码：`jwkj / jwkj`。
 
-## 七、Web 平台能力
+## 七、Web 平台能力（七模块）
 
 - **登录认证**：自定义登录页 + token 会话（账号密码走 `PLATFORM_USER`/`PLATFORM_PASSWORD`）
 - **总览**：统计卡片 + 分层金字塔（点击跳转用例库）+ 趋势图（绿/红/黄堆叠 + 通过率）+ 最近执行 + 五维

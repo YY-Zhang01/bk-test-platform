@@ -22,6 +22,7 @@ def tmp_db(tmp_path, monkeypatch):
 
 
 def test_保存运行记录后能按最近N条查回(tmp_db):
+    """保存两条运行记录，list_runs 按时间正序返回（旧→新），供首页折线图。"""
     storage.save_run('冒烟', 18, 0, 59, 1.0, 'all green')
     storage.save_run('回归', 77, 0, 0, 1.0, 'full')
     rows = storage.list_runs(20)
@@ -34,6 +35,7 @@ def test_保存运行记录后能按最近N条查回(tmp_db):
 
 
 def test_查询条数上限生效(tmp_db):
+    """list_runs 的 limit 生效：取最近 N 条（id 最大），正序返回。"""
     for i in range(5):
         storage.save_run(f'plan{i}', i, 0, 0, 1.0, '')
     rows = storage.list_runs(limit=2)
@@ -42,6 +44,7 @@ def test_查询条数上限生效(tmp_db):
 
 
 def test_接口调试留痕含成功失败位(tmp_db):
+    """log_probe 记录成功/失败位（ok 1/0），落库可查，供接口调试历史。"""
     storage.log_probe('job', 'get_script_list', True, '{"ok": true}')
     storage.log_probe('cmdb', 'search_business', False, '超时')
     with closing(sqlite3.connect(tmp_db)) as conn:
@@ -52,6 +55,7 @@ def test_接口调试留痕含成功失败位(tmp_db):
 
 
 def test_超长调试结果截断防爆库(tmp_db):
+    """调试结果超 500 字符被截断，防止探针日志撑爆数据库。"""
     storage.log_probe('job', 'get_script_list', True, 'x' * 1000)
     with closing(sqlite3.connect(tmp_db)) as conn:
         result = conn.execute('SELECT result FROM probe_logs').fetchone()[0]
@@ -59,6 +63,7 @@ def test_超长调试结果截断防爆库(tmp_db):
 
 
 def test_旧jsonl一次性迁移后不重复导入(tmp_path, monkeypatch, tmp_db):
+    """旧 jsonl 迁移到 SQLite 后改 .bak，重复迁移返回 0 不重复导入。"""
     old = tmp_path / 'results_history.jsonl'
     old.write_text('\n'.join([
         json.dumps({'stamp': '2026-08-22 10:00:00', 'plan': '冒烟',
@@ -76,6 +81,7 @@ def test_旧jsonl一次性迁移后不重复导入(tmp_path, monkeypatch, tmp_db
 
 
 def test_迁移时表非空则跳过并备份旧文件(tmp_path, monkeypatch, tmp_db):
+    """表已有数据时跳过迁移（防覆盖），旧文件仍备份为 .bak。"""
     storage.save_run('已有记录', 1, 0, 0, 1.0, '')
     old = tmp_path / 'results_history.jsonl'
     old.write_text(json.dumps({'stamp': '', 'plan': '旧数据',
@@ -88,4 +94,5 @@ def test_迁移时表非空则跳过并备份旧文件(tmp_path, monkeypatch, tm
 
 
 def test_无旧文件迁移直接返回零(tmp_path, monkeypatch, tmp_db):
+    """没有旧 jsonl 文件时 migrate 返回 0，不报错。"""
     assert storage.migrate_jsonl(tmp_path / '不存在.jsonl') == 0

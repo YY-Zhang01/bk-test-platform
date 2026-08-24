@@ -23,12 +23,14 @@ def client(tmp_path, monkeypatch):
 
 
 def test_首页返回平台页面(client):
+    """首页返回 200，内容含平台标识（Vue 挂载点或金字塔文案）。"""
     r = client.get('/')
     assert r.status_code == 200
     assert '金字塔' in r.text or '蓝鲸' in r.text
 
 
 def test_用例统计接口返回全量数字(client):
+    """stats 返回 total/unit/env，且 total = unit + env（口径自洽）。"""
     r = client.get('/api/stats')
     assert r.status_code == 200
     data = r.json()
@@ -39,6 +41,7 @@ def test_用例统计接口返回全量数字(client):
 
 
 def test_冒烟计划后台跑完并留历史(client):
+    """跑冒烟计划，轮询到 done，returncode=0，趋势接口能查到该条历史。"""
     r = client.post('/api/run', params={'plan': 'smoke', 'report': False})
     assert r.status_code == 200
     task_id = r.json()['task_id']
@@ -57,21 +60,25 @@ def test_冒烟计划后台跑完并留历史(client):
 
 
 def test_未知任务查询返回404(client):
+    """查不存在的任务 id 返回 404。"""
     r = client.get('/api/run/不存在的任务')
     assert r.status_code == 404
 
 
 def test_接口调试拒绝白名单外目标(client):
+    """probe 目标不在白名单（只认 job/cmdb）时返回 400 拒绝。"""
     r = client.post('/api/probe', json={'target': 'hack', 'api': 'x'})
     assert r.status_code == 400
 
 
 def test_接口调试拒绝写操作只开放只读(client):
+    """probe 调写操作（create_script）被拒，只开放只读查询（防误操作）。"""
     r = client.post('/api/probe', json={'target': 'job',
                                         'api': 'create_script'})
     assert r.status_code == 400
 
 
 def test_报告文件名白名单拒绝非法名(client):
+    """报告文件名不合白名单格式返回 400，防目录穿越。"""
     r = client.get('/report/evil.html')
     assert r.status_code == 400

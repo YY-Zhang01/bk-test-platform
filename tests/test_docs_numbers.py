@@ -45,6 +45,7 @@ def _count_markers(ini_text):
 
 @pytest.mark.unit
 def test_README用例数字与实测一致():
+    """README 的用例总数/函数数/能跑数/等账号数与代码实测一致。"""
     cases = extract_cases()
     total = sum(c['count'] for c in cases)                 # 用例总数（参数化展开后）
     funcs = len(cases)                                     # 测试函数数
@@ -64,6 +65,7 @@ def test_README用例数字与实测一致():
 
 @pytest.mark.unit
 def test_文档结构描述与代码一致():
+    """README 的模块数/marker 数、交接文档的文件数/模块数与代码实测一致。"""
     readme = (ROOT / 'README.md').read_text(encoding='utf-8')
     layout = (ROOT / 'frontend' / 'src' / 'layouts' / 'MainLayout.vue') \
         .read_text(encoding='utf-8')
