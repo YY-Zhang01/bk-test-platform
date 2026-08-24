@@ -394,7 +394,7 @@ INDEX_HTML = r"""<!DOCTYPE html>
   a { color: var(--blue); text-decoration: none; }
   a:hover { text-decoration: underline; }
   .hint { color: var(--weak); font-size: 12px; margin-top: 8px; }
-  canvas { display: block; max-width: 100%; height: auto; }
+  canvas { display: block; width: 100%; height: 220px; }
   .layout { flex: 1; display: flex; align-items: stretch; min-height: 0; }
   .sidebar { width: 200px; flex-shrink: 0; background: #0f1c4d;
              padding: 16px 0; display: flex; flex-direction: column; gap: 2px; }
@@ -575,7 +575,13 @@ $('p-api').onchange = () => {
 
 function drawTrend(items) {
   const c = $('trend'), ctx = c.getContext('2d');
-  const W = c.width, H = c.height, ox = 46, oy = 12,
+  const dpr = window.devicePixelRatio || 1;
+  const cssW = c.clientWidth || 900;
+  const cssH = 220;
+  c.width = Math.round(cssW * dpr);
+  c.height = Math.round(cssH * dpr);
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const W = cssW, H = cssH, ox = 46, oy = 12,
         w = W - ox - 10, h = H - oy - 24;
   ctx.clearRect(0, 0, W, H);
   ctx.font = '11px Consolas';
