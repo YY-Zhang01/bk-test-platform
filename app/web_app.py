@@ -272,7 +272,8 @@ async def gen_generate(req: Request):
         code = strip_code_fence(call_llm(
             name, doc, api_key=api_key,
             base_url=body.get('base_url') or None,
-            model=body.get('model') or None))
+            model=body.get('model') or None,
+            requirement=(body.get('requirement') or '').strip() or None))
         return {'ok': True, 'api_name': name, 'code': code}
     except Exception as e:
         return {'ok': False, 'error': f'生成失败：{e}'}
@@ -590,8 +591,11 @@ INDEX_HTML = r"""<!DOCTYPE html>
     <div class="btns" style="margin-bottom:10px;">
       <input type="password" id="gen-key" placeholder="粘贴 LLM API Key（如 DeepSeek）" style="flex:1;min-width:260px;">
     </div>
-    <div class="btns">
+    <div class="btns" style="margin-bottom:10px;">
       <select id="gen-api" style="flex:1;min-width:220px;"></select>
+    </div>
+    <textarea id="gen-req" rows="2" placeholder="需求描述（可选），如：多生成负面用例、重点测超时和 Base64"></textarea>
+    <div class="btns" style="margin-top:10px;">
       <button class="b-all" id="gen-go">生成草稿</button>
       <button class="b-unit" id="gen-approve" disabled>✓ 并入正式目录</button>
     </div>
@@ -729,7 +733,8 @@ $('gen-go').onclick = async () => {
   $('gen-msg').textContent = '生成中…（调大模型，可能要十几秒）';
   const r = await fetch('/api/gen/generate', {method: 'POST',
     headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({api_key: apiKey, api_name: apiName})}).then(x => x.json());
+    body: JSON.stringify({api_key: apiKey, api_name: apiName,
+                          requirement: $('gen-req').value.trim()})}).then(x => x.json());
   if (r.ok) {
     genLastApi = r.api_name;
     $('gen-code').textContent = r.code;
