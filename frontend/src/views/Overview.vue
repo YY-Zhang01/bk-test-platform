@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="overview">
     <!-- 统计卡片 -->
     <el-row :gutter="16">
       <el-col v-for="c in cards" :key="c.label" :xs="12" :sm="6">
@@ -17,23 +17,45 @@
       </el-col>
     </el-row>
 
-    <el-row :gutter="16" style="margin-top: 16px">
+    <!-- 测试分层金字塔 -->
+    <el-card class="pyramid-card">
+      <template #header>
+        <div class="card-head">
+          <span>测试分层金字塔</span>
+          <span class="sub">L1 打底 → L2 分开测 → L3 连块测，再横切边界与安全</span>
+        </div>
+      </template>
+      <div class="pyramid">
+        <div
+          v-for="(g, i) in pyramid"
+          :key="g.name"
+          class="pyr-level"
+          :style="{ width: (46 + i * 18) + '%', background: g.grad }"
+        >
+          <span class="pyr-name">{{ g.name }}</span>
+          <span class="pyr-count">{{ g.count }}</span>
+          <span class="pyr-desc">{{ g.desc }}</span>
+        </div>
+      </div>
+    </el-card>
+
+    <el-row :gutter="16" class="row-gap">
       <!-- 趋势图 -->
-      <el-col :xs="24" :md="16">
-        <el-card>
+      <el-col :xs="24" :md="15">
+        <el-card class="fill-card">
           <template #header>
             <div class="card-head">
               <span>通过率趋势</span>
               <span class="sub">最近 20 次执行</span>
             </div>
           </template>
-          <div ref="chartRef" style="height: 340px"></div>
+          <div ref="chartRef" class="chart"></div>
         </el-card>
       </el-col>
 
       <!-- 五维 -->
-      <el-col :xs="24" :md="8">
-        <el-card>
+      <el-col :xs="24" :md="9">
+        <el-card class="fill-card">
           <template #header>
             <div class="card-head"><span>全方位测试五维</span></div>
           </template>
@@ -61,6 +83,7 @@ import { api } from '@/api'
 const stats = ref({ total: '-', unit: '-', env: '-' })
 const funcs = ref('-')
 const trendItems = ref([])
+const caseGroups = ref([])
 const chartRef = ref(null)
 let chart = null
 
@@ -80,6 +103,20 @@ const dims = computed(() => [
   { name: '边界', desc: '等价类 / 边界值 / 非法值', ready: true },
   { name: '端到端', desc: '两系统联动 · 数据契约', ready: false },
 ])
+
+// 金字塔：从顶部 L3 到底部专项，宽度递增；数量从用例库分组动态取
+const pyramid = computed(() => {
+  const count = (prefix) => {
+    const g = caseGroups.value.find((x) => x.group.startsWith(prefix))
+    return g ? g.cases.reduce((s, c) => s + (c.count || 1), 0) : '-'
+  }
+  return [
+    { name: 'L3 连块测', count: count('L3'), desc: '两系统联动 · 数据契约', grad: 'linear-gradient(135deg, #8b5cf6, #a78bfa)' },
+    { name: 'L2 分开测', count: count('L2'), desc: 'JOB 六链路 + CMDB 独立链路', grad: 'linear-gradient(135deg, #6366f1, #3b82f6)' },
+    { name: 'L1 工具层', count: count('L1'), desc: '测自己写的工具（不碰蓝鲸）', grad: 'linear-gradient(135deg, #3b82f6, #0ea5e9)' },
+    { name: '专项横切', count: count('专项'), desc: '参数边界 + 安全', grad: 'linear-gradient(135deg, #f59e0b, #f97316)' },
+  ]
+})
 
 function renderChart() {
   if (!chartRef.value) return
@@ -126,6 +163,7 @@ onMounted(async () => {
     stats.value = { total: s.total, unit: s.unit, env: s.env }
     trendItems.value = t.items || []
     funcs.value = c.functions
+    caseGroups.value = c.groups || []
     await nextTick()
     renderChart()
   } catch (e) {
@@ -139,8 +177,15 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
+.overview {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
 .stat-card {
   transition: transform 0.22s ease, box-shadow 0.22s ease;
+  height: 100%;
 }
 .stat-card:hover {
   transform: translateY(-3px);
@@ -172,6 +217,55 @@ onBeforeUnmount(() => {
   color: #94a3b8;
   font-size: 13px;
 }
+
+/* 金字塔 */
+.pyramid-card {
+  margin-top: 0;
+}
+.pyramid {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+}
+.pyr-level {
+  height: 44px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.14);
+  transition: width 0.4s ease;
+}
+.pyr-name {
+  font-weight: 700;
+  font-size: 14px;
+  min-width: 96px;
+  text-align: right;
+}
+.pyr-count {
+  font-weight: 700;
+  font-size: 16px;
+  min-width: 40px;
+  text-align: center;
+}
+.pyr-desc {
+  font-size: 12px;
+  opacity: 0.9;
+}
+
+.row-gap {
+  margin-top: 0;
+}
+.fill-card {
+  height: 100%;
+}
+.chart {
+  height: 320px;
+}
 .card-head {
   display: flex;
   justify-content: space-between;
@@ -185,7 +279,8 @@ onBeforeUnmount(() => {
 .dims {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 22px;
+  padding: 8px 0;
 }
 .dim-row {
   display: flex;
@@ -200,7 +295,7 @@ onBeforeUnmount(() => {
 }
 .dim-name {
   font-weight: 600;
-  width: 40px;
+  width: 44px;
 }
 .dim-desc {
   flex: 1;
