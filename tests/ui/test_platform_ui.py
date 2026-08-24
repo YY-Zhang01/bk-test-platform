@@ -21,11 +21,19 @@ pytestmark = pytest.mark.ui
 # 平台地址：本地跑用 127.0.0.1:8000，服务器用 http://114.55.176.42:8000
 BASE_URL = 'http://127.0.0.1:8000'
 
+# 用系统自带 Edge（channel='msedge'），免下载 chromium；
+# 若想用 Playwright 自带浏览器，去掉 channel 参数即可。
+CHANNEL = 'msedge'
+
+
+def _new_browser(p):
+    return p.chromium.launch(channel=CHANNEL)
+
 
 def test_平台首页能打开():
     """打开首页，标题应为「蓝鲸双系统端到端测试平台」。"""
     with sync_playwright() as p:
-        browser = p.chromium.launch()
+        browser = _new_browser(p)
         page = browser.new_page()
         page.goto(BASE_URL)
         expect(page).to_have_title('蓝鲸双系统端到端测试平台')
@@ -35,7 +43,7 @@ def test_平台首页能打开():
 def test_切到跑测试并执行冒烟出结果():
     """切「跑测试」→ 选冒烟计划 → 执行 → 应出现「完成」和通过结果。"""
     with sync_playwright() as p:
-        browser = p.chromium.launch()
+        browser = _new_browser(p)
         page = browser.new_page()
         page.goto(BASE_URL)
         # 点左侧「跑测试」导航
