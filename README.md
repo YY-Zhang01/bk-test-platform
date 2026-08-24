@@ -175,13 +175,27 @@ python app/web_app.py                      # → http://127.0.0.1:8000
 locust -f scripts/locustfile.py --host <ESB_HOST>
 ```
 
+### 部署到服务器（公网访问）
+
+```bash
+# 用 uvicorn 跑，监听所有网卡；可选设置访问密码
+cd job-test
+PLATFORM_PASSWORD=你的密码 nohup python3 -m uvicorn app.web_app:app \
+  --host 0.0.0.0 --port 8000 > platform.log 2>&1 &
+# 然后在云服务器安全组放行 8000 端口，访问 http://<公网IP>:8000
+```
+
+不设置 `PLATFORM_PASSWORD` 则无需密码访问（适合直接给面试官看）。
+
 ## 七、Web 平台能力
 
+- **左侧导航布局**：总览 / 跑测试 / 接口调试 / 报告，四模块分栏切换（深色侧栏 + 内容区）
 - **仪表盘**：金字塔用例统计（实时 collect）、通过率趋势折线图、五大测试维度
 - **测试计划**：冒烟 / 回归 / 只 JOB / 只连块测，一键组合执行
 - **接口调试**：Postman 式在线调 JOB/CMDB 只读接口（写操作白名单拒绝）
 - **报告中心**：每次运行 HTML 报告归档，latest.html 永远最新
 - **历史留痕**：SQLite 落库（runs + probe_logs），可审计可扩展
+- **访问控制**：支持 `PLATFORM_PASSWORD` 环境变量设置访问密码（公网部署时启用）
 
 ## 八、设计取舍
 
