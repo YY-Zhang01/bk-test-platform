@@ -394,7 +394,7 @@ INDEX_HTML = r"""<!DOCTYPE html>
   a { color: var(--blue); text-decoration: none; }
   a:hover { text-decoration: underline; }
   .hint { color: var(--weak); font-size: 12px; margin-top: 8px; }
-  canvas { display: block; width: 100%; height: 220px; }
+  canvas { display: block; width: 100%; height: 300px; }
   .gen-flow { display: flex; align-items: center; gap: 8px; margin: 16px 0;
               flex-wrap: wrap; }
   .gen-step { background: #f0f4ff; color: var(--blue); border-radius: 8px;
@@ -462,7 +462,7 @@ INDEX_HTML = r"""<!DOCTYPE html>
 
   <section>
     <h2>执行趋势（已执行用例通过率 · 橙点=有跳过 · 最近 20 次）</h2>
-    <canvas id="trend" width="900" height="220"></canvas>
+    <canvas id="trend" width="900" height="300"></canvas>
   </section>
 
   <section>
@@ -624,12 +624,12 @@ function drawTrend(items) {
   const c = $('trend'), ctx = c.getContext('2d');
   const dpr = window.devicePixelRatio || 1;
   const cssW = c.clientWidth || 900;
-  const cssH = 220;
+  const cssH = 300;
   c.width = Math.round(cssW * dpr);
   c.height = Math.round(cssH * dpr);
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  const W = cssW, H = cssH, ox = 46, oy = 12,
-        w = W - ox - 10, h = H - oy - 24;
+  const W = cssW, H = cssH, ox = 50, oy = 30,
+        w = W - ox - 14, h = H - oy - 30;
   ctx.clearRect(0, 0, W, H);
   ctx.font = '11px Consolas';
   ctx.strokeStyle = '#e6eaf2'; ctx.fillStyle = '#999';
