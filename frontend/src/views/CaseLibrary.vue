@@ -71,7 +71,7 @@
             </div>
           </div>
 
-          <el-table :data="currentCases" size="default" stripe>
+          <el-table :data="pagedCases" size="default" stripe>
             <el-table-column label="用例" min-width="240">
               <template #default="{ row }">
                 <div class="case-name">{{ row.name }}</div>
@@ -92,6 +92,16 @@
             </el-table-column>
           </el-table>
 
+          <div class="pager-row">
+            <el-pagination
+              v-model:current-page="page"
+              :page-size="pageSize"
+              :total="currentCases.length"
+              layout="total, prev, pager, next, jumper"
+              background
+            />
+          </div>
+
           <div v-if="!currentCases.length" class="empty-tip">没有匹配的用例</div>
         </el-card>
       </el-col>
@@ -100,7 +110,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { Search } from '@element-plus/icons-vue'
 import { api } from '@/api'
 
@@ -110,6 +120,8 @@ const groups = ref([])
 const activeGroup = ref('')
 const keyword = ref('')
 const envFilter = ref('all')
+const page = ref(1)
+const pageSize = 20
 
 const GROUP_META = {
   L1: { short: '工具层', sub: '测自己写的工具', icon: 'Tools', grad: 'linear-gradient(135deg, #0ea5e9, #3b82f6)' },
@@ -135,6 +147,16 @@ const currentCases = computed(() => {
     const matchEnv = envFilter.value === 'all' || c.env === envFilter.value
     return matchKw && matchEnv
   })
+})
+
+const pagedCases = computed(() => {
+  const start = (page.value - 1) * pageSize
+  return currentCases.value.slice(start, start + pageSize)
+})
+
+// 切分组 / 搜索 / 筛选时回到第一页
+watch([activeGroup, keyword, envFilter], () => {
+  page.value = 1
 })
 
 onMounted(async () => {
@@ -274,6 +296,11 @@ onMounted(async () => {
   font-family: Consolas, monospace;
   font-size: 12px;
   color: #909399;
+}
+.pager-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
 }
 .empty-tip {
   text-align: center;
