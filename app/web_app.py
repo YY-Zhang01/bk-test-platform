@@ -257,7 +257,36 @@ def task_status(task_id: str):
 
 @app.get('/api/reports')
 def reports():
-    return {'reports': _list_reports()}
+    """报告列表 + 通过率（按文件名时间戳关联 runs 表）。"""
+    items = _list_reports()
+    runs = storage.list_runs(200)
+    by_stamp = {}
+    for r in runs:
+        stamp = (r['ts'] or '').replace('-', '').replace(':', '').replace(' ', '_')
+        by_stamp[stamp] = r
+    for item in items:
+        # report_20260824_184111.html -> 20260824_184111
+        stamp = item['name'].replace('report_', '').replace('.html', '')
+        r = by_stamp.get(stamp)
+        if r:
+            item['rate'] = r['rate']
+            item['passed'] = r['passed']
+            item['failed'] = r['failed']
+            item['skipped'] = r['skipped']
+    return {'reports': items}
+
+
+@app.delete('/api/reports/{filename}')
+def delete_report(filename: str):
+    """删除报告文件（白名单防目录穿越）。"""
+    if not re.fullmatch(r'report_\d{8}_\d{6}\.html', filename) \
+            and filename != 'latest.html':
+        raise HTTPException(400, '非法报告文件名')
+    path = REPORTS_DIR / filename
+    if not path.exists():
+        raise HTTPException(404, '报告不存在')
+    path.unlink()
+    return {'ok': True, 'deleted': filename}
 
 
 def _save_history(task_id: str):
@@ -318,6 +347,34 @@ def gen_info():
     }
 
 
+# AI 生成历史目录（每次生成的草稿存档，可回溯复用）
+GEN_HISTORY_DIR = BASE_DIR / 'gen_cases' / 'history'
+
+
+def _save_gen_history(api_name: str, code: str):
+    """把生成草稿存档到历史目录。"""
+    try:
+        GEN_HISTORY_DIR.mkdir(parents=True, exist_ok=True)
+        stamp = time.strftime('%Y%m%d_%H%M%S')
+        (GEN_HISTORY_DIR / f'{stamp}_{api_name}.py').write_text(code, encoding='utf-8')
+    except OSError:
+        pass
+
+
+@app.get('/api/gen/history')
+def gen_history():
+    """生成历史（最近 20 条，含草稿内容，前端点击加载回溯）。"""
+    items = []
+    for f in sorted(GEN_HISTORY_DIR.glob('*.py'), reverse=True)[:20]:
+        items.append({
+            'file': f.name,
+            'api': f.stem.rsplit('_', 1)[-1],
+            'ts': f.stem.rsplit('_', 1)[0] if '_' in f.stem else '',
+            'code': f.read_text(encoding='utf-8'),
+        })
+    return {'items': items}
+
+
 @app.post('/api/gen/generate')
 async def gen_generate(req: Request):
     """接口名 → 调大模型生成用例草稿（key 走服务端配置，前端不传）。"""
@@ -340,6 +397,7 @@ async def gen_generate(req: Request):
             base_url=body.get('base_url') or None,
             model=body.get('model') or None,
             requirement=(body.get('requirement') or '').strip() or None))
+        _save_gen_history(name, code)
         return {'ok': True, 'api_name': name, 'code': code}
     except Exception as e:
         return {'ok': False, 'error': f'生成失败：{e}'}
@@ -412,11 +470,14 @@ async def gen_heal(req: Request):
     max_rounds = int(body.get('max_rounds') or 3)
     max_rounds = max(1, min(max_rounds, 5))
     try:
-        return heal(api_name, api_key=api_key,
-                    base_url=body.get('base_url') or None,
-                    model=body.get('model') or None,
-                    requirement=(body.get('requirement') or '').strip() or None,
-                    max_rounds=max_rounds)
+        result = heal(api_name, api_key=api_key,
+                      base_url=body.get('base_url') or None,
+                      model=body.get('model') or None,
+                      requirement=(body.get('requirement') or '').strip() or None,
+                      max_rounds=max_rounds)
+        if result.get('ok') and result.get('code'):
+            _save_gen_history(result.get('api_name', api_name), result['code'])
+        return result
     except Exception as e:
         return {'ok': False, 'error': f'自愈失败：{e}'}
 
@@ -449,6 +510,12 @@ async def probe(req: Request):
     except Exception as e:
         storage.log_probe(target, api_name, False, str(e))
         return {'ok': False, 'error': str(e)}
+
+
+@app.get('/api/probe/history')
+def probe_history():
+    """接口调试历史（最近 20 条），前端「历史请求」点击回填复用。"""
+    return {'items': storage.list_probe_logs(20)}
 
 
 @app.get('/api/ui')

@@ -52,13 +52,16 @@ export const api = {
   runStatus: (task_id) => http.get(`/api/run/${task_id}`),
   // 接口调试
   probe: (data) => http.post('/api/probe', data),
+  probeHistory: () => http.get('/api/probe/history'),
   // UI 自动化
   uiList: () => http.get('/api/ui'),
   uiRun: () => http.post('/api/ui/run'),
   // 报告
   reports: () => http.get('/api/reports').then((d) => d.reports || []),
+  deleteReport: (filename) => http.delete(`/api/reports/${filename}`),
   // AI 生成
   genInfo: () => http.get('/api/gen'),
+  genHistory: () => http.get('/api/gen/history'),
   genGenerate: (data) => http.post('/api/gen/generate', data),
   genHeal: (data) => http.post('/api/gen/heal', data, { timeout: 300000 }),
   genValidate: (data) => http.post('/api/gen/validate', data),

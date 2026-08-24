@@ -82,7 +82,8 @@ def test_文档结构描述与代码一致():
     # 测试文件数 + app 模块数（交接文档里）
     test_files = len(list((ROOT / 'tests').glob('test_*.py')))
     app_modules = len([f for f in (ROOT / 'app').glob('*.py')
-                       if f.name != '__init__.py'])
+                       if f.name != '__init__.py'
+                       and f.name != 'job_config_local.py'])
     handoff = (ROOT / 'docs' / '2026-08-23-job-test进度交接.md') \
         .read_text(encoding='utf-8')
     assert f'{test_files} 个测试文件' in handoff, \

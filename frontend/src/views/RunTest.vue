@@ -31,19 +31,36 @@
       </template>
       <el-alert
         v-if="result.summary"
-        :title="result.summary"
+        :title="running ? `执行中… ${result.summary}` : result.summary"
         :type="result.returncode === 0 ? 'success' : 'warning'"
         :closable="false"
         style="margin-bottom: 12px"
       />
-      <pre class="output">{{ result.output || '等待输出…' }}</pre>
+
+      <!-- 失败用例结构化 -->
+      <div v-if="failureList.length" class="failures">
+        <div class="failures-title">
+          <el-icon color="#ef4444"><CircleCloseFilled /></el-icon>
+          失败用例（{{ failureList.length }}）
+        </div>
+        <div v-for="(f, i) in failureList" :key="i" class="fail-item">
+          <div class="fail-name">{{ f.name }}</div>
+          <pre class="fail-err">{{ f.error }}</pre>
+        </div>
+      </div>
+
+      <el-collapse v-if="result.output" style="margin-bottom: 12px">
+        <el-collapse-item title="查看完整输出" name="raw">
+          <pre class="output">{{ result.output }}</pre>
+        </el-collapse-item>
+      </el-collapse>
     </el-card>
   </div>
 </template>
 
 <script setup>
-import { onBeforeUnmount, ref } from 'vue'
-import { VideoPlay } from '@element-plus/icons-vue'
+import { computed, onBeforeUnmount, ref } from 'vue'
+import { CircleCloseFilled, VideoPlay } from '@element-plus/icons-vue'
 import { api } from '@/api'
 
 const plans = [
@@ -58,6 +75,20 @@ const plan = ref('smoke')
 const running = ref(false)
 const result = ref(null)
 let timer = null
+
+// 从 pytest 输出解析失败用例（FAILED path::name - error 行）
+const failureList = computed(() => {
+  const out = result.value?.output || ''
+  const fails = []
+  for (const line of out.split('\n')) {
+    const m = line.match(/^FAILED\s+(.+?)\s+-\s+(.+)$/)
+    if (m) {
+      const name = m[1].split('::').pop()
+      fails.push({ name, full: m[1], error: m[2] })
+    }
+  }
+  return fails
+})
 
 async function run() {
   running.value = true
@@ -111,5 +142,37 @@ onBeforeUnmount(() => {
   max-height: 420px;
   overflow: auto;
   white-space: pre-wrap;
+  margin: 0;
+}
+.failures {
+  margin-bottom: 14px;
+}
+.failures-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  color: #ef4444;
+  margin-bottom: 10px;
+}
+.fail-item {
+  border: 1px solid #fee2e2;
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  background: #fef2f2;
+}
+.fail-name {
+  font-weight: 600;
+  color: #dc2626;
+  margin-bottom: 6px;
+}
+.fail-err {
+  margin: 0;
+  font-family: Consolas, monospace;
+  font-size: 12px;
+  color: #b91c1c;
+  white-space: pre-wrap;
+  line-height: 1.5;
 }
 </style>

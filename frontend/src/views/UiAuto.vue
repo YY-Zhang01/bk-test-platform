@@ -24,15 +24,23 @@
       </div>
     </el-card>
 
-    <el-card shadow="never" style="margin-top: 16px">
-      <el-table :data="uiTests" size="default" stripe>
-        <el-table-column prop="file" label="文件" width="200">
-          <template #default="{ row }"><span class="mono">{{ row.file }}</span></template>
-        </el-table-column>
-        <el-table-column prop="name" label="测试" min-width="220" />
-        <el-table-column prop="desc" label="作用" min-width="300" show-overflow-tooltip />
-      </el-table>
-    </el-card>
+    <div v-for="g in groups" :key="g.name" class="group-card">
+      <el-card shadow="never">
+        <template #header>
+          <div class="card-head">
+            <div class="group-title">
+              <el-icon :size="16" :color="g.color"><component :is="g.icon" /></el-icon>
+              <span>{{ g.name }}</span>
+              <el-tag size="small" type="info">{{ g.tests.length }}</el-tag>
+            </div>
+          </div>
+        </template>
+        <el-table :data="g.tests" size="small" stripe>
+          <el-table-column prop="name" label="测试" min-width="240" />
+          <el-table-column prop="desc" label="作用" min-width="320" show-overflow-tooltip />
+        </el-table>
+      </el-card>
+    </div>
 
     <el-card v-if="result" shadow="never" style="margin-top: 16px">
       <template #header>
@@ -56,7 +64,7 @@
 </template>
 
 <script setup>
-import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { Monitor } from '@element-plus/icons-vue'
 import { api } from '@/api'
 
@@ -65,6 +73,18 @@ const note = ref('')
 const running = ref(false)
 const result = ref(null)
 let timer = null
+
+// 按被测对象分组：平台 / CMDB / JOB
+const groups = computed(() => {
+  const meta = [
+    { key: 'test_platform_ui', name: '测自己平台', icon: 'Monitor', color: '#3b82f6' },
+    { key: 'test_cmdb_ui', name: '测 CMDB', icon: 'DataBoard', color: '#10b981' },
+    { key: 'test_job_ui', name: '测 JOB', icon: 'Operation', color: '#8b5cf6' },
+  ]
+  return meta
+    .map((m) => ({ ...m, tests: uiTests.value.filter((t) => t.file.startsWith(m.key)) }))
+    .filter((g) => g.tests.length)
+})
 
 onMounted(async () => {
   try {
@@ -115,6 +135,15 @@ onBeforeUnmount(() => {
 .mono {
   font-family: Consolas, monospace;
   font-size: 12px;
+}
+.group-card {
+  margin-top: 16px;
+}
+.group-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
 }
 .card-head {
   display: flex;

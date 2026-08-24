@@ -72,13 +72,13 @@
           </div>
 
           <el-table :data="pagedCases" size="default" stripe>
-            <el-table-column label="用例" min-width="240">
+            <el-table-column label="用例" min-width="230">
               <template #default="{ row }">
-                <div class="case-name">{{ row.name }}</div>
+                <div class="case-name" @click="showDetail(row)">{{ row.name }}</div>
               </template>
             </el-table-column>
-            <el-table-column prop="desc" label="作用 / 设计原因" min-width="320" show-overflow-tooltip />
-            <el-table-column prop="marker" label="marker" width="140">
+            <el-table-column prop="desc" label="作用 / 设计原因" min-width="280" show-overflow-tooltip />
+            <el-table-column prop="marker" label="marker" width="130">
               <template #default="{ row }">
                 <span class="mono">{{ row.marker || '-' }}</span>
               </template>
@@ -90,7 +90,32 @@
                 </el-tag>
               </template>
             </el-table-column>
+            <el-table-column label="" width="60" align="center">
+              <template #default="{ row }">
+                <el-button size="small" text type="primary" :icon="View" @click="showDetail(row)" />
+              </template>
+            </el-table-column>
           </el-table>
+
+          <!-- 用例详情抽屉 -->
+          <el-drawer v-model="drawer" :title="detail?.name || '用例详情'" size="420px">
+            <div v-if="detail" class="detail">
+              <el-descriptions :column="1" border>
+                <el-descriptions-item label="所属文件">{{ detail.file }}</el-descriptions-item>
+                <el-descriptions-item label="层级">{{ detail.layer }}</el-descriptions-item>
+                <el-descriptions-item label="marker">{{ detail.marker || '-' }}</el-descriptions-item>
+                <el-descriptions-item label="状态">
+                  <el-tag :type="detail.env === '否' ? 'success' : 'warning'" size="small">
+                    {{ detail.env === '否' ? '可跑' : '等账号' }}
+                  </el-tag>
+                </el-descriptions-item>
+              </el-descriptions>
+              <div class="detail-section">
+                <div class="detail-title">完整说明</div>
+                <pre class="detail-desc">{{ detail.desc_full || detail.desc }}</pre>
+              </div>
+            </div>
+          </el-drawer>
 
           <div class="pager-row">
             <el-pagination
@@ -111,7 +136,7 @@
 
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue'
-import { Search } from '@element-plus/icons-vue'
+import { Search, View } from '@element-plus/icons-vue'
 import { api } from '@/api'
 
 const total = ref('-')
@@ -122,6 +147,13 @@ const keyword = ref('')
 const envFilter = ref('all')
 const page = ref(1)
 const pageSize = 20
+const drawer = ref(false)
+const detail = ref(null)
+
+function showDetail(row) {
+  detail.value = row
+  drawer.value = true
+}
 
 const GROUP_META = {
   L1: { short: '工具层', sub: '测自己写的工具', icon: 'Tools', grad: 'linear-gradient(135deg, #0ea5e9, #3b82f6)' },
@@ -291,6 +323,30 @@ onMounted(async () => {
 }
 .case-name {
   font-weight: 500;
+  cursor: pointer;
+  color: #2563eb;
+}
+.case-name:hover {
+  text-decoration: underline;
+}
+.detail-section {
+  margin-top: 18px;
+}
+.detail-title {
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #475569;
+}
+.detail-desc {
+  background: #f8fafc;
+  border: 1px solid #eef2f7;
+  border-radius: 8px;
+  padding: 12px;
+  font-size: 13px;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  color: #334155;
+  margin: 0;
 }
 .mono {
   font-family: Consolas, monospace;

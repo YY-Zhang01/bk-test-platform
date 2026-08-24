@@ -60,7 +60,8 @@ def extract_cases() -> list:
             if params:
                 name += f' ×{params[0]}'
             rows.append({'file': f.name, 'name': name, 'desc': first,
-                         'layer': layer, 'marker': ','.join(marks) or '-',
+                         'desc_full': doc, 'layer': layer,
+                         'marker': ','.join(marks) or '-',
                          'env': env, 'count': count})
     return rows
 

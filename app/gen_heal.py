@@ -69,6 +69,7 @@ def heal(api_name: str, api_key=None, base_url=None, model=None,
 
     code = strip_code_fence(call_llm(name, doc, api_key=api_key, base_url=base_url,
                                      model=model, requirement=requirement))
+    first_code = code  # 初版（供前端 diff 对比自愈前后）
     rounds = []
 
     TMP_DIR.mkdir(exist_ok=True)
@@ -103,10 +104,10 @@ def heal(api_name: str, api_key=None, base_url=None, model=None,
             passed = int(m.group(1)) if m else 0
             final = 'passed' if passed > 0 else 'collect_passed'
             return {'ok': True, 'api_name': name, 'code': code,
-                    'rounds': rounds, 'final': final}
+                    'first_code': first_code, 'rounds': rounds, 'final': final}
 
         # 达到上限还没成功
         return {'ok': True, 'api_name': name, 'code': code,
-                'rounds': rounds, 'final': 'failed'}
+                'first_code': first_code, 'rounds': rounds, 'final': 'failed'}
     finally:
         tmp_file.unlink(missing_ok=True)

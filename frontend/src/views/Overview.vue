@@ -31,6 +31,8 @@
           :key="g.name"
           class="pyr-level"
           :style="{ width: (46 + i * 18) + '%', background: g.grad }"
+          :title="`查看${g.name}用例`"
+          @click="gotoGroup(g.prefix)"
         >
           <span class="pyr-name">{{ g.name }}</span>
           <span class="pyr-count">{{ g.count }}</span>
@@ -50,6 +52,19 @@
             </div>
           </template>
           <div ref="chartRef" class="chart"></div>
+          <div class="recent-runs">
+            <div class="recent-title">最近执行</div>
+            <div v-if="!recentRuns.length" class="recent-empty">还没有执行记录，先去「跑测试」跑一次</div>
+            <div v-for="r in recentRuns" :key="r.ts" class="recent-row">
+              <span class="recent-time">{{ r.ts }}</span>
+              <span class="recent-plan">{{ r.plan }}</span>
+              <span class="recent-dots">
+                <el-tooltip content="通过"><span class="r-dot r-passed">{{ r.passed }}</span></el-tooltip>
+                <el-tooltip content="失败"><span class="r-dot r-failed">{{ r.failed }}</span></el-tooltip>
+                <el-tooltip content="跳过"><span class="r-dot r-skipped">{{ r.skipped }}</span></el-tooltip>
+              </span>
+            </div>
+          </div>
         </el-card>
       </el-col>
 
@@ -77,8 +92,15 @@
 
 <script setup>
 import { computed, onMounted, onBeforeUnmount, ref, nextTick } from 'vue'
+import { useRouter } from 'vue-router'
 import * as echarts from 'echarts'
 import { api } from '@/api'
+
+const router = useRouter()
+
+function gotoGroup(prefix) {
+  router.push({ path: '/cases', query: { group: prefix } })
+}
 
 const stats = ref({ total: '-', unit: '-', env: '-' })
 const funcs = ref('-')
@@ -111,12 +133,15 @@ const pyramid = computed(() => {
     return g ? g.cases.reduce((s, c) => s + (c.count || 1), 0) : '-'
   }
   return [
-    { name: 'L3 连块测', count: count('L3'), desc: '两系统联动 · 数据契约', grad: 'linear-gradient(135deg, #8b5cf6, #a78bfa)' },
-    { name: 'L2 分开测', count: count('L2'), desc: 'JOB 六链路 + CMDB 独立链路', grad: 'linear-gradient(135deg, #6366f1, #3b82f6)' },
-    { name: 'L1 工具层', count: count('L1'), desc: '测自己写的工具（不碰蓝鲸）', grad: 'linear-gradient(135deg, #3b82f6, #0ea5e9)' },
-    { name: '专项横切', count: count('专项'), desc: '参数边界 + 安全', grad: 'linear-gradient(135deg, #f59e0b, #f97316)' },
+    { name: 'L3 连块测', prefix: 'L3', count: count('L3'), desc: '两系统联动 · 数据契约', grad: 'linear-gradient(135deg, #8b5cf6, #a78bfa)' },
+    { name: 'L2 分开测', prefix: 'L2', count: count('L2'), desc: 'JOB 六链路 + CMDB 独立链路', grad: 'linear-gradient(135deg, #6366f1, #3b82f6)' },
+    { name: 'L1 工具层', prefix: 'L1', count: count('L1'), desc: '测自己写的工具（不碰蓝鲸）', grad: 'linear-gradient(135deg, #3b82f6, #0ea5e9)' },
+    { name: '专项横切', prefix: '专项', count: count('专项'), desc: '参数边界 + 安全', grad: 'linear-gradient(135deg, #f59e0b, #f97316)' },
   ]
 })
+
+// 最近 5 次执行（趋势图下方简表）
+const recentRuns = computed(() => trendItems.value.slice(-5).reverse())
 
 function renderChart() {
   if (!chartRef.value) return
@@ -248,7 +273,12 @@ onBeforeUnmount(() => {
   gap: 12px;
   color: #fff;
   box-shadow: 0 4px 14px rgba(15, 23, 42, 0.14);
-  transition: width 0.4s ease;
+  transition: width 0.4s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+}
+.pyr-level:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.22);
 }
 .pyr-name {
   font-weight: 700;
@@ -274,8 +304,54 @@ onBeforeUnmount(() => {
   height: 100%;
 }
 .chart {
-  height: 320px;
+  height: 260px;
 }
+.recent-runs {
+  margin-top: 12px;
+  border-top: 1px solid #f1f5f9;
+  padding-top: 10px;
+}
+.recent-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #475569;
+  margin-bottom: 8px;
+}
+.recent-empty {
+  font-size: 12px;
+  color: #94a3b8;
+  padding: 8px 0;
+}
+.recent-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 5px 0;
+  font-size: 12px;
+}
+.recent-time {
+  color: #94a3b8;
+  font-family: Consolas, monospace;
+  min-width: 90px;
+}
+.recent-plan {
+  flex: 1;
+  color: #475569;
+}
+.recent-dots {
+  display: flex;
+  gap: 8px;
+}
+.r-dot {
+  padding: 1px 7px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #fff;
+}
+.r-passed { background: #10b981; }
+.r-failed { background: #ef4444; }
+.r-skipped { background: #f59e0b; }
 .card-head {
   display: flex;
   justify-content: space-between;

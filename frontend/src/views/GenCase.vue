@@ -40,6 +40,17 @@
           <el-input-number v-model="maxRounds" :min="1" :max="5" size="small" />
         </div>
       </div>
+
+      <el-collapse v-if="history.length" class="history-collapse">
+        <el-collapse-item title="生成历史（点击加载草稿）">
+          <div class="history-list">
+            <div v-for="(h, i) in history" :key="i" class="history-item" @click="loadFromHistory(h)">
+              <span class="his-api">{{ h.api }}</span>
+              <span class="his-time">{{ h.ts }}</span>
+            </div>
+          </div>
+        </el-collapse-item>
+      </el-collapse>
     </el-card>
 
     <!-- 自愈过程 -->
@@ -87,7 +98,18 @@
         :closable="false"
         style="margin-bottom: 12px"
       />
-      <pre class="output">{{ code }}</pre>
+      <!-- 自愈 diff 视图：初版 vs 最终 -->
+      <div v-if="firstCode" class="diff-view">
+        <div class="diff-col">
+          <div class="diff-title">自愈前（初版）</div>
+          <pre class="output">{{ firstCode }}</pre>
+        </div>
+        <div class="diff-col">
+          <div class="diff-title">自愈后（最终）</div>
+          <pre class="output">{{ code }}</pre>
+        </div>
+      </div>
+      <pre v-else class="output">{{ code }}</pre>
     </el-card>
   </div>
 </template>
@@ -104,6 +126,7 @@ const requirement = ref('')
 const maxRounds = ref(3)
 const code = ref('')
 const genApiName = ref('')
+const firstCode = ref('')
 const generating = ref(false)
 const healing = ref(false)
 const validating = ref(false)
@@ -112,6 +135,7 @@ const validateResult = ref('')
 const collected = ref(false)
 const rounds = ref([])
 const healResult = ref('')
+const history = ref([])
 
 const finalText = computed(() => ({
   passed: '✓ 自愈通过（真跑绿）',
@@ -132,7 +156,26 @@ onMounted(async () => {
   } catch (e) {
     console.error(e)
   }
+  loadHistory()
 })
+
+async function loadHistory() {
+  try {
+    const r = await api.genHistory()
+    history.value = r.items || []
+  } catch (e) {
+    console.error(e)
+  }
+}
+
+function loadFromHistory(h) {
+  code.value = h.code
+  genApiName.value = h.api
+  firstCode.value = ''
+  rounds.value = []
+  healResult.value = ''
+  validateResult.value = ''
+}
 
 async function generate() {
   if (!apiName.value) { validateResult.value = '请先选择接口'; collected.value = false; return }
@@ -140,9 +183,10 @@ async function generate() {
   validateResult.value = ''
   rounds.value = []
   healResult.value = ''
+  firstCode.value = ''
   try {
     const r = await api.genGenerate({ api_name: apiName.value, requirement: requirement.value })
-    if (r.ok) { code.value = r.code; genApiName.value = r.api_name }
+    if (r.ok) { code.value = r.code; genApiName.value = r.api_name; loadHistory() }
     else { validateResult.value = r.error; collected.value = false }
   } catch (e) {
     validateResult.value = e.message; collected.value = false
@@ -157,6 +201,7 @@ async function heal() {
   validateResult.value = ''
   rounds.value = []
   healResult.value = ''
+  firstCode.value = ''
   try {
     const r = await api.genHeal({
       api_name: apiName.value,
@@ -166,8 +211,10 @@ async function heal() {
     if (r.ok) {
       code.value = r.code
       genApiName.value = r.api_name
+      firstCode.value = r.first_code || ''
       rounds.value = r.rounds || []
       healResult.value = r.final
+      loadHistory()
     } else {
       validateResult.value = r.error
       collected.value = false
@@ -284,5 +331,51 @@ async function approve() {
   background: #0b1437; color: #d4d9e6; padding: 16px; border-radius: 8px;
   font-family: Consolas, monospace; font-size: 12px; line-height: 1.6;
   max-height: 480px; overflow: auto; white-space: pre-wrap; margin: 0;
+}
+.diff-view {
+  display: flex;
+  gap: 14px;
+}
+.diff-col {
+  flex: 1;
+  min-width: 0;
+}
+.diff-title {
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #475569;
+}
+.history-collapse {
+  margin-top: 16px;
+  border-top: 1px solid #f1f5f9;
+}
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 260px;
+  overflow: auto;
+}
+.history-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.history-item:hover {
+  background: #f1f5f9;
+}
+.his-api {
+  font-weight: 500;
+  color: #334155;
+}
+.his-time {
+  color: #94a3b8;
+  font-family: Consolas, monospace;
+  font-size: 12px;
 }
 </style>

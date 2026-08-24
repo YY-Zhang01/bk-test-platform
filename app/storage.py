@@ -78,6 +78,14 @@ def log_probe(target: str, api: str, ok: bool, result: str) -> None:
         pass
 
 
+def list_probe_logs(limit: int = 20) -> list:
+    """最近 N 条接口调试记录（供前端「历史请求」回填复用）。"""
+    with closing(_conn()) as conn:
+        rows = conn.execute(
+            'SELECT * FROM probe_logs ORDER BY id DESC LIMIT ?', (limit,)).fetchall()
+    return [dict(r) for r in rows]
+
+
 def migrate_jsonl(old_file: Path) -> int:
     """一次性迁移：旧版 results_history.jsonl 的数据搬进 SQLite。
 
