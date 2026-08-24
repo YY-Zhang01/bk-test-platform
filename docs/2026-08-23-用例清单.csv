@@ -7,9 +7,14 @@ test_cmdb_core.py,test_查主机_当前业务主机列表非空,对应手动步�
 test_cmdb_core.py,test_查主机详情_按ID能查到,对应手动步骤：主机详情页。按 host_id 条件查询应返回该主机。,CMDB链路,-,是
 test_cmdb_core.py,test_查拓扑_集群和模块结构完整,对应手动步骤：业务拓扑页（集群→模块两层树）。,CMDB链路,-,是
 test_cmdb_core.py,test_查模型属性_host模型字段字典非空,对应手动步骤：模型管理 → 主机模型字段。,CMDB链路,-,是
+test_cmdb_core.py,test_写业务_创建后能查到,功能链路：建业务 → 查业务（写后读，验证写接口真生效）。,CMDB链路,-,是
+test_cmdb_core.py,test_写动态分组_创建后能执行,功能链路：建动态分组 → 执行该分组（写后读，验证圈人闭环）。,CMDB链路,-,是
+test_cmdb_core.py,test_写业务_参数边界_空名,参数边界：业务名必填。探测型——账号到手后实测 CMDB 的拒绝码，,CMDB链路,-,是
+test_cmdb_core.py,test_写业务_安全_无权限写,安全：无写权限的账号创建业务应被拒绝。探测型——账号到手后,CMDB链路,-,是
 test_integration.py,test_契约_JOB业务ID在CMDB业务列表里,JOB 的 bk_scope_id 就是 CMDB 的 bk_biz_id，两边必须对得上。,L3连块测·数据契约,-,是
 test_integration.py,test_契约_JOB目标主机在CMDB主机列表里,JOB 的 host_id 就是 CMDB 的 bk_host_id，主机数据同源。,L3连块测·数据契约,-,是
 test_integration.py,test_契约_动态分组圈出的主机合法,动态分组执行结果非空，且圈出的主机在当前业务主机列表里。,L3连块测·数据契约,-,是
+test_integration.py,test_契约_拓扑节点ID在CMDB拓扑里存在,第 4 种圈主机方式 topo_node 的契约一致性。,L3连块测·数据契约,-,是
 test_integration.py,test_联动_CMDB圈主机JOB执行成功,业务闭环：CMDB 圈人 → JOB 干活。,L3连块测·数据契约,-,是
 test_integration.py,test_联动_引用动态分组ID直接执行成功,业务闭环（分组直引版）：JOB 侧只传动态分组 ID，不传主机清单。,L3连块测·数据契约,-,是
 test_integration.py,test_联动_分组执行完成且日志正确,端到端全链路：分组圈的主机执行脚本 → 状态成功。,L3连块测·数据契约,-,是

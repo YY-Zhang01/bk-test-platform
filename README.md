@@ -8,7 +8,7 @@
 ![FastAPI](https://img.shields.io/badge/Web-FastAPI-009688)
 ![pytest](https://img.shields.io/badge/Framework-pytest-0a9edc)
 ![SQLite](https://img.shields.io/badge/Storage-SQLite-003b57?logo=sqlite)
-![Cases](https://img.shields.io/badge/Cases-98-blue)
+![Cases](https://img.shields.io/badge/Cases-103-blue)
 ![CI](https://github.com/{GITHUB_USER}/job-test/actions/workflows/ci.yml/badge.svg)
 ![Coverage](badge.svg)
 ![License](https://img.shields.io/badge/License-MIT-green)
@@ -38,7 +38,7 @@ job-test/
 │   ├── web_app.py                Web 平台（FastAPI 单文件，内嵌 HTML，含测试计划 PLANS）
 │   ├── gen_cases.py              AI 用例生成器（调 DeepSeek，需 LLM_API_KEY）
 │   └── job_config.py             环境/凭证配置（真凭证走 job_config_local.py，已 gitignore）
-├── tests/                        测试用例（98 个，按 marker 分层）
+├── tests/                        测试用例（103 个 / 95 函数，按 marker 分层）
 │   ├── conftest.py               公共 fixture（job_client/cmdb_client，凭证缺失诚实 skip）
 │   ├── test_job_script.py        JOB 链路 1：脚本管理
 │   ├── test_job_fast_exec.py     JOB 链路 2：快速执行
@@ -143,7 +143,7 @@ flowchart TB
 
 | 维度 | 大白话问什么 | 载体 |
 |------|-------------|------|
-| 功能 | 对不对？ | 98 个分层用例 |
+| 功能 | 对不对？ | 103 个分层用例 |
 | 性能 | 快不快？ | `scripts/locustfile.py` 只读压测 |
 | 安全 | 漏不漏？ | `tests/test_security.py`（鉴权/越权/注入/高危） |
 | 边界 | 临界点崩不崩？ | `tests/test_job_boundary.py`（等价类/边界值/非法值） |
@@ -152,7 +152,7 @@ flowchart TB
 ### 3. 诚实原则
 
 未配置凭证时，环境层用例全部诚实 skip（不造假绿）：
-35 个 unit 用例正常跑，63 个环境层用例等账号激活。
+35 个 unit 用例正常跑，68 个环境层用例等账号激活。
 
 ## 六、快速开始
 
@@ -166,7 +166,7 @@ pip install -r requirements.txt
 # 3. 跑测试
 python scripts/run_tests.py -m "unit and not platform"  # 冒烟 28 个，不等账号秒出
 python scripts/run_tests.py -m unit                     # unit 层 35 个（含 7 个 Web 层）
-python scripts/run_tests.py                             # 全量 98 用例 + HTML 报告
+python scripts/run_tests.py                             # 全量 103 用例 + HTML 报告
 
 # 4. 启动 Web 平台
 python app/web_app.py                      # → http://127.0.0.1:8000
