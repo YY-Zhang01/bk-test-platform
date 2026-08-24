@@ -8,6 +8,7 @@ __pycache__/
 reports/
 data/
 .run_*.log
+.coverage
 results_history.jsonl
 results_history.jsonl.bak
 latest.html
