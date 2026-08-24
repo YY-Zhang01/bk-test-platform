@@ -1,7 +1,7 @@
 <template>
   <div>
     <el-card shadow="never">
-      <el-form label-width="90px" style="max-width: 820px">
+      <el-form label-width="90px">
         <el-form-item label="接口">
           <el-select v-model="apiName" filterable placeholder="选择接口文档" style="width: 100%">
             <el-option v-for="a in apis" :key="a" :value="a" :label="a" />

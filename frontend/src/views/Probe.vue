@@ -1,7 +1,7 @@
 <template>
   <div>
     <el-card shadow="never">
-      <el-form label-width="90px" style="max-width: 720px">
+      <el-form label-width="90px">
         <el-form-item label="目标系统">
           <el-radio-group v-model="target">
             <el-radio-button value="job">JOB</el-radio-button>
