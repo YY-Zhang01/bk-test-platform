@@ -59,11 +59,7 @@
         </div>
       </div>
 
-      <el-collapse v-if="result.output" style="margin-bottom: 12px">
-        <el-collapse-item title="查看完整输出" name="raw">
-          <pre class="output">{{ result.output }}</pre>
-        </el-collapse-item>
-      </el-collapse>
+      <pre v-if="result.output" class="output">{{ result.output }}</pre>
     </el-card>
   </div>
 </template>
