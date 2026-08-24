@@ -339,6 +339,34 @@ async def gen_validate(req: Request):
         tmp_file.unlink(missing_ok=True)
 
 
+@app.post('/api/gen/heal')
+async def gen_heal(req: Request):
+    """AI 自愈闭环（参考 ghost）：生成 → collect 验证 → 真跑 → 失败喂回修 → 重试。
+
+    返回 {ok, api_name, code, rounds, final}；rounds 是每轮的过程
+    （stage=collect/run，ok 表示该步是否通过），供前端实时展示。
+    """
+    from app import job_config
+    from app.gen_heal import heal
+    body = await req.json()
+    api_key = (body.get('api_key') or '').strip() or job_config.LLM_API_KEY
+    if not api_key:
+        return {'ok': False, 'error': '未配置 LLM_API_KEY：请粘贴你的大模型密钥'}
+    api_name = (body.get('api_name') or '').strip()
+    if not api_name:
+        return {'ok': False, 'error': '请先选择接口'}
+    max_rounds = int(body.get('max_rounds') or 3)
+    max_rounds = max(1, min(max_rounds, 5))
+    try:
+        return heal(api_name, api_key=api_key,
+                    base_url=body.get('base_url') or None,
+                    model=body.get('model') or None,
+                    requirement=(body.get('requirement') or '').strip() or None,
+                    max_rounds=max_rounds)
+    except Exception as e:
+        return {'ok': False, 'error': f'自愈失败：{e}'}
+
+
 @app.post('/api/probe')
 async def probe(req: Request):
     """接口调试（Postman 式，借鉴 MeterSphere 接口调试）：白名单内的

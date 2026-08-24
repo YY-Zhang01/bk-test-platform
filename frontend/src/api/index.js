@@ -30,6 +30,7 @@ export const api = {
   // AI 生成
   genInfo: () => http.get('/api/gen'),
   genGenerate: (data) => http.post('/api/gen/generate', data),
+  genHeal: (data) => http.post('/api/gen/heal', data, { timeout: 300000 }),
   genValidate: (data) => http.post('/api/gen/validate', data),
   genApprove: (data) => http.post('/api/gen/approve', data),
 }
