@@ -6,7 +6,8 @@
 ## 一、一句话定位
 
 给蓝鲸 **CMDB** 和 **JOB** 两个系统做全方位测试的平台：pytest 分层用例做「测试内核」，
-FastAPI 单文件做「Web 入口」，SQLite 做「历史留痕」，客户端封装层做「与蓝鲸打交道的翻译官」。
+FastAPI 后端（routers 拆分）+ Vue3/Element Plus 前端做「Web 平台」，SQLite 做「历史留痕 + 会话/限流/状态持久化」，
+客户端封装层做「与蓝鲸打交道的翻译官」。
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -34,7 +35,7 @@ FastAPI 单文件做「Web 入口」，SQLite 做「历史留痕」，客户端�
 └─────────────────────────────────────────────┘
 ```
 
-## 二、模块组成（app/ 目录，9 个模块）
+## 二、模块组成（app/ 目录）
 
 | 模块 | 职责 | 一句话 |
 |------|------|--------|
@@ -43,12 +44,15 @@ FastAPI 单文件做「Web 入口」，SQLite 做「历史留痕」，客户端�
 | `cmdb_client.py` | CMDB 客户端（cc 组件） | 封装 7 读 + 3 写接口，独立链路 + 跨系统数据源 |
 | `envs.py` | 多环境管理 | 一套代码切多套环境（体验/本地 CMDB/生产），凭证不入库 |
 | `job_config.py` | 单环境配置 | 模板默认值入库，真凭证走 `job_config_local.py`（gitignore） |
-| `web_app.py` | Web 平台 | FastAPI 单文件，内嵌 HTML/JS，六大模块收进一个网页 |
-| `storage.py` | SQLite 留痕 | 运行历史 + 接口调试日志，趋势图数据源 |
+| `web_app.py` | Web 入口 | app 创建 + 登录拦截中间件 + 挂载 routers + 托管前端 build 产物 |
+| `state.py` | 共享状态 + 工具 | PLANS/PROBE_METHODS/TASKS 等常量状态 + pytest collect/历史落库/限流等工具函数 |
+| `routers/` | API 路由包 | 按模块拆 7 个文件：auth/stats/run/probe/gen/reports/ui |
+| `storage.py` | SQLite 持久化 | 运行历史 + 接口调试日志 + 会话 token + 限流 + 用例状态（全落库，重启不丢） |
 | `case_index.py` | 用例索引 | ast 提取测试函数，供「用例库」页 + 导出 CSV |
 | `gen_cases.py` | AI 用例生成 | apidoc 喂大模型，产出用例草稿（人来把关） |
+| `gen_heal.py` | AI 自愈闭环 | 生成→collect→真跑→失败喂回修→重试（参考 ghost） |
 
-**依赖方向（单向，不循环）**：Web / 测试 → 客户端 → ESB；Web → 支撑层；客户端 → envs/job_config。
+**依赖方向（单向，不循环）**：routers / 测试 → 客户端 → ESB；routers → state/storage；客户端 → envs/job_config。
 
 ## 三、分层架构（两层「分层」别混）
 
@@ -116,8 +120,10 @@ pytest 收集 tests/
 | `platform` marker 防递归 | Web 层测试会 subprocess 再起 pytest，不排除会无限递归（踩过 70s 超时） | 拆掉任何一半都会复发 |
 | SQLite 而非 jsonl | 结构化聚合、并发安全、零运维 | 单机文件库，不做多实例共享（够用） |
 | 前后端分离（Vue3 + FastAPI） | 前端 Vue3/Element Plus 独立项目，后端纯 API + 托管前端 build 产物，同源部署无 CORS | 引入 Node 构建链，部署多一步 `npm run build` |
-| 登录认证（token 会话） | 公网防滥用 key 烧钱；自定义登录页 + 内存 token；报告用 `?token=` 传（window.open 不带 header） | 内存级 token，服务重启失效（够用不上生产） |
-| AI 生成限流 | 每 IP 每分钟限 8 次，防公网恶意调接口烧 DeepSeek 额度 | 内存级限流，多进程不共享 |
+| 路由拆分（routers/ + state.py） | 1200 行单文件拆成「入口 + 7 个路由 + 共享状态」，加接口不用翻长文件 | 多文件略增复杂度，但换来可维护性 |
+| 登录认证（token 会话持久化） | 公网防滥用 key 烧钱；自定义登录页 + token 落 SQLite；报告用 `?token=` 传（window.open 不带 header） | 重启不丢登录态，比内存级更接近生产 |
+| AI 生成限流（持久化） | 每 IP 每分钟限 8 次，计数落 SQLite，重启不清零防借重启刷接口 | 每次请求读写 SQLite，多进程仍可共享 |
+| 执行状态持久化 | 用例「最近执行」状态落 SQLite（case_status 表），重启后用例库状态仍在 | 跑完一次多一次写库（代价可忽略） |
 | 写操作接口调试白名单拒绝 | 在线调试只开放只读，防止误操作搞脏共享体验环境 | 调试不了写接口（有需要再单开） |
 
 ## 六、目录结构
