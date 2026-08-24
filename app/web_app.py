@@ -13,7 +13,9 @@
 为什么 FastAPI 单文件：平台阶段 0 的定位是"有脸可用"，不引入
 前端工程；页面内嵌 HTML + 原生 JS，零依赖零构建。
 """
+import base64
 import json
+import os
 import re
 import subprocess
 import sys
@@ -21,7 +23,7 @@ import time
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, Query, Request
-from fastapi.responses import FileResponse, HTMLResponse
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 
 # 项目根（web_app.py 在 app/ 下，CLI 直跑时 sys.path[0] 是 app/，
 # 需要把根插入才能延迟导入 app 包 + 定位 reports/ 等根级目录）
@@ -52,6 +54,23 @@ PROBE_METHODS = {
 }
 
 app = FastAPI(title='蓝鲸双系统端到端测试平台')
+
+# 公网访问密码：部署到服务器时设置环境变量 PLATFORM_PASSWORD 启用；
+# 本地/测试不设置则完全放行，不影响现有用例。
+PLATFORM_PASSWORD = os.environ.get('PLATFORM_PASSWORD', '')
+
+
+@app.middleware('http')
+async def 密码拦截(request: Request, call_next):
+    """简单密码验证（HTTP Basic Auth）：设了 PLATFORM_PASSWORD 才生效。"""
+    if not PLATFORM_PASSWORD:
+        return await call_next(request)
+    expected = 'Basic ' + base64.b64encode(
+        f'admin:{PLATFORM_PASSWORD}'.encode('utf-8')).decode('utf-8')
+    if request.headers.get('Authorization') == expected:
+        return await call_next(request)
+    return JSONResponse(status_code=401, content={'detail': '需要密码'},
+                        headers={'WWW-Authenticate': 'Basic realm="bk-test-platform"'})
 
 # 后台任务表：task_id -> {'proc': Popen, 'output': str, 'done': bool}
 TASKS = {}
