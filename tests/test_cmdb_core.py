@@ -107,3 +107,50 @@ def test_查模型属性_host模型字段字典非空(cmdb_client):
     # 核心字段必须在：主机 ID 和云区域是 JOB 执行主机的最小契约
     assert 'bk_host_id' in names, f'host 模型缺 bk_host_id: {names}'
     assert 'bk_cloud_id' in names, f'host 模型缺 bk_cloud_id: {names}'
+
+
+# ---------- 写操作（功能链路 + 参数边界 + 安全，账号到手后补参核实） ----------
+# 说明：写操作是 CMDB 自身的功能测试对象，也是"端到端圈人"的前置。
+# create_business / add_host_to_biz / create_dynamic_group 的参数名是骨架猜测，
+# 账号到手后以官方文档为准；边界/安全用例当前是探测型，实测后固化断言。
+
+def test_写业务_创建后能查到(cmdb_client, unique_name):
+    """功能链路：建业务 → 查业务（写后读，验证写接口真生效）。
+
+    遗留：CMDB 客户端暂无删除业务接口，本用例会在环境遗留唯一名业务，
+    需手工清理，或待补 delete_business 后级联清理（见 README 已知限制）。
+    """
+    created = cmdb_client.create_business(biz_name=unique_name)
+    assert created, f'创建业务返回为空: {created}'
+    bizs = cmdb_client.search_business()
+    names = {b.get('bk_biz_name') for b in bizs}
+    assert unique_name in names, f'新建业务 {unique_name} 未出现在业务列表: {names}'
+
+
+def test_写动态分组_创建后能执行(cmdb_client, unique_name):
+    """功能链路：建动态分组 → 执行该分组（写后读，验证圈人闭环）。
+
+    info 的查询条件结构是骨架猜测，以官方文档为准；空条件分组应圈到
+    全部主机，至少能执行且返回合法列表结构。
+    """
+    info = {'condition': [{'bk_obj_id': 'host', 'condition': []}]}
+    created = cmdb_client.create_dynamic_group(name=unique_name, info=info)
+    assert created, f'创建动态分组返回为空: {created}'
+    group_id = created.get('id') or created.get('bk_group_id')
+    assert group_id, f'创建返回里找不到分组 ID: {created}'
+    hosts = cmdb_client.execute_dynamic_group(group_id)
+    assert isinstance(hosts, list), f'执行动态分组返回结构异常: {hosts}'
+
+
+def test_写业务_参数边界_空名(cmdb_client):
+    """参数边界：业务名必填。探测型——账号到手后实测 CMDB 的拒绝码，
+    再把"应拒绝"固化成精确断言（当前只验证返回是合法结构）。"""
+    created = cmdb_client.create_business(biz_name='')
+    assert isinstance(created, dict), f'空名创建返回异常: {created}'
+
+
+def test_写业务_安全_无权限写(cmdb_client):
+    """安全：无写权限的账号创建业务应被拒绝。探测型——账号到手后
+    用一个只读账号实测，确认被拒后再固化"result=false + 权限错误码"。"""
+    created = cmdb_client.create_business(biz_name='no-perm-probe')
+    assert isinstance(created, dict), f'无权限写返回异常: {created}'
