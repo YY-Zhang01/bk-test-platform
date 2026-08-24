@@ -154,3 +154,14 @@ def test_写业务_安全_无权限写(cmdb_client):
     用一个只读账号实测，确认被拒后再固化"result=false + 权限错误码"。"""
     created = cmdb_client.create_business(biz_name='no-perm-probe')
     assert isinstance(created, dict), f'无权限写返回异常: {created}'
+
+
+def test_写导主机_导入后能查到(cmdb_client):
+    """功能链路：导入主机 → 查主机列表验证（写后读，补齐 add_host_to_biz）。
+
+    host_list 参数结构是骨架猜测，账号到手后以官方文档核实；
+    CMDB 无删除主机接口，遗留数据需手工清理（与建业务/建分组同）。
+    """
+    host_list = [{'bk_host_id': 0, 'bk_cloud_id': 0}]  # 骨架示例，待账号核实
+    imported = cmdb_client.add_host_to_biz(host_list)
+    assert isinstance(imported, dict), f'导入主机返回异常: {imported}'

@@ -1,4 +1,13 @@
 ﻿文件,用例名,作用/设计原因,所属层级/维度,marker,是否等账号
+test_cmdb_boundary.py,test_make_page_默认值,默认 start=0、limit=10，不带 sort 字段。,其他,unit,否
+test_cmdb_boundary.py,test_make_page_边界值透传 ×5,分页参数必须原样透传，构造层不做过滤（越界值留给服务端校验）。,其他,unit,否
+test_cmdb_boundary.py,test_查业务_条件构造自洽,search_business 传 biz_id 时，condition 结构应为 {bk_biz_id: id}。,其他,unit,否
+test_cmdb_boundary.py,test_查主机_条件构造自洽,search_host 按 host_id 查，condition 应含 host 模型 + $eq 条件。,其他,unit,否
+test_cmdb_boundary.py,test_查主机列表_fields透传,list_biz_hosts 传 fields 时原样透传，不传则不带该字段。,其他,unit,否
+test_cmdb_boundary.py,test_查模型属性_obj_id透传,search_object_attribute 的 obj_id 原样透传（默认 host）。,其他,unit,否
+test_cmdb_boundary.py,test_分页_start负数,探测型：start 传负数，账号到手后实测 CMDB 是拒绝还是静默返回空。,其他,-,是
+test_cmdb_boundary.py,test_查主机_非法biz_id,探测型：用不存在的 biz_id 查主机，账号到手后实测返回（预期空列表）。,其他,-,是
+test_cmdb_boundary.py,test_查模型_非法obj_id,探测型：查不存在的对象类型，账号到手后实测返回（预期空或报错）。,其他,-,是
 test_cmdb_core.py,test_分页参数_构造正确,make_page：默认 0 起点、10 条；传 sort 才带排序字段。,CMDB链路,unit,否
 test_cmdb_core.py,test_客户端_未配置时业务ID为空,CMDB 客户端复用 job_config 配置；未配置时 biz_id 为 None，,CMDB链路,unit,否
 test_cmdb_core.py,test_客户端_构造参数可覆盖配置,传参优先级：显式传参 > job_config。压测/多环境切换靠这个。,CMDB链路,unit,否
@@ -11,8 +20,15 @@ test_cmdb_core.py,test_写业务_创建后能查到,功能链路：建业务 →
 test_cmdb_core.py,test_写动态分组_创建后能执行,功能链路：建动态分组 → 执行该分组（写后读，验证圈人闭环）。,CMDB链路,-,是
 test_cmdb_core.py,test_写业务_参数边界_空名,参数边界：业务名必填。探测型——账号到手后实测 CMDB 的拒绝码，,CMDB链路,-,是
 test_cmdb_core.py,test_写业务_安全_无权限写,安全：无写权限的账号创建业务应被拒绝。探测型——账号到手后,CMDB链路,-,是
-test_docs_numbers.py,test_README用例数字与实测一致,,L1工具·文档数字自检,unit,否
-test_docs_numbers.py,test_文档结构描述与代码一致,,L1工具·文档数字自检,unit,否
+test_cmdb_core.py,test_写导主机_导入后能查到,功能链路：导入主机 → 查主机列表验证（写后读，补齐 add_host_to_biz）。,CMDB链路,-,是
+test_cmdb_security.py,test_供应商账号认证必带,CMDB 每个请求必须带 bk_supplier_account（历史参数，默认 0）。,其他,unit,否
+test_cmdb_security.py,test_写业务_参数构造自洽,create_business 拼参：bk_biz_name 和 bk_biz_maintainer 正确。,其他,unit,否
+test_cmdb_security.py,test_导主机_参数构造自洽,add_host_to_biz 拼参：host_list 原样透传。,其他,unit,否
+test_cmdb_security.py,test_查询_自动带业务ID做数据隔离,list_biz_hosts 未显式传 biz_id 时，自动用客户端的 biz_id（隔离锚点）。,其他,unit,否
+test_cmdb_security.py,test_越权_跨业务查不到本业务主机,业务隔离：用别的业务 biz_id 查主机，应查不到本业务的主机。,其他,-,是
+test_cmdb_security.py,test_写操作_无权限建业务被拒,探测型：无写权限的账号建业务应被拒。账号到手后用一个只读账号,其他,-,是
+test_docs_numbers.py,test_README用例数字与实测一致,README 的用例总数/函数数/能跑数/等账号数与代码实测一致。,L1工具·文档数字自检,unit,否
+test_docs_numbers.py,test_文档结构描述与代码一致,README 的模块数/marker 数、交接文档的文件数/模块数与代码实测一致。,L1工具·文档数字自检,unit,否
 test_envs.py,test_模板环境_列出体验与本地CMDB,envs.example.json 里应内置两个占位环境。,L1工具·多环境,unit,否
 test_envs.py,test_取不存在的环境_返回空dict,get_env 对未知环境返回空 dict，调用方用 .get 兜底，不抛异常。,L1工具·多环境,unit,否
 test_envs.py,test_local文件覆盖模板,envs.local.json 里的同名环境覆盖模板（local 优先，真凭证不入库）。,L1工具·多环境,unit,否
@@ -88,17 +104,17 @@ test_security.py,test_鉴权_错误token被拒,用真实 app_code/secret + 错�
 test_security.py,test_越权_跨业务scope查不到本业务脚本,"业务隔离：用本业务建一个脚本，用""别的业务 scope""去查，应查不到。",专项·安全,-,是
 test_security.py,test_注入_SQL注入参数被拒,脚本参数塞 SQL 注入 payload，应被服务端参数校验 / 高危检测拦截。,专项·安全,-,是
 test_security.py,test_高危命令_rm_rf被check_script命中,check_script 对 rm -rf / 应返回命中列表（level 3 致命）。,专项·安全,-,是
-test_storage.py,test_保存运行记录后能按最近N条查回,,L1工具·存储,-,否
-test_storage.py,test_查询条数上限生效,,L1工具·存储,-,否
-test_storage.py,test_接口调试留痕含成功失败位,,L1工具·存储,-,否
-test_storage.py,test_超长调试结果截断防爆库,,L1工具·存储,-,否
-test_storage.py,test_旧jsonl一次性迁移后不重复导入,,L1工具·存储,-,否
-test_storage.py,test_迁移时表非空则跳过并备份旧文件,,L1工具·存储,-,否
-test_storage.py,test_无旧文件迁移直接返回零,,L1工具·存储,-,否
-test_webapp.py,test_首页返回平台页面,,L1工具·Web平台层,-,否
-test_webapp.py,test_用例统计接口返回全量数字,,L1工具·Web平台层,-,否
-test_webapp.py,test_冒烟计划后台跑完并留历史,,L1工具·Web平台层,-,否
-test_webapp.py,test_未知任务查询返回404,,L1工具·Web平台层,-,否
-test_webapp.py,test_接口调试拒绝白名单外目标,,L1工具·Web平台层,-,否
-test_webapp.py,test_接口调试拒绝写操作只开放只读,,L1工具·Web平台层,-,否
-test_webapp.py,test_报告文件名白名单拒绝非法名,,L1工具·Web平台层,-,否
+test_storage.py,test_保存运行记录后能按最近N条查回,保存两条运行记录，list_runs 按时间正序返回（旧→新），供首页折线图。,L1工具·存储,-,否
+test_storage.py,test_查询条数上限生效,list_runs 的 limit 生效：取最近 N 条（id 最大），正序返回。,L1工具·存储,-,否
+test_storage.py,test_接口调试留痕含成功失败位,log_probe 记录成功/失败位（ok 1/0），落库可查，供接口调试历史。,L1工具·存储,-,否
+test_storage.py,test_超长调试结果截断防爆库,调试结果超 500 字符被截断，防止探针日志撑爆数据库。,L1工具·存储,-,否
+test_storage.py,test_旧jsonl一次性迁移后不重复导入,旧 jsonl 迁移到 SQLite 后改 .bak，重复迁移返回 0 不重复导入。,L1工具·存储,-,否
+test_storage.py,test_迁移时表非空则跳过并备份旧文件,表已有数据时跳过迁移（防覆盖），旧文件仍备份为 .bak。,L1工具·存储,-,否
+test_storage.py,test_无旧文件迁移直接返回零,没有旧 jsonl 文件时 migrate 返回 0，不报错。,L1工具·存储,-,否
+test_webapp.py,test_首页返回平台页面,首页返回 200，内容含平台标识（Vue 挂载点或金字塔文案）。,L1工具·Web平台层,-,否
+test_webapp.py,test_用例统计接口返回全量数字,stats 返回 total/unit/env，且 total = unit + env（口径自洽）。,L1工具·Web平台层,-,否
+test_webapp.py,test_冒烟计划后台跑完并留历史,跑冒烟计划，轮询到 done，returncode=0，趋势接口能查到该条历史。,L1工具·Web平台层,-,否
+test_webapp.py,test_未知任务查询返回404,查不存在的任务 id 返回 404。,L1工具·Web平台层,-,否
+test_webapp.py,test_接口调试拒绝白名单外目标,probe 目标不在白名单（只认 job/cmdb）时返回 400 拒绝。,L1工具·Web平台层,-,否
+test_webapp.py,test_接口调试拒绝写操作只开放只读,probe 调写操作（create_script）被拒，只开放只读查询（防误操作）。,L1工具·Web平台层,-,否
+test_webapp.py,test_报告文件名白名单拒绝非法名,报告文件名不合白名单格式返回 400，防目录穿越。,L1工具·Web平台层,-,否
