@@ -8,7 +8,7 @@
 ![FastAPI](https://img.shields.io/badge/Web-FastAPI-009688)
 ![pytest](https://img.shields.io/badge/Framework-pytest-0a9edc)
 ![SQLite](https://img.shields.io/badge/Storage-SQLite-003b57?logo=sqlite)
-![Cases](https://img.shields.io/badge/Cases-103-blue)
+![Cases](https://img.shields.io/badge/Cases-109-blue)
 ![CI](https://github.com/{GITHUB_USER}/job-test/actions/workflows/ci.yml/badge.svg)
 ![Coverage](badge.svg)
 ![License](https://img.shields.io/badge/License-MIT-green)
@@ -33,12 +33,16 @@
 job-test/
 ├── app/                          产品代码（测试内核的"手"和"操作台"）
 │   ├── api_client.py             JOB ESB 客户端（38 个接口封装，三件套认证）
-│   ├── cmdb_client.py            CMDB ESB 客户端（业务/主机/拓扑/模型/分组查询）
+│   ├── cmdb_client.py            CMDB ESB 客户端（业务/主机/拓扑/模型/分组查询 + 写操作）
+│   ├── base_client.py            ESB 客户端基类（统一拼 URL + 三件套 + 查结果）
+│   ├── envs.py                   多环境管理（一套代码切多套环境，凭证不入库）
+│   ├── envs.example.json         多环境模板（真凭证写 envs.local.json，已 gitignore）
 │   ├── storage.py                SQLite 存储层（执行记录 runs + 探针日志 probe_logs）
+│   ├── case_index.py             用例索引（ast 提取，供用例库页 + 导出 CSV）
 │   ├── web_app.py                Web 平台（FastAPI 单文件，内嵌 HTML，含测试计划 PLANS）
 │   ├── gen_cases.py              AI 用例生成器（调 DeepSeek，需 LLM_API_KEY）
-│   └── job_config.py             环境/凭证配置（真凭证走 job_config_local.py，已 gitignore）
-├── tests/                        测试用例（103 个 / 95 函数，按 marker 分层）
+│   └── job_config.py             单环境配置（真凭证走 job_config_local.py，已 gitignore）
+├── tests/                        测试用例（109 个 / 101 函数，按 marker 分层）
 │   ├── conftest.py               公共 fixture（job_client/cmdb_client，凭证缺失诚实 skip）
 │   ├── test_job_script.py        JOB 链路 1：脚本管理
 │   ├── test_job_fast_exec.py     JOB 链路 2：快速执行
@@ -52,17 +56,19 @@ job-test/
 │   ├── test_security.py          安全（鉴权/越权/注入/高危命令）
 │   ├── test_storage.py           存储层
 │   ├── test_webapp.py            Web 平台层（冒烟计划排除，防自引用）
+│   ├── test_envs.py              多环境管理单元测试
 │   └── ui/                       UI 自动化（Playwright）：测平台 / 测 CMDB / 测 JOB 骨架
 ├── scripts/                      工具脚本
-│   ├── run_tests.py              统一测试入口（全量/链路 + HTML 报告）
+│   ├── run_tests.py              统一测试入口（全量/链路 + HTML 报告 + --env 切环境）
 │   ├── locustfile.py             只读接口压测（Locust）
 │   ├── export_cases.py           导出用例清单 CSV
+│   ├── gen_api_docs.py           生成 API 参考文档（扫描客户端公开方法）
 │   └── gen_cmdb_docs.py          生成 CMDB 接口文档
-├── docs/                         策略文档 + 接口文档（apidoc/ JOB 38 份 + apidoc_cmdb/ CMDB 7 份）+ 面试问答卡
+├── docs/                         策略/架构/API 文档 + 接口文档（apidoc/ JOB 38 份 + apidoc_cmdb/ CMDB 7 份）+ 面试问答卡
 ├── reports/                      HTML 报告（gitignore）
 ├── data/                         SQLite 数据库（gitignore）
 ├── .github/workflows/ci.yml      GitHub Actions（push 跑测试 + 回写覆盖率徽章）
-├── pytest.ini                    12 个 marker 注册
+├── pytest.ini                    13 个 marker 注册
 ├── badge.svg                     覆盖率徽章（CI 自动回写）
 └── requirements.txt              依赖清单
 ```
@@ -135,7 +141,8 @@ flowchart TB
 三组 L3 场景围绕数据契约组织：
 
 - **契约一致性**（只读）：JOB 的 `bk_scope_id` == CMDB 的 `bk_biz_id`，
-  `host_id` == `bk_host_id`，`dynamic_group_list[].id` == CMDB 分组 ID
+  `host_id` == `bk_host_id`，`dynamic_group_list[].id` == CMDB 分组 ID，
+  `topo_node.id` == CMDB 拓扑实例 ID
 - **业务联动**：CMDB 圈人（动态分组）→ JOB 干活（快速执行 / 文件分发）
 - **隔离反向**（负面）：CMDB 不存在的幽灵主机 / 幽灵分组，JOB 必须拒绝
 
@@ -143,7 +150,7 @@ flowchart TB
 
 | 维度 | 大白话问什么 | 载体 |
 |------|-------------|------|
-| 功能 | 对不对？ | 103 个分层用例 |
+| 功能 | 对不对？ | 109 个分层用例 |
 | 性能 | 快不快？ | `scripts/locustfile.py` 只读压测 |
 | 安全 | 漏不漏？ | `tests/test_security.py`（鉴权/越权/注入/高危） |
 | 边界 | 临界点崩不崩？ | `tests/test_job_boundary.py`（等价类/边界值/非法值） |
@@ -152,7 +159,7 @@ flowchart TB
 ### 3. 诚实原则
 
 未配置凭证时，环境层用例全部诚实 skip（不造假绿）：
-35 个 unit 用例正常跑，68 个环境层用例等账号激活。
+41 个 unit 用例正常跑，68 个环境层用例等账号激活。
 
 ## 六、快速开始
 
@@ -164,9 +171,9 @@ pip install -r requirements.txt
 #    在 local 文件里填三件套（模板入库、真凭证不入库，见 docs/申请指引）
 
 # 3. 跑测试
-python scripts/run_tests.py -m "unit and not platform"  # 冒烟 28 个，不等账号秒出
-python scripts/run_tests.py -m unit                     # unit 层 35 个（含 7 个 Web 层）
-python scripts/run_tests.py                             # 全量 103 用例 + HTML 报告
+python scripts/run_tests.py -m "unit and not platform"  # 冒烟 34 个，不等账号秒出
+python scripts/run_tests.py -m unit                     # unit 层 41 个（含 7 个 Web 层）
+python scripts/run_tests.py                             # 全量 109 用例 + HTML 报告
 
 # 4. 启动 Web 平台
 python app/web_app.py                      # → http://127.0.0.1:8000
@@ -174,6 +181,25 @@ python app/web_app.py                      # → http://127.0.0.1:8000
 # 5. 性能压测（可选，凭证配好后）
 locust -f scripts/locustfile.py --host <ESB_HOST>
 ```
+
+### 多环境切换（可选）
+
+一套代码切多套环境（体验环境 / 本地 CMDB / 生产），不用改 `job_config.py`：
+
+```bash
+# 1. 复制模板，填真凭证（不入库）
+cp app/envs.example.json app/envs.local.json
+
+# 2. 按环境名跑（不传 --env 则走 job_config.py，行为不变）
+python scripts/run_tests.py --env experience        # 体验环境
+python scripts/run_tests.py -m cmdb --env local_cmdb
+
+# 客户端代码里也可直接指定环境
+JobClient(env='experience')
+CmdbClient(env='local_cmdb')
+```
+
+取值优先级：**显式参数 > env 配置 > job_config.py 默认值**。
 
 ### 部署到服务器（公网访问）
 
@@ -205,6 +231,8 @@ PLATFORM_PASSWORD=你的密码 nohup python3 -m uvicorn app.web_app:app \
 - **为什么 SQLite 不 MySQL**：单文件零运维，sqlite3 标准库，足够趋势图场景
 - **为什么压测只压只读**：共享体验环境黑名单约束，只读接口无副作用且是线上高频
 - **为什么不造假绿**：凭证没到就 skip 并提示下一步，绝不 mock 成 pass
+- **为什么多环境是叠加式**：`envs.py` 在 `job_config.py` 之上叠一层，旧用法不破坏，
+  真凭证走 `envs.local.json`（gitignore）不入库；架构详见 `docs/ARCHITECTURE.md`
 
 ## License
 
