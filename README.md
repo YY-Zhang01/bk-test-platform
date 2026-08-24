@@ -212,36 +212,40 @@ CmdbClient(env='local_cmdb')
 ### 部署到服务器（公网访问）
 
 ```bash
-# 用 uvicorn 跑，监听所有网卡；可选设置访问密码
+# 前端先 build，再启动后端（托管前端 build 产物 + 提供 API）
+cd frontend && npm install && npm run build && cd ..
 cd job-test
-PLATFORM_PASSWORD=你的密码 nohup python3 -m uvicorn app.web_app:app \
+PLATFORM_USER=jwkj PLATFORM_PASSWORD=jwkj nohup python3 -m uvicorn app.web_app:app \
   --host 0.0.0.0 --port 8000 > platform.log 2>&1 &
 # 然后在云服务器安全组放行 8000 端口，访问 http://<公网IP>:8000
 ```
 
-不设置 `PLATFORM_PASSWORD` 则无需密码访问（适合直接给面试官看）。
+**登录认证**：设了 `PLATFORM_PASSWORD` 后，访问会进自定义登录页（token 认证），
+账号密码由 `PLATFORM_USER` / `PLATFORM_PASSWORD` 决定。不设置则完全放行（适合本地开发）。
+默认账号密码：`jwkj / jwkj`。
 
 ## 七、Web 平台能力
 
-- **Vue3 + Element Plus 界面**：总览 / 跑测试 / 接口调试 / 报告 / AI 生成 / 用例库 / UI 自动化，七模块分栏切换
-- **AI 自愈生成**：粘贴大模型密钥 + 选接口 → 生成草稿 → 自动跑 → 失败喂回 AI 修复 → 重试到绿或达上限（参考 ghost）
-- **仪表盘**：金字塔用例统计（实时 collect）、通过率趋势折线图、五大测试维度
-- **UI 自动化**：列出 Playwright 测试、一键运行（需浏览器，本机跑）、看结果
-- **测试计划**：冒烟 / 回归 / 只 JOB / 只连块测，一键组合执行
-- **接口调试**：Postman 式在线调 JOB/CMDB 只读接口（写操作白名单拒绝）
-- **报告中心**：每次运行 HTML 报告归档，latest.html 永远最新
+- **登录认证**：自定义登录页 + token 会话（账号密码走 `PLATFORM_USER`/`PLATFORM_PASSWORD`）
+- **总览**：统计卡片 + 分层金字塔（点击跳转用例库）+ 趋势图（绿/红/黄堆叠 + 通过率）+ 最近执行 + 五维
+- **跑测试**：冒烟/回归/只 JOB/只连块测/全量，实时进度条，失败用例结构化展示
+- **接口调试**：参数说明内嵌（自动解析 apidoc）+ 历史请求回填 + 结果复制，只读白名单
+- **报告**：通过率标签 + 绿/红/黄数 + 删除
+- **AI 生成**：生成草稿 + 自愈闭环（生成→跑→修，参考 ghost）+ 自愈 diff + 生成历史回溯
+- **用例库**：左右分栏分组导航 + 分页 + 优先级(P0/P1/P2) + 最近执行状态 + 详情抽屉
+- **UI 自动化**：按平台/CMDB/JOB 分组、一键运行、失败自动截图 + HTML 报告
 - **历史留痕**：SQLite 落库（runs + probe_logs），可审计可扩展
-- **访问控制**：支持 `PLATFORM_PASSWORD` 环境变量设置访问密码（公网部署时启用）
 
 ## 八、设计取舍
 
-- **为什么 FastAPI 单文件**：阶段 0 定位"有脸可用"，内嵌 HTML + 原生 JS，
-  零前端工程、零构建、断网可演示
-- **为什么 SQLite 不 MySQL**：单文件零运维，sqlite3 标准库，足够趋势图场景
+- **为什么前后端分离（Vue3 + FastAPI）**：前端 Vue3/Element Plus 独立项目，后端 FastAPI 纯 API + 托管前端 build 产物，
+  同源部署无 CORS 问题；比「单文件内嵌 HTML」更适合持续长大
+- **为什么 SQLite 不 MySQL**：单机零运维，sqlite3 标准库，足够趋势图场景；多人协作再换 MySQL
 - **为什么压测只压只读**：共享体验环境黑名单约束，只读接口无副作用且是线上高频
 - **为什么不造假绿**：凭证没到就 skip 并提示下一步，绝不 mock 成 pass
 - **为什么多环境是叠加式**：`envs.py` 在 `job_config.py` 之上叠一层，旧用法不破坏，
   真凭证走 `envs.local.json`（gitignore）不入库；架构详见 `docs/ARCHITECTURE.md`
+- **为什么 AI 生成要限流 + 登录**：key 内置服务端，公网接口必须防滥用烧钱（每 IP 每分钟限 8 次 + 全站 token 登录）
 
 ## License
 
