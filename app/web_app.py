@@ -24,6 +24,7 @@ from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
 
 # 项目根（web_app.py 在 app/ 下，CLI 直跑时 sys.path[0] 是 app/，
 # 需要把根插入才能延迟导入 app 包 + 定位 reports/ 等根级目录）
@@ -32,6 +33,8 @@ from app import storage
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 REPORTS_DIR = BASE_DIR / 'reports'
+# Vue 前端 build 产物目录（npm run build 生成）；不存在时回退旧内嵌 HTML
+DIST_DIR = BASE_DIR / 'frontend' / 'dist'
 
 # 一次性迁移：旧版 jsonl 历史数据搬进 SQLite（幂等，见 storage.migrate_jsonl）
 storage.migrate_jsonl(BASE_DIR / 'results_history.jsonl')
@@ -54,6 +57,10 @@ PROBE_METHODS = {
 }
 
 app = FastAPI(title='蓝鲸双系统端到端测试平台')
+
+# Vue 前端静态资源：dist 存在就挂载 /assets（前后端同源托管）
+if (DIST_DIR / 'assets').exists():
+    app.mount('/assets', StaticFiles(directory=DIST_DIR / 'assets'), name='assets')
 
 # 公网访问密码：部署到服务器时设置环境变量 PLATFORM_PASSWORD 启用；
 # 本地/测试不设置则完全放行，不影响现有用例。
@@ -133,9 +140,13 @@ def _list_reports() -> list:
 
 # ---------------- API ----------------
 
-@app.get('/', response_class=HTMLResponse)
+@app.get('/')
 def index():
-    return INDEX_HTML
+    """首页：优先返回 Vue build 的 index.html（前后端同源），否则回退旧内嵌 HTML。"""
+    spa_index = DIST_DIR / 'index.html'
+    if spa_index.exists():
+        return FileResponse(spa_index)
+    return HTMLResponse(INDEX_HTML)
 
 
 @app.get('/api/stats')
@@ -995,6 +1006,19 @@ refreshCases();
 </body>
 </html>
 """
+
+
+@app.get('/{full_path:path}')
+def spa_fallback(full_path: str):
+    """SPA 路由 fallback：Vue Router 的 history 模式，前端路由（/overview 等）
+    刷新时回退到 index.html；API/报告路径不 fallback，返回 404。"""
+    if full_path.startswith('api/') or full_path.startswith('report/'):
+        raise HTTPException(404, '接口或报告不存在')
+    spa_index = DIST_DIR / 'index.html'
+    if spa_index.exists():
+        return FileResponse(spa_index)
+    return HTMLResponse(INDEX_HTML)
+
 
 if __name__ == '__main__':
     import uvicorn
