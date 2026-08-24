@@ -249,6 +249,50 @@ def gen_info():
     }
 
 
+@app.post('/api/gen/generate')
+async def gen_generate(req: Request):
+    """粘贴 key + 接口名 → 调大模型生成用例草稿。"""
+    from app import job_config
+    body = await req.json()
+    api_key = (body.get('api_key') or '').strip() or job_config.LLM_API_KEY
+    if not api_key:
+        return {'ok': False, 'error': '未配置 LLM_API_KEY：请粘贴你的大模型密钥'}
+    api_name = (body.get('api_name') or '').strip()
+    from app.gen_cases import call_llm, load_docs, strip_code_fence
+    docs = load_docs(api_name)
+    if not docs:
+        return {'ok': False, 'error': f'没找到含「{api_name}」的接口文档（docs/apidoc/）'}
+    name, doc = docs[0]
+    try:
+        code = strip_code_fence(call_llm(
+            name, doc, api_key=api_key,
+            base_url=body.get('base_url') or None,
+            model=body.get('model') or None))
+        return {'ok': True, 'api_name': name, 'code': code}
+    except Exception as e:
+        return {'ok': False, 'error': f'生成失败：{e}'}
+
+
+@app.post('/api/gen/approve')
+async def gen_approve(req: Request):
+    """审阅通过后，把草稿写入 gen_cases/ 草稿目录（test_接口名_ai.py）。"""
+    body = await req.json()
+    api_name = (body.get('api_name') or '').strip()
+    code = body.get('code') or ''
+    if not api_name or not code:
+        return {'ok': False, 'error': '接口名和草稿内容不能为空'}
+    if not re.fullmatch(r'[a-z0-9_]+', api_name):
+        return {'ok': False, 'error': '接口名不合法'}
+    out_dir = BASE_DIR / 'gen_cases'
+    out_dir.mkdir(exist_ok=True)
+    filename = f'test_{api_name}_ai.py'
+    header = (f'# -*- coding: utf-8 -*-\n'
+              f'# AI 生成的用例草稿（接口 {api_name}），经人工审阅。\n'
+              f'# 移入正式 tests/ 目录前请再次确认可收集、断言正确。\n')
+    (out_dir / filename).write_text(header + code + '\n', encoding='utf-8')
+    return {'ok': True, 'saved': f'gen_cases/{filename}'}
+
+
 @app.post('/api/probe')
 async def probe(req: Request):
     """接口调试（Postman 式，借鉴 MeterSphere 接口调试）：白名单内的
@@ -406,6 +450,10 @@ INDEX_HTML = r"""<!DOCTYPE html>
                 "Courier New", monospace; font-size: 12px; padding: 14px 16px;
                 border-radius: 10px; overflow: auto; white-space: pre;
                 line-height: 1.6; }
+  input { border: 1px solid #d4dcec; border-radius: 8px; padding: 9px 14px;
+          font-size: 13px; background: #fff; color: var(--ink);
+          outline: none; transition: border-color .15s; }
+  input:focus { border-color: var(--blue); }
   .layout { flex: 1; display: flex; align-items: stretch; min-height: 0; }
   .sidebar { width: 200px; flex-shrink: 0; background: #0f1c4d;
              padding: 16px 0; display: flex; flex-direction: column; gap: 2px; }
@@ -532,45 +580,20 @@ INDEX_HTML = r"""<!DOCTYPE html>
   <div class="tab-panel hidden" id="tab-gen">
   <section>
     <h2>AI 用例生成（gen_cases.py）</h2>
-    <p>把 docs/apidoc/ 里 <b id="gen-doc-count">-</b> 份接口文档喂给大模型（<span id="gen-model">DeepSeek</span>），自动产出 pytest 用例草稿，人工审阅后并入正式用例目录。</p>
+    <p>人设：<b>蓝鲸 JOB 接口测试专家</b>——把 <span id="gen-doc-count">-</span> 份接口文档转成 pytest 用例草稿。粘贴你的大模型密钥，选接口生成，审阅后选择是否并入正式目录。</p>
 
-    <div class="gen-flow">
-      <span class="gen-step">① 选接口文档</span>
-      <span class="gen-arrow">→</span>
-      <span class="gen-step">② AI 生成草稿</span>
-      <span class="gen-arrow">→</span>
-      <span class="gen-step">③ 人工审阅并入 tests/</span>
+    <div class="btns" style="margin-bottom:10px;">
+      <input type="password" id="gen-key" placeholder="粘贴 LLM API Key（如 DeepSeek）" style="flex:1;min-width:260px;">
+    </div>
+    <div class="btns">
+      <input type="text" id="gen-api" placeholder="接口名，如 fast_execute_script" style="flex:1;min-width:200px;">
+      <button class="b-all" id="gen-go">生成草稿</button>
+      <button class="b-unit" id="gen-approve" disabled>✓ 并入正式目录</button>
     </div>
 
-    <h3 class="gen-title">示例：AI 生成的用例草稿长这样（fast_execute_script）</h3>
-    <pre class="gen-sample"># -*- coding: utf-8 -*-
-# AI 生成的用例草稿（接口 fast_execute_script）
-# 本文件由 gen_cases.py 自动生成，只做骨架：需人工审阅后移入正式用例目录。
-import pytest
-
-from app import job_config
-from app.api_client import JobError, make_target_server
-
-
-def test_快速执行_脚本执行成功(job_client, target_host):
-    # 对应手动步骤：快速执行页 → 选脚本 → 选目标主机 → 执行
-    result = job_client.fast_execute_script(
-        content='echo hello', language=1,
-        account_alias=job_config.ACCOUNT_ALIAS,
-        target_server=make_target_server(host_id_list=[target_host]))
-    assert result['job_instance_id']
-
-
-def test_快速执行_空脚本内容被拒(job_client, target_host):
-    # 负面用例：脚本内容为空，应被服务端参数校验拒绝
-    with pytest.raises(JobError):
-        job_client.fast_execute_script(
-            content='', language=1,
-            account_alias=job_config.ACCOUNT_ALIAS,
-            target_server=make_target_server(host_id_list=[target_host]))</pre>
-
-    <p class="hint">命令行用法：python gen_cases.py（全量）/ -i 接口名（单个）/ --collect（生成后验证可收集）。</p>
-    <p class="hint" id="gen-status">加载中…</p>
+    <div id="gen-msg" class="hint" style="margin:12px 0;"></div>
+    <pre id="gen-code" class="gen-sample" style="display:none;max-height:420px;">生成的草稿会显示在这里</pre>
+    <p class="hint" id="gen-status" style="margin-top:10px;">加载中…</p>
   </section>
   </div>
 </main>
@@ -687,11 +710,42 @@ async function refreshStats() {
 async function refreshGen() {
   const r = await fetch('/api/gen').then(x => x.json());
   $('gen-doc-count').textContent = r.apidoc_count;
-  $('gen-model').textContent = r.model;
   $('gen-status').textContent = r.key_configured
-    ? '✅ LLM_API_KEY 已配置，可生成用例草稿'
-    : '⚠️ LLM_API_KEY 未配置（需 DeepSeek 开放平台申请），当前为展示性功能';
+    ? '✅ 已配置默认 key，可直接生成；也可在下方粘贴你自己的 key'
+    : '⚠️ 默认 key 未配置：请在下方粘贴你的大模型密钥后生成';
 }
+let genLastApi = '';
+$('gen-go').onclick = async () => {
+  const apiKey = $('gen-key').value.trim();
+  const apiName = $('gen-api').value.trim();
+  if (!apiKey) { $('gen-msg').textContent = '请先粘贴你的大模型密钥'; return; }
+  if (!apiName) { $('gen-msg').textContent = '请填接口名'; return; }
+  $('gen-msg').textContent = '生成中…（调大模型，可能要十几秒）';
+  const r = await fetch('/api/gen/generate', {method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({api_key: apiKey, api_name: apiName})}).then(x => x.json());
+  if (r.ok) {
+    genLastApi = r.api_name;
+    $('gen-code').textContent = r.code;
+    $('gen-code').style.display = 'block';
+    $('gen-msg').textContent = '✅ 生成成功（接口 ' + r.api_name + '）。请审阅下方草稿，确认无误再点「并入正式目录」。';
+    $('gen-approve').disabled = false;
+  } else {
+    $('gen-msg').textContent = '❌ ' + r.error;
+    $('gen-code').style.display = 'none';
+    $('gen-approve').disabled = true;
+  }
+};
+$('gen-approve').onclick = async () => {
+  const code = $('gen-code').textContent;
+  if (!genLastApi || !code) return;
+  const r = await fetch('/api/gen/approve', {method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({api_name: genLastApi, code: code})}).then(x => x.json());
+  $('gen-msg').textContent = r.ok
+    ? '✅ 已并入草稿目录：' + r.saved + '（移入正式 tests/ 前请再次确认）'
+    : '❌ ' + r.error;
+};
 function setBusy(b) {
   $('b-run').disabled = b; $('plan').disabled = b;
 }

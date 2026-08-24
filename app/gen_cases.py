@@ -55,12 +55,18 @@ def load_docs(api_filter: str) -> list:
     return docs
 
 
-def call_llm(api_name: str, doc: str) -> str:
-    """调 OpenAI 兼容接口生成用例代码。"""
-    url = f"{job_config.LLM_BASE_URL.rstrip('/')}/chat/completions"
-    headers = {'Authorization': f'Bearer {job_config.LLM_API_KEY}'}
+def call_llm(api_name: str, doc: str, api_key: str = None,
+             base_url: str = None, model: str = None) -> str:
+    """调 OpenAI 兼容接口生成用例代码。
+
+    api_key / base_url / model 可显式传入（网页粘贴的 key），
+    不传则回落到 job_config 的默认配置。
+    """
+    key = api_key or job_config.LLM_API_KEY
+    url = f"{(base_url or job_config.LLM_BASE_URL).rstrip('/')}/chat/completions"
+    headers = {'Authorization': f'Bearer {key}'}
     body = {
-        'model': job_config.LLM_MODEL,
+        'model': model or job_config.LLM_MODEL,
         'messages': [
             {'role': 'system',
              'content': f'你是蓝鲸作业平台(JOB)接口测试专家。根据接口文档生成 pytest 用例草稿。{STYLE_RULES}'},
