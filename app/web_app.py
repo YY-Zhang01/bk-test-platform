@@ -82,6 +82,20 @@ async def 密码拦截(request: Request, call_next):
 # 后台任务表：task_id -> {'proc': Popen, 'output': str, 'done': bool}
 TASKS = {}
 
+# AI 生成限流（内存级）：防公网滥用 key 烧钱。每 IP 每分钟最多 N 次。
+_GEN_RATE = {}
+
+
+def _gen_rate_ok(ip: str, limit: int = 8) -> bool:
+    """简单滑动窗口限流：60 秒内最多 limit 次 AI 生成。"""
+    now = time.time()
+    times = [t for t in _GEN_RATE.get(ip, []) if now - t < 60]
+    if len(times) >= limit:
+        return False
+    times.append(now)
+    _GEN_RATE[ip] = times
+    return True
+
 # 统计缓存（pytest collect-only 每次 ~0.2s，缓存 30 秒避免连点卡顿）
 _STATS_CACHE = {'ts': 0, 'data': None}
 
@@ -281,12 +295,14 @@ def gen_info():
 
 @app.post('/api/gen/generate')
 async def gen_generate(req: Request):
-    """粘贴 key + 接口名 → 调大模型生成用例草稿。"""
+    """接口名 → 调大模型生成用例草稿（key 走服务端配置，前端不传）。"""
+    if not _gen_rate_ok(req.client.host if req.client else 'unknown'):
+        raise HTTPException(429, 'AI 生成太频繁，请稍后再试（每分钟限 8 次）')
     from app import job_config
     body = await req.json()
     api_key = (body.get('api_key') or '').strip() or job_config.LLM_API_KEY
     if not api_key:
-        return {'ok': False, 'error': '未配置 LLM_API_KEY：请粘贴你的大模型密钥'}
+        return {'ok': False, 'error': '未配置 LLM_API_KEY：请在服务端 job_config_local.py 配置'}
     api_name = (body.get('api_name') or '').strip()
     from app.gen_cases import call_llm, load_docs, strip_code_fence
     docs = load_docs(api_name)
@@ -357,12 +373,14 @@ async def gen_heal(req: Request):
     返回 {ok, api_name, code, rounds, final}；rounds 是每轮的过程
     （stage=collect/run，ok 表示该步是否通过），供前端实时展示。
     """
+    if not _gen_rate_ok(req.client.host if req.client else 'unknown'):
+        raise HTTPException(429, 'AI 生成太频繁，请稍后再试（每分钟限 8 次）')
     from app import job_config
     from app.gen_heal import heal
     body = await req.json()
     api_key = (body.get('api_key') or '').strip() or job_config.LLM_API_KEY
     if not api_key:
-        return {'ok': False, 'error': '未配置 LLM_API_KEY：请粘贴你的大模型密钥'}
+        return {'ok': False, 'error': '未配置 LLM_API_KEY：请在服务端 job_config_local.py 配置'}
     api_name = (body.get('api_name') or '').strip()
     if not api_name:
         return {'ok': False, 'error': '请先选择接口'}

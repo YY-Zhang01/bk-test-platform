@@ -1,36 +1,49 @@
 <template>
-  <div>
-    <el-card shadow="never">
-      <el-form label-width="90px">
-        <el-form-item label="接口">
-          <el-select v-model="apiName" filterable placeholder="选择接口文档" style="width: 100%">
+  <div class="gen">
+    <!-- 顶部配置区 -->
+    <el-card class="config-card">
+      <div class="config-head">
+        <div class="config-title">
+          <el-icon :size="18" color="#6366f1"><MagicStick /></el-icon>
+          <span>AI 用例生成工作台</span>
+        </div>
+        <el-tag type="success" effect="light" size="small">模型 {{ model }} 已就绪</el-tag>
+      </div>
+
+      <div class="config-row">
+        <div class="field">
+          <div class="field-label">目标接口</div>
+          <el-select v-model="apiName" filterable placeholder="选择接口文档" class="field-select">
             <el-option v-for="a in apis" :key="a" :value="a" :label="a" />
           </el-select>
-        </el-form-item>
-        <el-form-item label="模型 Key">
-          <el-input v-model="apiKey" placeholder="留空则用服务端配置的 key" type="password" show-password />
-        </el-form-item>
-        <el-form-item label="额外需求">
-          <el-input v-model="requirement" type="textarea" :rows="2" placeholder="如：多生成负面用例、边界值用例" />
-        </el-form-item>
-        <el-form-item label="自愈上限">
-          <el-input-number v-model="maxRounds" :min="1" :max="5" />
-          <span class="hint">生成失败时让 AI 自动修复的最多轮数</span>
-        </el-form-item>
-        <el-form-item>
-          <el-button type="primary" :icon="MagicStick" :loading="generating" @click="generate">
-            {{ generating ? '生成中…' : '生成草稿' }}
-          </el-button>
-          <el-button type="success" :icon="RefreshRight" :loading="healing" @click="heal">
-            {{ healing ? '自愈中…' : '自愈生成（生成→跑→修）' }}
-          </el-button>
-          <el-tag type="info" style="margin-left: 12px">共 {{ apis.length }} 个接口 · {{ model }}</el-tag>
-        </el-form-item>
-      </el-form>
+        </div>
+        <div class="field field-grow">
+          <div class="field-label">额外需求（可选）</div>
+          <el-input
+            v-model="requirement"
+            type="textarea"
+            :rows="3"
+            placeholder="描述你想要的用例侧重点，例如：多生成负面用例、边界值用例、参数越界场景…"
+          />
+        </div>
+      </div>
+
+      <div class="action-row">
+        <el-button size="large" :icon="MagicStick" :loading="generating" @click="generate">
+          生成草稿
+        </el-button>
+        <el-button size="large" type="primary" :icon="RefreshRight" :loading="healing" @click="heal">
+          自愈生成（生成 → 跑 → 修）
+        </el-button>
+        <div class="rounds-set">
+          <span class="rounds-label">自愈上限</span>
+          <el-input-number v-model="maxRounds" :min="1" :max="5" size="small" />
+        </div>
+      </div>
     </el-card>
 
-    <!-- 自愈过程时间线 -->
-    <el-card v-if="rounds.length" shadow="never" style="margin-top: 16px">
+    <!-- 自愈过程 -->
+    <el-card v-if="rounds.length" class="result-card">
       <template #header>
         <div class="card-head">
           <span>自愈过程</span>
@@ -45,11 +58,9 @@
           :timestamp="`第 ${r.round} 轮 · ${r.stage === 'collect' ? '收集验证' : '真跑验证'}`"
         >
           <div class="round-line">
-            <el-tag :type="r.ok ? 'success' : 'danger'" size="small">
-              {{ r.ok ? '通过' : '失败' }}
-            </el-tag>
-            <el-collapse style="flex:1" v-if="!r.ok">
-              <el-collapse-item title="查看错误信息">
+            <el-tag :type="r.ok ? 'success' : 'danger'" size="small">{{ r.ok ? '通过' : '失败' }}</el-tag>
+            <el-collapse v-if="!r.ok" style="flex:1">
+              <el-collapse-item title="查看错误">
                 <pre class="err">{{ r.output }}</pre>
               </el-collapse-item>
             </el-collapse>
@@ -58,11 +69,11 @@
       </el-timeline>
     </el-card>
 
-    <!-- 草稿代码 -->
-    <el-card v-if="code" shadow="never" style="margin-top: 16px">
+    <!-- 代码结果 -->
+    <el-card v-if="code" class="result-card">
       <template #header>
         <div class="card-head">
-          <span>草稿（接口：{{ genApiName }}）</span>
+          <span>生成草稿 · {{ genApiName }}</span>
           <div>
             <el-button size="small" :loading="validating" @click="validate">验证可收集</el-button>
             <el-button size="small" type="success" :loading="approving" @click="approve">并入 tests/</el-button>
@@ -89,7 +100,6 @@ import { api } from '@/api'
 const apis = ref([])
 const model = ref('deepseek-chat')
 const apiName = ref('')
-const apiKey = ref('')
 const requirement = ref('')
 const maxRounds = ref(3)
 const code = ref('')
@@ -131,7 +141,7 @@ async function generate() {
   rounds.value = []
   healResult.value = ''
   try {
-    const r = await api.genGenerate({ api_name: apiName.value, api_key: apiKey.value, requirement: requirement.value })
+    const r = await api.genGenerate({ api_name: apiName.value, requirement: requirement.value })
     if (r.ok) { code.value = r.code; genApiName.value = r.api_name }
     else { validateResult.value = r.error; collected.value = false }
   } catch (e) {
@@ -150,7 +160,6 @@ async function heal() {
   try {
     const r = await api.genHeal({
       api_name: apiName.value,
-      api_key: apiKey.value,
       requirement: requirement.value,
       max_rounds: maxRounds.value,
     })
@@ -198,17 +207,82 @@ async function approve() {
 </script>
 
 <style scoped>
-.card-head { display: flex; justify-content: space-between; align-items: center; }
-.hint { margin-left: 10px; font-size: 12px; color: #909399; }
-.round-line { display: flex; align-items: flex-start; gap: 12px; }
+.gen {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.config-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+.config-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  font-size: 16px;
+}
+.config-row {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 260px;
+}
+.field-grow {
+  flex: 1;
+  min-width: 320px;
+}
+.field-label {
+  font-size: 13px;
+  color: #64748b;
+  font-weight: 500;
+}
+.field-select {
+  width: 100%;
+}
+.action-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+.rounds-set {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+.rounds-label {
+  font-size: 13px;
+  color: #64748b;
+}
+.card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.round-line {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
 .err {
   background: #0b1437; color: #f8b4b4; padding: 10px; border-radius: 6px;
   font-family: Consolas, monospace; font-size: 11px; line-height: 1.5;
   max-height: 200px; overflow: auto; white-space: pre-wrap; margin: 0;
 }
 .output {
-  background: #0b1437; color: #d4d9e6; padding: 14px; border-radius: 6px;
+  background: #0b1437; color: #d4d9e6; padding: 16px; border-radius: 8px;
   font-family: Consolas, monospace; font-size: 12px; line-height: 1.6;
-  max-height: 480px; overflow: auto; white-space: pre-wrap;
+  max-height: 480px; overflow: auto; white-space: pre-wrap; margin: 0;
 }
 </style>
