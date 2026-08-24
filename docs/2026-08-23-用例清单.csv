@@ -11,6 +11,7 @@ test_cmdb_core.py,test_写业务_创建后能查到,功能链路：建业务 →
 test_cmdb_core.py,test_写动态分组_创建后能执行,功能链路：建动态分组 → 执行该分组（写后读，验证圈人闭环）。,CMDB链路,-,是
 test_cmdb_core.py,test_写业务_参数边界_空名,参数边界：业务名必填。探测型——账号到手后实测 CMDB 的拒绝码，,CMDB链路,-,是
 test_cmdb_core.py,test_写业务_安全_无权限写,安全：无写权限的账号创建业务应被拒绝。探测型——账号到手后,CMDB链路,-,是
+test_docs_numbers.py,test_README用例数字与实测一致,,L1工具·文档数字自检,unit,否
 test_envs.py,test_模板环境_列出体验与本地CMDB,envs.example.json 里应内置两个占位环境。,L1工具·多环境,unit,否
 test_envs.py,test_取不存在的环境_返回空dict,get_env 对未知环境返回空 dict，调用方用 .get 兜底，不抛异常。,L1工具·多环境,unit,否
 test_envs.py,test_local文件覆盖模板,envs.local.json 里的同名环境覆盖模板（local 优先，真凭证不入库）。,L1工具·多环境,unit,否

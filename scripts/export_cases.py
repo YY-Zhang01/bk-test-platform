@@ -26,6 +26,7 @@ FILE_META = {
     'test_storage.py':      ('L1工具·存储', False),
     'test_webapp.py':       ('L1工具·Web平台层', False),
     'test_envs.py':         ('L1工具·多环境', False),
+    'test_docs_numbers.py': ('L1工具·文档数字自检', False),
 }
 
 

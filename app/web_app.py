@@ -580,7 +580,7 @@ INDEX_HTML = r"""<!DOCTYPE html>
   <section>
     <h2>全方位测试五大维度（功能 / 性能 / 安全 / 边界 / 端到端）</h2>
     <div class="dims">
-      <div class="dim"><div class="d-t">功能</div><div class="d-s">JOB 6 链路 + CMDB · 109 用例</div><span class="tag ok">已落地</span></div>
+      <div class="dim"><div class="d-t">功能</div><div class="d-s">JOB 6 链路 + CMDB · 110 用例</div><span class="tag ok">已落地</span></div>
       <div class="dim"><div class="d-t">边界</div><div class="d-s">等价类 / 边界值 / 非法值</div><span class="tag ok">已落地</span></div>
       <div class="dim"><div class="d-t">端到端</div><div class="d-s">两系统联动 · 数据契约是其中一环</div><span class="tag wait">待账号</span></div>
       <div class="dim"><div class="d-t">性能</div><div class="d-s">Locust 只读压测</div><span class="tag wait">待账号</span></div>
