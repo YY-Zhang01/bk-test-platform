@@ -293,7 +293,8 @@ INDEX_HTML = r"""<!DOCTYPE html>
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
-         background: var(--bg); color: var(--ink); }
+         background: var(--bg); color: var(--ink);
+         display: flex; flex-direction: column; min-height: 100vh; }
   header { background: #0f1c4d; color: #fff; padding: 16px 24px;
            display: flex; align-items: baseline; gap: 16px; }
   header h1 { font-size: 20px; letter-spacing: 1px; }
@@ -379,7 +380,7 @@ INDEX_HTML = r"""<!DOCTYPE html>
   a:hover { text-decoration: underline; }
   .hint { color: var(--weak); font-size: 12px; margin-top: 8px; }
   canvas { width: 100%; }
-  .layout { max-width: 1440px; margin: 0 auto; display: flex; align-items: stretch; }
+  .layout { flex: 1; display: flex; align-items: stretch; min-height: 0; }
   .sidebar { width: 200px; flex-shrink: 0; background: #0f1c4d;
              padding: 16px 0; display: flex; flex-direction: column; gap: 2px; }
   .nav-item { text-align: left; background: transparent; color: rgba(255,255,255,.72);
