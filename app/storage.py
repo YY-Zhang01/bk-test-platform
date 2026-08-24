@@ -41,6 +41,20 @@ def _conn() -> sqlite3.Connection:
             ok     INTEGER NOT NULL,
             result TEXT
         );
+        CREATE TABLE IF NOT EXISTS sessions (
+            token      TEXT PRIMARY KEY,
+            created_ts TEXT NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS rate_limits (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            ip TEXT NOT NULL,
+            ts REAL NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS case_status (
+            test_name TEXT PRIMARY KEY,
+            status    TEXT NOT NULL,
+            ts        TEXT NOT NULL
+        );
     ''')
     conn.commit()
     return conn
@@ -120,3 +134,59 @@ def migrate_jsonl(old_file: Path) -> int:
                      r.get('skipped', 0), r.get('rate', 0), ''))
     old_file.replace(old_file.with_suffix('.jsonl.bak'))
     return len(rows)
+
+
+# ── 会话 token（持久化：重启不丢登录态）──
+
+def save_session(token: str) -> None:
+    """签发会话 token，落库持久化（服务重启登录态仍在）。"""
+    with closing(_conn()) as conn, conn:
+        conn.execute('INSERT OR REPLACE INTO sessions (token, created_ts)'
+                     ' VALUES (?, ?)',
+                     (token, time.strftime('%Y-%m-%d %H:%M:%S')))
+
+
+def has_session(token: str) -> bool:
+    """校验 token 是否有效（登录过）。"""
+    if not token:
+        return False
+    with closing(_conn()) as conn:
+        row = conn.execute('SELECT 1 FROM sessions WHERE token = ?',
+                           (token,)).fetchone()
+    return row is not None
+
+
+# ── 限流（持久化：重启不清零，防借重启刷接口）──
+
+def log_rate(ip: str) -> None:
+    """记录一次 AI 生成请求（时间戳 float，用于滑动窗口计数）。"""
+    with closing(_conn()) as conn, conn:
+        conn.execute('INSERT INTO rate_limits (ip, ts) VALUES (?, ?)',
+                     (ip, time.time()))
+
+
+def count_rate(ip: str, window: float = 60.0) -> int:
+    """数某 IP 最近 window 秒内的请求次数。"""
+    cutoff = time.time() - window
+    with closing(_conn()) as conn:
+        row = conn.execute(
+            'SELECT COUNT(*) AS n FROM rate_limits WHERE ip = ? AND ts > ?',
+            (ip, cutoff)).fetchone()
+    return row['n']
+
+
+# ── 用例执行状态（持久化：重启后用例库状态仍在）──
+
+def save_case_status(name: str, status: str) -> None:
+    """存单个用例的最近执行状态（passed/failed/skipped）。"""
+    with closing(_conn()) as conn, conn:
+        conn.execute('INSERT OR REPLACE INTO case_status (test_name, status, ts)'
+                     ' VALUES (?, ?, ?)',
+                     (name, status, time.strftime('%Y-%m-%d %H:%M:%S')))
+
+
+def get_all_case_status() -> dict:
+    """返回全部用例状态 {test_name: status}。"""
+    with closing(_conn()) as conn:
+        rows = conn.execute('SELECT test_name, status FROM case_status').fetchall()
+    return {r['test_name']: r['status'] for r in rows}
