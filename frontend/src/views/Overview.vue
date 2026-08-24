@@ -123,9 +123,13 @@ function renderChart() {
   if (!chart) chart = echarts.init(chartRef.value)
   const items = trendItems.value
   const labels = items.map((i) => i.ts || '')
+  const passed = items.map((i) => i.passed || 0)
+  const failed = items.map((i) => i.failed || 0)
+  const skipped = items.map((i) => i.skipped || 0)
   const rates = items.map((i) => Math.round((i.rate || 0) * 100))
   chart.setOption({
-    grid: { left: 40, right: 16, top: 20, bottom: 40 },
+    grid: { left: 40, right: 48, top: 40, bottom: 40 },
+    legend: { data: ['通过', '失败', '跳过', '通过率'], top: 0, textStyle: { fontSize: 12 } },
     tooltip: {
       trigger: 'axis',
       backgroundColor: 'rgba(15,23,42,.9)',
@@ -133,27 +137,33 @@ function renderChart() {
       textStyle: { color: '#fff' },
     },
     xAxis: {
-      type: 'category', data: labels, boundaryGap: false,
+      type: 'category', data: labels,
       axisLine: { lineStyle: { color: '#e2e8f0' } },
       axisLabel: { rotate: 30, fontSize: 10, color: '#94a3b8' },
     },
-    yAxis: {
-      type: 'value', min: 0, max: 100,
-      splitLine: { lineStyle: { color: '#f1f5f9' } },
-      axisLabel: { formatter: '{value}%', color: '#94a3b8' },
-    },
-    series: [{
-      type: 'line', smooth: true, data: rates, name: '通过率',
-      symbol: 'circle', symbolSize: 7,
-      itemStyle: { color: '#3b82f6', borderColor: '#fff', borderWidth: 2 },
-      lineStyle: { color: '#3b82f6', width: 3 },
-      areaStyle: {
-        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-          { offset: 0, color: 'rgba(59,130,246,.30)' },
-          { offset: 1, color: 'rgba(59,130,246,.02)' },
-        ]),
+    yAxis: [
+      {
+        type: 'value', name: '用例数',
+        splitLine: { lineStyle: { color: '#f1f5f9' } },
+        axisLabel: { color: '#94a3b8' },
       },
-    }],
+      {
+        type: 'value', name: '通过率', min: 0, max: 100,
+        axisLabel: { formatter: '{value}%', color: '#94a3b8' },
+        splitLine: { show: false },
+      },
+    ],
+    series: [
+      { name: '通过', type: 'bar', stack: 'total', data: passed, barMaxWidth: 22, itemStyle: { color: '#10b981' } },
+      { name: '失败', type: 'bar', stack: 'total', data: failed, barMaxWidth: 22, itemStyle: { color: '#ef4444' } },
+      { name: '跳过', type: 'bar', stack: 'total', data: skipped, barMaxWidth: 22, itemStyle: { color: '#f59e0b' } },
+      {
+        name: '通过率', type: 'line', yAxisIndex: 1, data: rates,
+        smooth: true, symbol: 'circle', symbolSize: 7,
+        itemStyle: { color: '#3b82f6', borderColor: '#fff', borderWidth: 2 },
+        lineStyle: { color: '#3b82f6', width: 3 },
+      },
+    ],
   })
 }
 
