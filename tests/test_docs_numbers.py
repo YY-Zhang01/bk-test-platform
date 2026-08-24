@@ -65,13 +65,14 @@ def test_README用例数字与实测一致():
 @pytest.mark.unit
 def test_文档结构描述与代码一致():
     readme = (ROOT / 'README.md').read_text(encoding='utf-8')
-    web = (ROOT / 'app' / 'web_app.py').read_text(encoding='utf-8')
+    layout = (ROOT / 'frontend' / 'src' / 'layouts' / 'MainLayout.vue') \
+        .read_text(encoding='utf-8')
     ini = (ROOT / 'pytest.ini').read_text(encoding='utf-8')
 
-    # Web 平台导航模块数（侧栏按钮）
-    nav = web.count('<button class="nav-item')
+    # Web 平台导航模块数（Vue 前端 MainLayout 的 menus 数组项数）
+    nav = layout.count("{ path: '")
     assert f'{_cn(nav)}模块' in readme, \
-        f'README 应写「{_cn(nav)}模块」（侧栏实际 {nav} 个导航按钮）'
+        f'README 应写「{_cn(nav)}模块」（前端侧栏实际 {nav} 个菜单）'
 
     # marker 注册数
     markers = _count_markers(ini)
