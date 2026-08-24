@@ -67,14 +67,14 @@ def test_README用例数字与实测一致():
 def test_文档结构描述与代码一致():
     """README 的模块数/marker 数、交接文档的文件数/模块数与代码实测一致。"""
     readme = (ROOT / 'README.md').read_text(encoding='utf-8')
-    layout = (ROOT / 'frontend' / 'src' / 'layouts' / 'MainLayout.vue') \
-        .read_text(encoding='utf-8')
     ini = (ROOT / 'pytest.ini').read_text(encoding='utf-8')
 
-    # Web 平台导航模块数（Vue 前端 MainLayout 的 menus 数组项数）
-    nav = layout.count("{ path: '")
+    # Web 平台模块数：数后端 routers 的路由文件数（每个功能模块一个路由文件）。
+    # 不数 frontend/src（那是构建源，服务器部署的只有 dist 产物，src 不存在）。
+    routers_dir = ROOT / 'app' / 'routers'
+    nav = len([f for f in routers_dir.glob('*.py') if f.name != '__init__.py'])
     assert f'{_cn(nav)}模块' in readme, \
-        f'README 应写「{_cn(nav)}模块」（前端侧栏实际 {nav} 个菜单）'
+        f'README 应写「{_cn(nav)}模块」（后端实际 {nav} 个路由模块）'
 
     # marker 注册数
     markers = _count_markers(ini)
