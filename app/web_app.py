@@ -289,14 +289,40 @@ async def gen_approve(req: Request):
         return {'ok': False, 'error': '接口名和草稿内容不能为空'}
     if not re.fullmatch(r'[a-z0-9_]+', api_name):
         return {'ok': False, 'error': '接口名不合法'}
-    out_dir = BASE_DIR / 'gen_cases'
+    out_dir = BASE_DIR / 'tests'
     out_dir.mkdir(exist_ok=True)
     filename = f'test_{api_name}_ai.py'
     header = (f'# -*- coding: utf-8 -*-\n'
-              f'# AI 生成的用例草稿（接口 {api_name}），经人工审阅。\n'
-              f'# 移入正式 tests/ 目录前请再次确认可收集、断言正确。\n')
+              f'# AI 生成的用例草稿（接口 {api_name}），已通过 pytest 收集验证。\n'
+              f'# 断言与清理逻辑仍需人工复核。\n')
     (out_dir / filename).write_text(header + code + '\n', encoding='utf-8')
-    return {'ok': True, 'saved': f'gen_cases/{filename}'}
+    return {'ok': True, 'saved': f'tests/{filename}'}
+
+
+@app.post('/api/gen/validate')
+async def gen_validate(req: Request):
+    """验证草稿能否被 pytest 收集（临时写文件跑 --collect-only）。"""
+    body = await req.json()
+    api_name = (body.get('api_name') or '').strip()
+    code = body.get('code') or ''
+    if not api_name or not code:
+        return {'ok': False, 'error': '接口名和草稿内容不能为空'}
+    if not re.fullmatch(r'[a-z0-9_]+', api_name):
+        return {'ok': False, 'error': '接口名不合法'}
+    tmp_dir = BASE_DIR / 'gen_cases'
+    tmp_dir.mkdir(exist_ok=True)
+    tmp_file = tmp_dir / f'_validate_{api_name}.py'
+    tmp_file.write_text(code + '\n', encoding='utf-8')
+    try:
+        cmd = [sys.executable, '-m', 'pytest', '--collect-only', '-q', str(tmp_file)]
+        proc = subprocess.run(cmd, cwd=BASE_DIR, capture_output=True,
+                              text=True, timeout=120)
+        out = (proc.stdout + proc.stderr)[-800:]
+        if proc.returncode == 0:
+            return {'ok': True, 'collected': True, 'output': out}
+        return {'ok': True, 'collected': False, 'output': out}
+    finally:
+        tmp_file.unlink(missing_ok=True)
 
 
 @app.post('/api/probe')
@@ -597,7 +623,8 @@ INDEX_HTML = r"""<!DOCTYPE html>
     <textarea id="gen-req" rows="2" placeholder="需求描述（可选），如：多生成负面用例、重点测超时和 Base64"></textarea>
     <div class="btns" style="margin-top:10px;">
       <button class="b-all" id="gen-go">生成草稿</button>
-      <button class="b-unit" id="gen-approve" disabled>✓ 并入正式目录</button>
+      <button class="b-unit" id="gen-validate" disabled>验证可收集</button>
+      <button class="b-unit" id="gen-approve" disabled>✓ 并入 tests/</button>
     </div>
 
     <div id="gen-msg" class="hint" style="margin:12px 0;"></div>
@@ -725,6 +752,7 @@ async function refreshGen() {
     : '⚠️ 默认 key 未配置：请在下方粘贴你的大模型密钥后生成';
 }
 let genLastApi = '';
+let genValidated = false;
 $('gen-go').onclick = async () => {
   const apiKey = $('gen-key').value.trim();
   const apiName = $('gen-api').value.trim();
@@ -737,24 +765,45 @@ $('gen-go').onclick = async () => {
                           requirement: $('gen-req').value.trim()})}).then(x => x.json());
   if (r.ok) {
     genLastApi = r.api_name;
+    genValidated = false;
     $('gen-code').textContent = r.code;
     $('gen-code').style.display = 'block';
-    $('gen-msg').textContent = '✅ 生成成功（接口 ' + r.api_name + '）。请审阅下方草稿，确认无误再点「并入正式目录」。';
-    $('gen-approve').disabled = false;
+    $('gen-msg').textContent = '✅ 生成成功（接口 ' + r.api_name + '）。请先点「验证可收集」，通过后才能并入。';
+    $('gen-validate').disabled = false;
+    $('gen-approve').disabled = true;
   } else {
     $('gen-msg').textContent = '❌ ' + r.error;
     $('gen-code').style.display = 'none';
+    $('gen-validate').disabled = true;
     $('gen-approve').disabled = true;
+  }
+};
+$('gen-validate').onclick = async () => {
+  const code = $('gen-code').textContent;
+  if (!genLastApi || !code) return;
+  $('gen-msg').textContent = '验证中…（跑 pytest --collect-only，几秒）';
+  const r = await fetch('/api/gen/validate', {method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({api_name: genLastApi, code: code})}).then(x => x.json());
+  if (r.ok && r.collected) {
+    genValidated = true;
+    $('gen-approve').disabled = false;
+    $('gen-msg').textContent = '✅ 验证通过，可被 pytest 收集。确认后点「并入 tests/」。';
+  } else {
+    genValidated = false;
+    $('gen-approve').disabled = true;
+    $('gen-msg').textContent = '❌ 验证失败（不可收集）：\n' + (r.output || r.error);
   }
 };
 $('gen-approve').onclick = async () => {
   const code = $('gen-code').textContent;
   if (!genLastApi || !code) return;
+  if (!genValidated) { $('gen-msg').textContent = '请先点「验证可收集」，通过后才能并入。'; return; }
   const r = await fetch('/api/gen/approve', {method: 'POST',
     headers: {'Content-Type': 'application/json'},
     body: JSON.stringify({api_name: genLastApi, code: code})}).then(x => x.json());
   $('gen-msg').textContent = r.ok
-    ? '✅ 已并入草稿目录：' + r.saved + '（移入正式 tests/ 前请再次确认）'
+    ? '✅ 已并入正式目录：' + r.saved
     : '❌ ' + r.error;
 };
 function setBusy(b) {
