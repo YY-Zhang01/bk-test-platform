@@ -107,6 +107,40 @@ async def login(req: Request):
 # 后台任务表：task_id -> {'proc': Popen, 'output': str, 'done': bool}
 TASKS = {}
 
+# 用例最近执行状态：test_name -> 'passed'/'failed'/'skipped'（跑测试后从 junitxml 解析）
+_CASE_STATUS = {}
+
+
+def _parse_junit(path) -> dict:
+    """解析 pytest junitxml，返回 {测试名: passed/failed/skipped}。"""
+    import xml.etree.ElementTree as ET
+    status = {}
+    try:
+        tree = ET.parse(path)
+        for tc in tree.iter('testcase'):
+            name = tc.get('name')
+            if name is None:
+                continue
+            if tc.find('failure') is not None or tc.find('error') is not None:
+                status[name] = 'failed'
+            elif tc.find('skipped') is not None:
+                status[name] = 'skipped'
+            else:
+                status[name] = 'passed'
+    except (ET.ParseError, OSError):
+        pass
+    return status
+
+
+def _count_progress(text: str) -> int:
+    """数 pytest -q 输出里的进度字符（. F E s 等组成的行），得到已跑用例数。"""
+    count = 0
+    for line in text.split('\n'):
+        s = line.strip()
+        if s and all(c in '.FEsxX' for c in s):
+            count += len(s)
+    return count
+
 # AI 生成限流（内存级）：防公网滥用 key 烧钱。每 IP 每分钟最多 N 次。
 _GEN_RATE = {}
 
@@ -202,7 +236,9 @@ def run(marker: str | None = Query(default=None),
     输出写日志文件（子进程 stdout 重定向），轮询读文件尾部。"""
     marker = PLANS.get(plan, marker)
     task_id = str(int(time.time() * 1000))
-    cmd = [sys.executable, '-m', 'pytest', '-q', '--tb=short']
+    junit_path = BASE_DIR / '.last_result.xml'
+    cmd = [sys.executable, '-m', 'pytest', '-q', '--tb=short',
+           '--junitxml', str(junit_path)]
     if marker:
         cmd += ['-m', marker]
     if report:
@@ -212,13 +248,15 @@ def run(marker: str | None = Query(default=None),
     log_path = BASE_DIR / f'.run_{task_id}.log'
     log_f = open(log_path, 'w', encoding='utf-8')
     env = dict(__import__('os').environ, PYTHONIOENCODING='utf-8')
+    # 启动前 collect 拿总数（供前端进度条显示 已跑/总数）
+    total = _pytest_collect(marker=marker)['count'] if marker else 0
     proc = subprocess.Popen(cmd, cwd=BASE_DIR, stdout=log_f,
                             stderr=subprocess.STDOUT, env=env)
     TASKS[task_id] = {'proc': proc, 'log': str(log_path), 'done': False,
                       'cmd': ' '.join(cmd[-6:]),
                       'plan': plan or marker or 'all',
-                      'report': bool(report)}
-    # 收尾：记历史（趋势图用）+ 拷贝 latest.html + 清统计缓存
+                      'report': bool(report), 'total': total}
+    # 收尾：记历史（趋势图用）+ 拷贝 latest.html + 清统计缓存 + 解析用例状态
     def _on_exit(p, tid=task_id):
         p.wait()
         TASKS[tid]['done'] = True
@@ -229,6 +267,7 @@ def run(marker: str | None = Query(default=None),
             import shutil
             shutil.copy(out_html, latest)
         _STATS_CACHE['ts'] = 0
+        _CASE_STATUS.update(_parse_junit(junit_path))
         try:
             log_f.close()
         except OSError:
@@ -248,9 +287,11 @@ def task_status(task_id: str):
     except OSError:
         text = ''
     m = re.search(r'(\d+ passed[^\n]*)', text)
+    progress = _count_progress(text)
     return {'done': task['done'], 'running': task['proc'].poll() is None,
             'returncode': task.get('returncode'),
             'summary': m.group(1) if m else '',
+            'progress': progress, 'total': task.get('total'),
             'output': text[-4000:],
             'cmd': task['cmd']}
 
@@ -316,11 +357,16 @@ def trend():
 
 @app.get('/api/cases')
 def cases():
-    """用例库：按四大类分组返回全部用例（名字/作用/层级/是否等账号）。"""
+    """用例库：按四大类分组返回全部用例（含优先级 + 最近执行状态）。"""
     from app.case_index import group_cases
     groups = group_cases()
     total_cases = sum(c['count'] for g in groups for c in g['cases'])
     total_funcs = sum(len(g['cases']) for g in groups)
+    # 附上每个用例的最近执行状态（去掉参数化后缀再匹配）
+    for g in groups:
+        for c in g['cases']:
+            base = c['name'].split(' ×')[0]
+            c['status'] = _CASE_STATUS.get(base)
     return {
         'total': total_cases,
         'functions': total_funcs,
@@ -518,6 +564,42 @@ def probe_history():
     return {'items': storage.list_probe_logs(20)}
 
 
+def _parse_api_doc(md_text: str) -> dict:
+    """从 apidoc markdown 提取功能描述 + 参数表（字段/类型/必选/描述）。"""
+    desc = ''
+    m = re.search(r'###\s*功能描述\s*\n+(.*?)(?=###|\Z)', md_text, re.DOTALL)
+    if m:
+        desc = m.group(1).strip()
+    params = []
+    lines = md_text.split('\n')
+    in_table = False
+    for line in lines:
+        s = line.strip()
+        if s.startswith('|') and '字段' in s and '类型' in s:
+            in_table = True
+            continue
+        if in_table:
+            if s.startswith('|') and '---' not in s and s:
+                cells = [c.strip() for c in s.strip('|').split('|')]
+                if len(cells) >= 4 and cells[0]:
+                    params.append({'name': cells[0], 'type': cells[1],
+                                   'required': cells[2], 'desc': cells[3]})
+            elif not s.startswith('|'):
+                in_table = False
+    return {'desc': desc, 'params': params}
+
+
+@app.get('/api/probe/meta')
+def probe_meta(target: str, api: str):
+    """接口参数说明（从 apidoc/apidoc_cmdb 解析参数表），前端选接口时展示。"""
+    name = api
+    for d in (BASE_DIR / 'docs' / 'apidoc', BASE_DIR / 'docs' / 'apidoc_cmdb'):
+        f = d / f'{name}.md'
+        if f.exists():
+            return _parse_api_doc(f.read_text(encoding='utf-8'))
+    return {'desc': '', 'params': []}
+
+
 @app.get('/api/ui')
 def ui_tests():
     """列出 UI 自动化测试（扫描 tests/ui/ 的 test_*.py）。"""
@@ -542,8 +624,15 @@ def ui_tests():
 def ui_run():
     """后台跑 UI 自动化测试（Playwright，需浏览器 + 被测系统在跑）。"""
     task_id = str(int(time.time() * 1000))
+    # 失败自动截图（pytest-playwright），截图存 ui_screenshots/ 目录
+    shot_dir = BASE_DIR / 'ui_screenshots'
+    shot_dir.mkdir(exist_ok=True)
+    stamp = time.strftime('%Y%m%d_%H%M%S')
+    ui_html = REPORTS_DIR / f'ui_report_{stamp}.html'
     cmd = [sys.executable, '-m', 'pytest', 'tests/ui', '-m', 'ui',
-           '--run-ui', '-q', '--tb=short']
+           '--run-ui', '-q', '--tb=short',
+           '--screenshot', 'on_failure', '--output', str(shot_dir),
+           '--html', str(ui_html), '--self-contained-html']
     log_path = BASE_DIR / f'.run_{task_id}.log'
     log_f = open(log_path, 'w', encoding='utf-8')
     env = dict(os.environ, PYTHONIOENCODING='utf-8')

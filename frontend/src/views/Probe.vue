@@ -16,6 +16,23 @@
                 <el-option v-for="a in currentApis" :key="a" :value="a" :label="a" />
               </el-select>
             </el-form-item>
+            <el-form-item v-if="meta.desc || meta.params.length" label="参数说明">
+              <div class="api-meta">
+                <div v-if="meta.desc" class="meta-desc">{{ meta.desc }}</div>
+                <el-table v-if="meta.params.length" :data="meta.params" size="small" border>
+                  <el-table-column prop="name" label="字段" width="140">
+                    <template #default="{ row }"><span class="mono">{{ row.name }}</span></template>
+                  </el-table-column>
+                  <el-table-column prop="type" label="类型" width="80" />
+                  <el-table-column prop="required" label="必选" width="60" align="center">
+                    <template #default="{ row }">
+                      <el-tag :type="row.required === '是' ? 'danger' : 'info'" size="small">{{ row.required }}</el-tag>
+                    </template>
+                  </el-table-column>
+                  <el-table-column prop="desc" label="描述" min-width="180" show-overflow-tooltip />
+                </el-table>
+              </div>
+            </el-form-item>
             <el-form-item label="参数 JSON">
               <el-input
                 v-model="paramsText"
@@ -76,7 +93,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { CopyDocument, Promotion, Refresh } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import { api } from '@/api'
@@ -96,6 +113,17 @@ const history = ref([])
 
 const currentApis = computed(() => METHODS[target.value])
 const resultText = computed(() => JSON.stringify(result.value, null, 2) || '')
+const meta = ref({ desc: '', params: [] })
+
+async function loadMeta() {
+  try {
+    meta.value = await api.probeMeta(target.value, apiName.value)
+  } catch (e) {
+    meta.value = { desc: '', params: [] }
+  }
+}
+
+watch([target, apiName], loadMeta)
 
 async function send() {
   let params = {}
@@ -146,7 +174,10 @@ async function copyResult() {
   }
 }
 
-onMounted(loadHistory)
+onMounted(() => {
+  loadHistory()
+  loadMeta()
+})
 </script>
 
 <style scoped>
@@ -206,5 +237,18 @@ onMounted(loadHistory)
   color: #94a3b8;
   font-family: Consolas, monospace;
   font-size: 11px;
+}
+.api-meta {
+  width: 100%;
+}
+.meta-desc {
+  font-size: 13px;
+  color: #475569;
+  margin-bottom: 8px;
+  line-height: 1.6;
+}
+.mono {
+  font-family: Consolas, monospace;
+  font-size: 12px;
 }
 </style>

@@ -53,6 +53,7 @@ export const api = {
   // 接口调试
   probe: (data) => http.post('/api/probe', data),
   probeHistory: () => http.get('/api/probe/history'),
+  probeMeta: (target, api) => http.get('/api/probe/meta', { params: { target, api } }),
   // UI 自动化
   uiList: () => http.get('/api/ui'),
   uiRun: () => http.post('/api/ui/run'),

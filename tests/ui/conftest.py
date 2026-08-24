@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
-"""UI 测试的收集控制。
+"""UI 测试的收集控制 + 浏览器配置。
 
 UI 测试需要浏览器 + 平台在跑，不适合默认全量跑、也不适合 CI（无浏览器）。
 默认 skip 所有 ui 测试；显式传 --run-ui 才真正执行。
 
-用法：
-    python -m pytest tests/ui/ -m ui --run-ui      # 显式跑 UI
-    python -m pytest                              # 全量跑，ui 自动 skip
+浏览器统一用系统 Edge（channel='msedge'），免下载 chromium；
+失败自动截图（pytest-playwright 的 --screenshot=on_failure 由 /api/ui/run 带上）。
 """
 import pytest
 
@@ -23,3 +22,14 @@ def pytest_collection_modifyitems(config, items):
     for item in items:
         if 'ui' in item.keywords:
             item.add_marker(skip_ui)
+
+
+@pytest.fixture(scope='session')
+def browser_type_launch_args(browser_type_launch_args):
+    """统一用系统 Edge，开可见窗口，每步间隔 500ms 便于观察。"""
+    return {
+        **browser_type_launch_args,
+        'channel': 'msedge',
+        'headless': False,
+        'slow_mo': 500,
+    }

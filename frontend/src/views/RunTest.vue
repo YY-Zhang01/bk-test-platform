@@ -29,6 +29,16 @@
           <el-tag v-else type="danger" size="small">有失败</el-tag>
         </div>
       </template>
+      <div v-if="running && result.total" class="progress-row">
+        <el-progress
+          :percentage="Math.min(100, Math.round((result.progress || 0) / result.total * 100))"
+          :stroke-width="12"
+          striped
+          striped-flow
+        />
+        <span class="progress-text">{{ result.progress || 0 }} / {{ result.total }}</span>
+      </div>
+
       <el-alert
         v-if="result.summary"
         :title="running ? `执行中… ${result.summary}` : result.summary"
@@ -143,6 +153,21 @@ onBeforeUnmount(() => {
   overflow: auto;
   white-space: pre-wrap;
   margin: 0;
+}
+.progress-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.progress-row .el-progress {
+  flex: 1;
+}
+.progress-text {
+  font-family: Consolas, monospace;
+  font-size: 13px;
+  color: #64748b;
+  white-space: nowrap;
 }
 .failures {
   margin-bottom: 14px;

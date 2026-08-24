@@ -78,7 +78,20 @@
               </template>
             </el-table-column>
             <el-table-column prop="desc" label="作用 / 设计原因" min-width="280" show-overflow-tooltip />
-            <el-table-column prop="marker" label="marker" width="130">
+            <el-table-column label="优先级" width="80" align="center">
+              <template #default="{ row }">
+                <el-tag :type="priorityType(row.priority)" size="small" effect="light">{{ row.priority }}</el-tag>
+              </template>
+            </el-table-column>
+            <el-table-column label="最近执行" width="100" align="center">
+              <template #default="{ row }">
+                <el-tag v-if="row.status === 'passed'" type="success" size="small">通过</el-tag>
+                <el-tag v-else-if="row.status === 'failed'" type="danger" size="small">失败</el-tag>
+                <el-tag v-else-if="row.status === 'skipped'" type="warning" size="small">跳过</el-tag>
+                <span v-else class="na">-</span>
+              </template>
+            </el-table-column>
+            <el-table-column prop="marker" label="marker" width="120">
               <template #default="{ row }">
                 <span class="mono">{{ row.marker || '-' }}</span>
               </template>
@@ -153,6 +166,10 @@ const detail = ref(null)
 function showDetail(row) {
   detail.value = row
   drawer.value = true
+}
+
+function priorityType(p) {
+  return { P0: 'danger', P1: 'warning', P2: 'info' }[p] || 'info'
 }
 
 const GROUP_META = {
@@ -325,6 +342,9 @@ onMounted(async () => {
   font-weight: 500;
   cursor: pointer;
   color: #2563eb;
+}
+.na {
+  color: #cbd5e1;
 }
 .case-name:hover {
   text-decoration: underline;

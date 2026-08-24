@@ -59,10 +59,17 @@ def extract_cases() -> list:
             count = params[0] if params else 1
             if params:
                 name += f' ×{params[0]}'
+            # 优先级：安全 P0，端到端/边界 P1，其余 P2（从 marker 推断）
+            if 'security' in marks:
+                priority = 'P0'
+            elif 'integration' in marks or 'boundary' in marks:
+                priority = 'P1'
+            else:
+                priority = 'P2'
             rows.append({'file': f.name, 'name': name, 'desc': first,
                          'desc_full': doc, 'layer': layer,
                          'marker': ','.join(marks) or '-',
-                         'env': env, 'count': count})
+                         'env': env, 'count': count, 'priority': priority})
     return rows
 
 
