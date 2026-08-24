@@ -235,6 +235,20 @@ def trend():
     return {'items': storage.list_runs(20)}
 
 
+@app.get('/api/gen')
+def gen_info():
+    """AI 用例生成的状态与说明（gen_cases.py，命令行工具）。"""
+    from app import job_config
+    apidoc_dir = BASE_DIR / 'docs' / 'apidoc'
+    apidoc_count = len(list(apidoc_dir.glob('*.md'))) if apidoc_dir.exists() else 0
+    return {
+        'key_configured': bool(job_config.LLM_API_KEY),
+        'model': job_config.LLM_MODEL or 'deepseek-chat',
+        'apidoc_count': apidoc_count,
+        'usage': 'python gen_cases.py  # 为 apidoc 里全部接口生成用例草稿',
+    }
+
+
 @app.post('/api/probe')
 async def probe(req: Request):
     """接口调试（Postman 式，借鉴 MeterSphere 接口调试）：白名单内的
@@ -380,7 +394,7 @@ INDEX_HTML = r"""<!DOCTYPE html>
   a { color: var(--blue); text-decoration: none; }
   a:hover { text-decoration: underline; }
   .hint { color: var(--weak); font-size: 12px; margin-top: 8px; }
-  canvas { width: 100%; }
+  canvas { display: block; max-width: 100%; height: auto; }
   .layout { flex: 1; display: flex; align-items: stretch; min-height: 0; }
   .sidebar { width: 200px; flex-shrink: 0; background: #0f1c4d;
              padding: 16px 0; display: flex; flex-direction: column; gap: 2px; }
@@ -408,6 +422,7 @@ INDEX_HTML = r"""<!DOCTYPE html>
   <button class="nav-item" data-tab="run"><span class="ico">▶</span>跑测试</button>
   <button class="nav-item" data-tab="probe"><span class="ico">⌘</span>接口调试</button>
   <button class="nav-item" data-tab="reports"><span class="ico">▤</span>报告</button>
+  <button class="nav-item" data-tab="gen"><span class="ico">✦</span>AI 生成</button>
 </aside>
 <main class="content">
   <div class="tab-panel" id="tab-overview">
@@ -500,6 +515,15 @@ INDEX_HTML = r"""<!DOCTYPE html>
     <h2>历史报告</h2>
     <table id="reports"><tbody></tbody></table>
     <div class="hint" id="report-hint"></div>
+  </section>
+  </div>
+
+  <div class="tab-panel hidden" id="tab-gen">
+  <section>
+    <h2>AI 用例生成（gen_cases.py）</h2>
+    <p>把 docs/apidoc/ 里 <b id="gen-doc-count">-</b> 份接口文档喂给大模型（<span id="gen-model">DeepSeek</span>），自动产出 pytest 用例草稿，人工审阅后并入正式用例目录。</p>
+    <p class="hint">命令行用法：python gen_cases.py（全量）/ -i 接口名（单个）/ --collect（生成后验证可收集）。</p>
+    <p class="hint" id="gen-status">加载中…</p>
   </section>
   </div>
 </main>
@@ -607,6 +631,14 @@ async function refreshStats() {
   const t = await fetch('/api/trend').then(x => x.json());
   drawTrend(t.items);
 }
+async function refreshGen() {
+  const r = await fetch('/api/gen').then(x => x.json());
+  $('gen-doc-count').textContent = r.apidoc_count;
+  $('gen-model').textContent = r.model;
+  $('gen-status').textContent = r.key_configured
+    ? '✅ LLM_API_KEY 已配置，可生成用例草稿'
+    : '⚠️ LLM_API_KEY 未配置（需 DeepSeek 开放平台申请），当前为展示性功能';
+}
 function setBusy(b) {
   $('b-run').disabled = b; $('plan').disabled = b;
 }
@@ -645,6 +677,7 @@ $('p-go').onclick = async () => {
 };
 fillApis();
 refreshStats();
+refreshGen();
 </script>
 </body>
 </html>
