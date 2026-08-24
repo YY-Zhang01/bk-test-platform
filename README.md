@@ -58,7 +58,7 @@ job-test/
 ├── scripts/                      工具脚本
 │   ├── run_tests.py              统一测试入口（全量/链路 + HTML 报告）
 │   └── locustfile.py             只读接口压测（Locust）
-├── docs/                         策略文档 + 接口文档（apidoc/ 38 份）+ 面试问答卡
+├── docs/                         策略文档 + 接口文档（apidoc/ JOB 38 份 + apidoc_cmdb/ CMDB 7 份）+ 面试问答卡
 ├── reports/                      HTML 报告（gitignore）
 ├── data/                         SQLite 数据库（gitignore）
 ├── .github/workflows/ci.yml      GitHub Actions（push 跑测试 + 回写覆盖率徽章）
@@ -189,7 +189,8 @@ PLATFORM_PASSWORD=你的密码 nohup python3 -m uvicorn app.web_app:app \
 
 ## 七、Web 平台能力
 
-- **左侧导航布局**：总览 / 跑测试 / 接口调试 / 报告，四模块分栏切换（深色侧栏 + 内容区）
+- **左侧导航布局**：总览 / 跑测试 / 接口调试 / 报告 / AI 生成，五模块分栏切换（深色侧栏 + 内容区）
+- **AI 用例生成**：粘贴大模型密钥 + 选接口（JOB 38 + CMDB 7）+ 需求描述，生成 pytest 用例草稿，审阅后并入正式目录
 - **仪表盘**：金字塔用例统计（实时 collect）、通过率趋势折线图、五大测试维度
 - **测试计划**：冒烟 / 回归 / 只 JOB / 只连块测，一键组合执行
 - **接口调试**：Postman 式在线调 JOB/CMDB 只读接口（写操作白名单拒绝）
