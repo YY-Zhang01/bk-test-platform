@@ -22,9 +22,10 @@
 import requests
 
 from app import job_config
+from app.base_client import BaseClient, EsbError
 
 
-class CmdbError(Exception):
+class CmdbError(EsbError):
     """CMDB 接口返回 result=false 或 code!=0 时抛出，带错误码方便定位。"""
 
 
@@ -36,44 +37,26 @@ def make_page(start=0, limit=10, sort='') -> dict:
     return page
 
 
-class CmdbClient:
+class CmdbClient(BaseClient):
     """配置平台 ESB 客户端。
 
     凭证与 JOB 完全复用（都是 ESB 三件套），业务 ID 复用
     job_config.BK_SCOPE_ID——因为 JOB 的 scope_id 本来就是 CMDB 的业务 ID。
+    认证/调接口/查结果复用 BaseClient，差异是 cc 组件名 + bk_supplier_account 参数。
     """
+
+    component = 'cc'
+    error_class = CmdbError
 
     def __init__(self, esb_host=None, app_code=None, app_secret=None,
                  token=None, biz_id=None):
-        self.esb_host = esb_host or job_config.ESB_HOST
-        self.app_code = app_code or job_config.BK_APP_CODE
-        self.app_secret = app_secret or job_config.BK_APP_SECRET
-        self.token = token or job_config.BK_TOKEN
+        super().__init__(esb_host, app_code, app_secret, token)
         self.biz_id = biz_id or job_config.BK_SCOPE_ID
 
-    # ---------------- 底层 ---------------- #
-
-    def _call(self, api_name: str, params: dict):
-        """统一请求入口：cc 组件 URL + 三件套 + 结果检查。"""
-        url = f'{self.esb_host}/api/c/compapi/v2/cc/{api_name}/'
-        body = {
-            'bk_app_code': self.app_code,
-            'bk_app_secret': self.app_secret,
-            'bk_token': self.token,
-            # 供应商账号是 CC 组件的历史遗留参数，默认 0（直属），
-            # 不传部分接口会报"缺少 bk_supplier_account"
-            'bk_supplier_account': '0',
-        }
-        body.update(params)
-        resp = requests.post(url, json=body, timeout=30)
-        if resp.status_code != 200:
-            raise CmdbError(f'HTTP {resp.status_code}: {resp.text[:200]}')
-        payload = resp.json()
-        if not payload.get('result') or payload.get('code') != 0:
-            raise CmdbError(f'接口 {api_name} 调用失败: '
-                            f"code={payload.get('code')} "
-                            f"message={payload.get('message', payload)[:200]}")
-        return payload.get('data')
+    def _extra_auth(self) -> dict:
+        # 供应商账号是 CC 组件的历史遗留参数，默认 0（直属），
+        # 不传部分接口会报"缺少 bk_supplier_account"
+        return {'bk_supplier_account': '0'}
 
     # ---------------- 分开测：CMDB 独立链路 ----------------
 

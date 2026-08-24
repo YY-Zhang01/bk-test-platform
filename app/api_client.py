@@ -32,9 +32,10 @@ import time
 import requests
 
 from app import job_config
+from app.base_client import BaseClient, EsbError
 
 
-class JobError(Exception):
+class JobError(EsbError):
     """JOB 接口返回 result=false 或 code!=0 时抛出，带错误码方便定位。"""
 
 
@@ -73,42 +74,22 @@ def make_target_server(host_id_list=None, ip_list=None,
     return server
 
 
-class JobClient:
+class JobClient(BaseClient):
     """作业平台 ESB 客户端。
 
     构造时读取 job_config.py；scope 相关的接口自动带 bk_scope_type/bk_scope_id，
     少数无资源范围的接口（check_script、高危规则系列）不带。
+    认证/调接口/查结果复用 BaseClient，这里只保留 scope 相关差异。
     """
+
+    component = 'jobv3'
+    error_class = JobError
 
     def __init__(self, esb_host=None, app_code=None, app_secret=None,
                  token=None, scope_type=None, scope_id=None):
-        self.esb_host = esb_host or job_config.ESB_HOST
-        self.app_code = app_code or job_config.BK_APP_CODE
-        self.app_secret = app_secret or job_config.BK_APP_SECRET
-        self.token = token or job_config.BK_TOKEN
+        super().__init__(esb_host, app_code, app_secret, token)
         self.scope_type = scope_type or job_config.BK_SCOPE_TYPE
         self.scope_id = scope_id or job_config.BK_SCOPE_ID
-
-    # ---------------- 底层 ---------------- #
-
-    def _call(self, api_name: str, params: dict):
-        """统一请求入口：拼 ESB URL + 三件套 + 结果检查。"""
-        url = f'{self.esb_host}/api/c/compapi/v2/jobv3/{api_name}/'
-        body = {
-            'bk_app_code': self.app_code,
-            'bk_app_secret': self.app_secret,
-            'bk_token': self.token,
-        }
-        body.update(params)
-        resp = requests.post(url, json=body, timeout=30)
-        if resp.status_code != 200:
-            raise JobError(f'HTTP {resp.status_code}: {resp.text[:200]}')
-        payload = resp.json()
-        if not payload.get('result') or payload.get('code') != 0:
-            raise JobError(f'接口 {api_name} 调用失败: '
-                           f"code={payload.get('code')} "
-                           f"message={payload.get('message', payload)[:200]}")
-        return payload.get('data')
 
     def _scope(self, extra: dict | None = None) -> dict:
         """拼 bk_scope 参数。注意文档要求 string，这里统一转 str。"""
