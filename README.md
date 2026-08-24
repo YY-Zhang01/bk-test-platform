@@ -16,7 +16,7 @@
 ## 一、项目定位
 
 面试作业背景：对蓝鲸 **CMDB 和 JOB 两套系统**做全方位测试——
-功能 / 性能 / 安全 / 参数边界 / 交互 / 端到端，集合成一个测试平台。
+功能 / 性能 / 安全 / 边界 / 端到端五个维度，集合成一个测试平台。
 
 **两个系统平等对待，各自都是被测对象：**
 
@@ -85,9 +85,9 @@ flowchart TB
     end
 
     subgraph CORE["测试内核"]
-        L1["L1 API 层<br/>JobClient / CmdbClient"]
-        L2["L2 用例层<br/>6 条 JOB 链路 + CMDB 链路"]
-        L3["L3 场景层<br/>契约 / 联动 / 反向矩阵"]
+        L1["L1 工具层<br/>测自己写的工具（存储 / Web / 多环境）"]
+        L2["L2 分开测<br/>6 条 JOB 链路 + CMDB 链路"]
+        L3["L3 连块测<br/>契约 / 联动 / 反向矩阵"]
     end
 
     subgraph INFRA["基础"]
@@ -134,9 +134,9 @@ flowchart TB
 
 | 层 | 对齐术语 | 内容 | 触发 |
 |----|---------|------|------|
-| L1 | API 层 | 客户端封装自洽（拼参、Base64、分页构造） | `-m unit`，不等账号 |
-| L2 | 用例层 | JOB 六链路 + CMDB 独立链路，分开测故障隔离 | `-m script` 等按链路 |
-| L3 | 场景层 | 跨系统矩阵：契约一致性 / 业务联动 / 隔离反向 | `-m integration` |
+| L1 | 工具层 | 测自己写的工具（拼参、Base64、分页、存储、Web 层、多环境） | `-m unit`，不等账号 |
+| L2 | 分开测 | JOB 六链路 + CMDB 独立链路，故障隔离 | `-m script` 等按链路 |
+| L3 | 连块测 | 跨系统矩阵：契约一致性 / 业务联动 / 隔离反向 | `-m integration` |
 
 三组 L3 场景围绕数据契约组织：
 
@@ -188,7 +188,8 @@ locust -f scripts/locustfile.py --host <ESB_HOST>
 
 ```bash
 # 1. 复制模板，填真凭证（不入库）
-cp app/envs.example.json app/envs.local.json
+#    Windows：copy app\envs.example.json app\envs.local.json
+#    Linux/Mac：cp app/envs.example.json app/envs.local.json
 
 # 2. 按环境名跑（不传 --env 则走 job_config.py，行为不变）
 python scripts/run_tests.py --env experience        # 体验环境
@@ -215,7 +216,7 @@ PLATFORM_PASSWORD=你的密码 nohup python3 -m uvicorn app.web_app:app \
 
 ## 七、Web 平台能力
 
-- **左侧导航布局**：总览 / 跑测试 / 接口调试 / 报告 / AI 生成，五模块分栏切换（深色侧栏 + 内容区）
+- **左侧导航布局**：总览 / 跑测试 / 接口调试 / 报告 / AI 生成 / 用例库，六模块分栏切换（深色侧栏 + 内容区）
 - **AI 用例生成**：粘贴大模型密钥 + 选接口（JOB 38 + CMDB 7）+ 需求描述，生成用例草稿 → 验证可收集 → 通过后并入正式目录
 - **仪表盘**：金字塔用例统计（实时 collect）、通过率趋势折线图、五大测试维度
 - **测试计划**：冒烟 / 回归 / 只 JOB / 只连块测，一键组合执行

@@ -675,7 +675,7 @@ INDEX_HTML = r"""<!DOCTYPE html>
 <script>
 const $ = id => document.getElementById(id);
 
-// Tab 切换：总览 / 跑测试 / 接口调试 / 报告
+// Tab 切换：总览 / 跑测试 / 接口调试 / 报告 / AI 生成 / 用例库
 function switchTab(name) {
   document.querySelectorAll('.tab-panel').forEach(p =>
     p.classList.toggle('hidden', p.id !== 'tab-' + name));
