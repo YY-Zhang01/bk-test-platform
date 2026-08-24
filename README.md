@@ -54,10 +54,13 @@ job-test/
 │   ├── test_job_boundary.py      参数边界
 │   ├── test_security.py          安全（鉴权/越权/注入/高危命令）
 │   ├── test_storage.py           存储层
-│   └── test_webapp.py            Web 平台层（冒烟计划排除，防自引用）
+│   ├── test_webapp.py            Web 平台层（冒烟计划排除，防自引用）
+│   └── ui/                       UI 自动化（Playwright）：测平台 / 测 CMDB / 测 JOB 骨架
 ├── scripts/                      工具脚本
 │   ├── run_tests.py              统一测试入口（全量/链路 + HTML 报告）
-│   └── locustfile.py             只读接口压测（Locust）
+│   ├── locustfile.py             只读接口压测（Locust）
+│   ├── export_cases.py           导出用例清单 CSV
+│   └── gen_cmdb_docs.py          生成 CMDB 接口文档
 ├── docs/                         策略文档 + 接口文档（apidoc/ JOB 38 份 + apidoc_cmdb/ CMDB 7 份）+ 面试问答卡
 ├── reports/                      HTML 报告（gitignore）
 ├── data/                         SQLite 数据库（gitignore）
