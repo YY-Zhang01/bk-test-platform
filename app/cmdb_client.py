@@ -151,3 +151,29 @@ class CmdbClient(BaseClient):
         }
         data = self._call('search_object_attribute', params)
         return data.get('info', [])
+
+    # ---------------- 写操作（建业务/导主机/建分组，端到端"圈人"的前置） ----------------
+    # 说明：CMDB 与 JOB 平等，都是被测对象；写操作是"端到端圈人"的前置准备。
+    # 参数名待账号到手后以官方文档核实（当前为骨架）。
+
+    def create_business(self, biz_name: str, maintainer: str = 'admin') -> dict:
+        """创建业务（写操作）。参数名待账号后以官方文档核实。"""
+        params = {
+            'bk_biz_name': biz_name,
+            'bk_biz_maintainer': maintainer,
+        }
+        return self._call('create_business', params)
+
+    def add_host_to_biz(self, host_list: list) -> dict:
+        """导入主机到业务（写操作）。参数名待账号后以官方文档核实。"""
+        params = {'host_list': host_list}
+        return self._call('add_host_to_biz', params)
+
+    def create_dynamic_group(self, name: str, info: dict) -> dict:
+        """创建动态分组（写操作）。参数名待账号后以官方文档核实。"""
+        params = {
+            'bk_biz_id': self.biz_id,
+            'name': name,
+            'info': info,
+        }
+        return self._call('create_dynamic_group', params)
