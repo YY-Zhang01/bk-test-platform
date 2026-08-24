@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """跑测试路由：后台跑 pytest + 轮询状态。"""
+import os
 import subprocess
 import sys
 import threading
@@ -35,7 +36,10 @@ def run(marker: str | None = Query(default=None),
         cmd += ['--html', str(out_html), '--self-contained-html']
     log_path = BASE_DIR / f'.run_{task_id}.log'
     log_f = open(log_path, 'w', encoding='utf-8')
-    env = dict(__import__('os').environ, PYTHONIOENCODING='utf-8')
+    env = dict(os.environ, PYTHONIOENCODING='utf-8')
+    # 清除登录密码环境变量：pytest 子进程里 TestClient 直调路由不该被认证拦
+    env.pop('PLATFORM_PASSWORD', None)
+    env.pop('PLATFORM_USER', None)
     # 启动前 collect 拿总数（供前端进度条显示 已跑/总数）
     total = _pytest_collect(marker=marker)['count'] if marker else 0
     proc = subprocess.Popen(cmd, cwd=BASE_DIR, stdout=log_f,

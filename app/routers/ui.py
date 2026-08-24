@@ -49,6 +49,8 @@ def ui_run():
     log_path = BASE_DIR / f'.run_{task_id}.log'
     log_f = open(log_path, 'w', encoding='utf-8')
     env = dict(os.environ, PYTHONIOENCODING='utf-8')
+    env.pop('PLATFORM_PASSWORD', None)
+    env.pop('PLATFORM_USER', None)
     proc = subprocess.Popen(cmd, cwd=BASE_DIR, stdout=log_f,
                             stderr=subprocess.STDOUT, env=env)
     TASKS[task_id] = {'proc': proc, 'log': str(log_path), 'done': False,

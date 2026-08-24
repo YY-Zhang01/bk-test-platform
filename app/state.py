@@ -54,6 +54,8 @@ def _pytest_collect(marker: str | None = None) -> dict:
     if marker:
         cmd += ['-m', marker]
     env = dict(os.environ, PYTHONIOENCODING='utf-8')
+    env.pop('PLATFORM_PASSWORD', None)
+    env.pop('PLATFORM_USER', None)
     proc = subprocess.run(cmd, cwd=BASE_DIR, capture_output=True,
                           text=True, encoding='utf-8', errors='replace',
                           env=env, timeout=120)
