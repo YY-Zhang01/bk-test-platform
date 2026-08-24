@@ -48,7 +48,9 @@ def _run(tmp_file: Path) -> tuple:
 def _fix_code(code: str, error: str, api_key=None, base_url=None, model=None) -> str:
     """把错误喂回 LLM 让它修复，返回修复后的完整代码。"""
     prompt = (
-        '你之前生成的 pytest 用例代码跑失败了，请修复后重新输出完整代码。\n\n'
+        '你之前生成的 pytest 用例代码跑失败了，请修复后重新输出完整代码。\n'
+        '注意：导入必须用 app 包完整路径（from app.api_client import JobClient, '
+        'JobError, b64_encode），禁止 from api_client 或 from conftest。\n\n'
         f'错误信息：\n{error}\n\n'
         f'当前代码：\n{code}\n\n'
         '要求：只输出修复后的 Python 代码，不要任何解释。'

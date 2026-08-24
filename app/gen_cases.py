@@ -34,13 +34,15 @@ STYLE_RULES = """
 生成的 pytest 用例必须遵守项目风格：
 1. 模块 docstring 说明这条链路的故事（对应 Web 端哪个页面、什么操作顺序）
 2. 测试函数名用中文，格式 test_动作_断言目标，如 test_建脚本_列表能查到且内容自洽
-3. 依赖 job_client fixture（来自 conftest.py），数据自建自清
-4. 每个用例 docstring 写"对应手动步骤"，把坑位写进注释
-5. 接口参数按文档给的类型和必填项传，content/param 需要 Base64（用 api_client 的 b64_encode）
-6. 断言要具体：查回的数据和传进去的数据自洽（内容、状态码、字段）
-7. 负面用例用 pytest.raises(JobError)
-8. 未配置锚点数据时用 pytest.skip 跳过，不造假绿
-9. 只输出 Python 代码，不要任何解释
+3. 导入必须用 app 包完整路径：`from app.api_client import JobClient, JobError, b64_encode`、
+   `from app.cmdb_client import CmdbClient, CmdbError`、`import pytest`。禁止写 `from api_client import`、`from conftest import`。
+4. 依赖 job_client / cmdb_client fixture（conftest.py 已提供，作为测试函数参数直接用），数据自建自清
+5. 每个用例 docstring 写"对应手动步骤"，把坑位写进注释
+6. 接口参数按文档给的类型和必填项传，content/param 需要 Base64（用 api_client 的 b64_encode）
+7. 断言要具体：查回的数据和传进去的数据自洽（内容、状态码、字段）
+8. 负面用例用 pytest.raises(JobError)
+9. 未配置锚点数据时用 pytest.skip 跳过，不造假绿
+10. 只输出 Python 代码，不要任何解释
 """.strip()
 
 
