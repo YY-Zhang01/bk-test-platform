@@ -25,6 +25,9 @@ export const api = {
   runStatus: (task_id) => http.get(`/api/run/${task_id}`),
   // 接口调试
   probe: (data) => http.post('/api/probe', data),
+  // UI 自动化
+  uiList: () => http.get('/api/ui'),
+  uiRun: () => http.post('/api/ui/run'),
   // 报告
   reports: () => http.get('/api/reports').then((d) => d.reports || []),
   // AI 生成

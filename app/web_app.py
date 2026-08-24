@@ -397,6 +397,54 @@ async def probe(req: Request):
         return {'ok': False, 'error': str(e)}
 
 
+@app.get('/api/ui')
+def ui_tests():
+    """列出 UI 自动化测试（扫描 tests/ui/ 的 test_*.py）。"""
+    import ast
+    ui_dir = BASE_DIR / 'tests' / 'ui'
+    tests = []
+    for f in sorted(ui_dir.glob('test_*.py')):
+        try:
+            tree = ast.parse(f.read_text(encoding='utf-8'))
+        except OSError:
+            continue
+        for node in tree.body:
+            if isinstance(node, ast.FunctionDef) and node.name.startswith('test_'):
+                doc = (ast.get_docstring(node) or '').strip()
+                tests.append({'file': f.name, 'name': node.name,
+                              'desc': doc.split('\n')[0].strip()})
+    return {'tests': tests, 'count': len(tests),
+            'note': 'UI 测试需要浏览器，请在本地跑（服务器无浏览器会失败）'}
+
+
+@app.post('/api/ui/run')
+def ui_run():
+    """后台跑 UI 自动化测试（Playwright，需浏览器 + 被测系统在跑）。"""
+    task_id = str(int(time.time() * 1000))
+    cmd = [sys.executable, '-m', 'pytest', 'tests/ui', '-m', 'ui',
+           '--run-ui', '-q', '--tb=short']
+    log_path = BASE_DIR / f'.run_{task_id}.log'
+    log_f = open(log_path, 'w', encoding='utf-8')
+    env = dict(os.environ, PYTHONIOENCODING='utf-8')
+    proc = subprocess.Popen(cmd, cwd=BASE_DIR, stdout=log_f,
+                            stderr=subprocess.STDOUT, env=env)
+    TASKS[task_id] = {'proc': proc, 'log': str(log_path), 'done': False,
+                      'cmd': 'pytest tests/ui --run-ui', 'plan': 'ui',
+                      'report': False}
+
+    def _on_exit(p, tid=task_id):
+        p.wait()
+        TASKS[tid]['done'] = True
+        TASKS[tid]['returncode'] = p.returncode
+        try:
+            log_f.close()
+        except OSError:
+            pass
+    import threading
+    threading.Thread(target=_on_exit, args=(proc,), daemon=True).start()
+    return {'task_id': task_id}
+
+
 @app.get('/report/{filename}')
 def report_file(filename: str):
     """返回 reports/ 下的 HTML 报告（文件名白名单防目录穿越）。"""
