@@ -1,8 +1,8 @@
 # 蓝鲸双系统端到端测试平台
 
 > CMDB（配置管理）+ JOB（作业平台）双系统的全方位测试平台：
-> pytest 分层用例 + FastAPI Web 平台 + SQLite 历史留痕 + Locust 只读压测，
-> 覆盖功能 / 性能 / 安全 / 边界 / 端到端五个维度，另有 AI 用例生成。
+> pytest 分层用例 + FastAPI 后端 + Vue3/Element Plus 前端 + SQLite 留痕 + Locust 压测，
+> 覆盖功能 / 性能 / 安全 / 边界 / 端到端五个维度，另有 AI 自愈用例生成 + UI 自动化。
 
 ![Python](https://img.shields.io/badge/Python-3.10%2B-3776ab?logo=python)
 ![FastAPI](https://img.shields.io/badge/Web-FastAPI-009688)
@@ -39,9 +39,12 @@ job-test/
 │   ├── envs.example.json         多环境模板（真凭证写 envs.local.json，已 gitignore）
 │   ├── storage.py                SQLite 存储层（执行记录 runs + 探针日志 probe_logs）
 │   ├── case_index.py             用例索引（ast 提取，供用例库页 + 导出 CSV）
-│   ├── web_app.py                Web 平台（FastAPI 单文件，内嵌 HTML，含测试计划 PLANS）
+│   ├── web_app.py                FastAPI 后端（API 路由 + 托管前端 build 产物）
 │   ├── gen_cases.py              AI 用例生成器（调 DeepSeek，需 LLM_API_KEY）
+│   ├── gen_heal.py               AI 自愈闭环（生成→跑→失败喂回修→重试，参考 ghost）
 │   └── job_config.py             单环境配置（真凭证走 job_config_local.py，已 gitignore）
+├── frontend/                     Vue3 + Element Plus 前端（npm run build 后由后端托管）
+│   └── src/                      页面：总览/跑测试/接口调试/报告/AI生成/用例库/UI自动化
 ├── tests/                        测试用例（111 个 / 103 函数，按 marker 分层）
 │   ├── conftest.py               公共 fixture（job_client/cmdb_client，凭证缺失诚实 skip）
 │   ├── test_job_script.py        JOB 链路 1：脚本管理
@@ -175,10 +178,14 @@ python scripts/run_tests.py -m "unit and not platform"  # 冒烟 36 个，不等
 python scripts/run_tests.py -m unit                     # unit 层 43 个（含 7 个 Web 层）
 python scripts/run_tests.py                             # 全量 111 用例 + HTML 报告
 
-# 4. 启动 Web 平台
-python app/web_app.py                      # → http://127.0.0.1:8000
+# 4. 构建前端（首次或改前端后；需要 Node.js）
+cd frontend && npm install && npm run build && cd ..
 
-# 5. 性能压测（可选，凭证配好后）
+# 5. 启动 Web 平台（托管前端 build 产物 + 提供 API）
+python app/web_app.py                      # → http://127.0.0.1:8000
+# 前端开发模式（热更新）：cd frontend && npm run dev  → http://localhost:5173
+
+# 6. 性能压测（可选，凭证配好后）
 locust -f scripts/locustfile.py --host <ESB_HOST>
 ```
 
@@ -216,9 +223,10 @@ PLATFORM_PASSWORD=你的密码 nohup python3 -m uvicorn app.web_app:app \
 
 ## 七、Web 平台能力
 
-- **左侧导航布局**：总览 / 跑测试 / 接口调试 / 报告 / AI 生成 / 用例库，六模块分栏切换（深色侧栏 + 内容区）
-- **AI 用例生成**：粘贴大模型密钥 + 选接口（JOB 38 + CMDB 7）+ 需求描述，生成用例草稿 → 验证可收集 → 通过后并入正式目录
+- **Vue3 + Element Plus 界面**：总览 / 跑测试 / 接口调试 / 报告 / AI 生成 / 用例库 / UI 自动化，七模块分栏切换
+- **AI 自愈生成**：粘贴大模型密钥 + 选接口 → 生成草稿 → 自动跑 → 失败喂回 AI 修复 → 重试到绿或达上限（参考 ghost）
 - **仪表盘**：金字塔用例统计（实时 collect）、通过率趋势折线图、五大测试维度
+- **UI 自动化**：列出 Playwright 测试、一键运行（需浏览器，本机跑）、看结果
 - **测试计划**：冒烟 / 回归 / 只 JOB / 只连块测，一键组合执行
 - **接口调试**：Postman 式在线调 JOB/CMDB 只读接口（写操作白名单拒绝）
 - **报告中心**：每次运行 HTML 报告归档，latest.html 永远最新
