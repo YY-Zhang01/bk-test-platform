@@ -23,6 +23,7 @@ import requests
 
 from app import job_config
 from app.base_client import BaseClient, EsbError
+from app.envs import get_env
 
 
 class CmdbError(EsbError):
@@ -49,9 +50,11 @@ class CmdbClient(BaseClient):
     error_class = CmdbError
 
     def __init__(self, esb_host=None, app_code=None, app_secret=None,
-                 token=None, biz_id=None):
-        super().__init__(esb_host, app_code, app_secret, token)
-        self.biz_id = biz_id or job_config.BK_SCOPE_ID
+                 token=None, biz_id=None, env=None):
+        super().__init__(esb_host, app_code, app_secret, token, env)
+        cfg = get_env(env) if env else {}
+        # CMDB 业务 ID 复用 JOB 的 scope_id（两者本就是同一个业务 ID）
+        self.biz_id = biz_id or cfg.get('scope_id') or job_config.BK_SCOPE_ID
 
     def _extra_auth(self) -> dict:
         # 供应商账号是 CC 组件的历史遗留参数，默认 0（直属），

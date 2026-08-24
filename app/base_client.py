@@ -11,6 +11,7 @@ JOB（jobv3 组件）和 CMDB（cc 组件）都走蓝鲸 ESB 网关：
 import requests
 
 from app import job_config
+from app.envs import get_env
 
 
 class EsbError(Exception):
@@ -21,7 +22,12 @@ class EsbError(Exception):
 
 
 class BaseClient:
-    """ESB 客户端基类：统一「拼 URL + 三件套 + 结果检查」。"""
+    """ESB 客户端基类：统一「拼 URL + 三件套 + 结果检查」。
+
+    多环境支持（叠加式）：构造传 env='experience' 时，从 app/envs 读该环境
+    配置作为第二优先级默认值——显式参数 > env 配置 > job_config.py。
+    不传 env 则走原 job_config.py 逻辑，行为不变。
+    """
 
     # 子类覆盖：URL 组件名（/api/c/compapi/v2/{component}/{api}/）
     component = ''
@@ -29,11 +35,13 @@ class BaseClient:
     error_class = EsbError
 
     def __init__(self, esb_host=None, app_code=None, app_secret=None,
-                 token=None):
-        self.esb_host = esb_host or job_config.ESB_HOST
-        self.app_code = app_code or job_config.BK_APP_CODE
-        self.app_secret = app_secret or job_config.BK_APP_SECRET
-        self.token = token or job_config.BK_TOKEN
+                 token=None, env=None):
+        cfg = get_env(env) if env else {}
+        self.esb_host = esb_host or cfg.get('esb_host') or job_config.ESB_HOST
+        self.app_code = app_code or cfg.get('bk_app_code') or job_config.BK_APP_CODE
+        self.app_secret = (app_secret or cfg.get('bk_app_secret')
+                           or job_config.BK_APP_SECRET)
+        self.token = token or cfg.get('bk_token') or job_config.BK_TOKEN
 
     def _extra_auth(self) -> dict:
         """子类可覆盖：额外认证参数（如 CMDB 的 bk_supplier_account）。"""

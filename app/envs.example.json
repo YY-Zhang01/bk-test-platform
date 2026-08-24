@@ -1,0 +1,28 @@
+{
+  "experience": {
+    "name": "蓝鲸社区版体验环境",
+    "esb_host": "",
+    "bk_app_code": "",
+    "bk_app_secret": "",
+    "bk_token": "",
+    "scope_type": "biz",
+    "scope_id": "",
+    "target_host_id": "",
+    "account_alias": "root",
+    "dynamic_group_id": "",
+    "db_account_id": ""
+  },
+  "local_cmdb": {
+    "name": "本地 CMDB standalone（Docker）",
+    "esb_host": "",
+    "bk_app_code": "",
+    "bk_app_secret": "",
+    "bk_token": "",
+    "scope_type": "biz",
+    "scope_id": "",
+    "target_host_id": "",
+    "account_alias": "root",
+    "dynamic_group_id": "",
+    "db_account_id": ""
+  }
+}

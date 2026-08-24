@@ -25,6 +25,7 @@ FILE_META = {
     'test_security.py':     ('专项·安全', None),
     'test_storage.py':      ('L1工具·存储', False),
     'test_webapp.py':       ('L1工具·Web平台层', False),
+    'test_envs.py':         ('L1工具·多环境', False),
 }
 
 

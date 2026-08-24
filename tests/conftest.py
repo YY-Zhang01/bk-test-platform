@@ -12,29 +12,64 @@ import pytest
 from app import job_config
 from app.api_client import JobClient
 from app.cmdb_client import CmdbClient
+from app.envs import get_env
+
+
+def pytest_addoption(parser):
+    """多环境切换：`pytest --env=experience` 从 app/envs 读配置跑。
+    不传 --env 则走原来的 job_config.py 逻辑，行为完全不变。"""
+    parser.addoption('--env', action='store', default='',
+                     help='目标环境名（见 app/envs.example.json）；'
+                          '不传走 job_config.py')
 
 
 @pytest.fixture(scope='session')
-def job_client():
-    """JOB ESB 客户端。凭证没配好时整组 skip，并提示下一步。"""
-    if not (job_config.ESB_HOST and job_config.BK_APP_CODE
-            and job_config.BK_APP_SECRET and job_config.BK_SCOPE_ID):
-        pytest.skip('JOB 体验环境凭证未配置：先申请账号，填好 job_config.py'
-                    '（步骤见《2026-08-22-JOB体验账号申请指引.md》）')
-    return JobClient()
+def env_name(request):
+    """当前环境名；空串表示未启用多环境（走 job_config.py）。"""
+    return request.config.getoption('--env') or ''
+
+
+def _env_cfg(env_name):
+    """取环境配置；未启用多环境时返回 {}。"""
+    return get_env(env_name) if env_name else {}
 
 
 @pytest.fixture(scope='session')
-def cmdb_client():
+def job_client(env_name):
+    """JOB ESB 客户端。凭证没配好时整组 skip，并提示下一步。
+
+    两种来源：--env 指定环境名 → 读 app/envs；否则读 job_config.py。
+    """
+    cfg = _env_cfg(env_name)
+    if not (cfg.get('esb_host') and cfg.get('bk_app_code')
+            and cfg.get('bk_app_secret') and cfg.get('scope_id')):
+        if env_name:
+            pytest.skip(f'环境 {env_name} 凭证未配置：填好 app/envs.local.json'
+                        '（模板见 app/envs.example.json）')
+        if not (job_config.ESB_HOST and job_config.BK_APP_CODE
+                and job_config.BK_APP_SECRET and job_config.BK_SCOPE_ID):
+            pytest.skip('JOB 体验环境凭证未配置：先申请账号，填好 job_config.py'
+                        '（步骤见《2026-08-22-JOB体验账号申请指引.md》）')
+    return JobClient(env=env_name or None)
+
+
+@pytest.fixture(scope='session')
+def cmdb_client(env_name):
     """CMDB ESB 客户端（与 JOB 共用 ESB 三件套，业务 ID 复用 scope_id）。
 
     分开测时 CMDB 链路独立跑，连块测时与 job_client 配合做契约校验。
     """
-    if not (job_config.ESB_HOST and job_config.BK_APP_CODE
-            and job_config.BK_APP_SECRET and job_config.BK_SCOPE_ID):
-        pytest.skip('CMDB 体验环境凭证未配置：先申请账号，填好 job_config.py'
-                    '（CMDB 与 JOB 共用 ESB 凭证，业务 ID 复用 BK_SCOPE_ID）')
-    return CmdbClient()
+    cfg = _env_cfg(env_name)
+    if not (cfg.get('esb_host') and cfg.get('bk_app_code')
+            and cfg.get('bk_app_secret') and cfg.get('scope_id')):
+        if env_name:
+            pytest.skip(f'环境 {env_name} 凭证未配置：填好 app/envs.local.json'
+                        '（CMDB 与 JOB 共用 ESB 凭证）')
+        if not (job_config.ESB_HOST and job_config.BK_APP_CODE
+                and job_config.BK_APP_SECRET and job_config.BK_SCOPE_ID):
+            pytest.skip('CMDB 体验环境凭证未配置：先申请账号，填好 job_config.py'
+                        '（CMDB 与 JOB 共用 ESB 凭证，业务 ID 复用 BK_SCOPE_ID）')
+    return CmdbClient(env=env_name or None)
 
 
 @pytest.fixture()
@@ -89,8 +124,10 @@ def recent_time_range():
 
 
 @pytest.fixture()
-def target_host():
-    """快速执行的目标主机 ID。未在 job_config 配置时跳过相关用例。"""
-    if not job_config.TARGET_HOST_ID:
+def target_host(env_name):
+    """快速执行的目标主机 ID。--env 指定时读 env 配置，否则读 job_config。"""
+    cfg = _env_cfg(env_name)
+    value = cfg.get('target_host_id') if env_name else job_config.TARGET_HOST_ID
+    if not value:
         pytest.skip('未配置 TARGET_HOST_ID（体验环境业务下先导入一台主机）')
-    return job_config.TARGET_HOST_ID
+    return int(value)

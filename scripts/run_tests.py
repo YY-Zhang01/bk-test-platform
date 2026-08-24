@@ -29,11 +29,15 @@ def main():
                         help='按链路标签筛选，如 unit/script/integration；'
                              '冒烟用 -m "unit and not platform"')
     parser.add_argument('--no-report', action='store_true', help='不生成 HTML 报告')
+    parser.add_argument('--env', default='',
+                        help='目标环境名（见 app/envs.example.json），透传给 pytest --env')
     args = parser.parse_args()
 
     cmd = [sys.executable, '-m', 'pytest', '-v']
     if args.marker:
         cmd += ['-m', args.marker]
+    if args.env:
+        cmd += ['--env', args.env]
 
     html_path = None
     if not args.no_report:

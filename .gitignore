@@ -16,6 +16,8 @@ gen_cases/
 
 # 本地凭证（绝不提交真实 ESB 三件套，模块名不能带点故用下划线）
 job_config_local.py
+# 多环境真凭证（模板 envs.example.json 入库，真凭证写 envs.local.json）
+app/envs.local.json
 
 # IDE
 .idea/

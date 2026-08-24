@@ -33,6 +33,7 @@ import requests
 
 from app import job_config
 from app.base_client import BaseClient, EsbError
+from app.envs import get_env
 
 
 class JobError(EsbError):
@@ -86,10 +87,11 @@ class JobClient(BaseClient):
     error_class = JobError
 
     def __init__(self, esb_host=None, app_code=None, app_secret=None,
-                 token=None, scope_type=None, scope_id=None):
-        super().__init__(esb_host, app_code, app_secret, token)
-        self.scope_type = scope_type or job_config.BK_SCOPE_TYPE
-        self.scope_id = scope_id or job_config.BK_SCOPE_ID
+                 token=None, scope_type=None, scope_id=None, env=None):
+        super().__init__(esb_host, app_code, app_secret, token, env)
+        cfg = get_env(env) if env else {}
+        self.scope_type = scope_type or cfg.get('scope_type') or job_config.BK_SCOPE_TYPE
+        self.scope_id = scope_id or cfg.get('scope_id') or job_config.BK_SCOPE_ID
 
     def _scope(self, extra: dict | None = None) -> dict:
         """拼 bk_scope 参数。注意文档要求 string，这里统一转 str。"""
