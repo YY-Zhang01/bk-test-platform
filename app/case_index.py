@@ -30,12 +30,46 @@ FILE_META = {
 }
 
 
+def _marker_name(node):
+    """从 AST 节点提取 marker 名：pytest.mark.xxx → 'xxx'；不是 marker 返回 None。"""
+    if isinstance(node, ast.Attribute) and isinstance(node.value, ast.Attribute) \
+            and getattr(node.value, 'attr', '') == 'mark':
+        return node.attr
+    return None
+
+
+def _module_markers(tree):
+    """提取模块级 pytestmark（单值或列表），供该文件所有用例继承。
+
+    绝大多数测试文件用 `pytestmark = pytest.mark.xxx`（或列表）统一打标，
+    函数级不再重复写；这里把模块级 marker 捞出来，合并进每个用例。
+    """
+    marks = []
+    for node in tree.body:
+        if not isinstance(node, ast.Assign):
+            continue
+        for target in node.targets:
+            if isinstance(target, ast.Name) and target.id == 'pytestmark':
+                val = node.value
+                if isinstance(val, ast.List):
+                    for elt in val.elts:
+                        name = _marker_name(elt)
+                        if name:
+                            marks.append(name)
+                else:
+                    name = _marker_name(val)
+                    if name:
+                        marks.append(name)
+    return marks
+
+
 def _node_markers(node):
+    """提取单个函数上的 marker 与 parametrize 参数展开数。"""
     marks, params = [], []
     for d in node.decorator_list:
-        if isinstance(d, ast.Attribute) and isinstance(d.value, ast.Attribute) \
-                and getattr(d.value, 'attr', '') == 'mark':
-            marks.append(d.attr)
+        name = _marker_name(d)
+        if name:
+            marks.append(name)
         elif isinstance(d, ast.Call) and isinstance(d.func, ast.Attribute) \
                 and d.func.attr == 'parametrize' and len(d.args) >= 2 \
                 and isinstance(d.args[1], (ast.List, ast.Tuple)):
@@ -49,12 +83,14 @@ def extract_cases() -> list:
     for f in sorted(TESTS.glob('test_*.py')):
         layer, env_default = FILE_META.get(f.name, ('其他', None))
         tree = ast.parse(f.read_text(encoding='utf-8'))
+        mod_marks = _module_markers(tree)
         for node in tree.body:
             if not (isinstance(node, ast.FunctionDef) and node.name.startswith('test_')):
                 continue
             doc = (ast.get_docstring(node) or '').strip()
             first = doc.split('\n')[0].strip()
             marks, params = _node_markers(node)
+            marks = sorted(set(mod_marks + marks))  # 模块级 pytestmark + 函数级，去重排序
             is_unit = 'unit' in marks
             env = '否' if is_unit else ('否' if env_default is False else '是')
             name = node.name

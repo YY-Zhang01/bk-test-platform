@@ -1,120 +1,120 @@
-﻿文件,用例名,作用/设计原因,所属层级/维度,marker,是否等账号
-test_cmdb_boundary.py,test_make_page_默认值,默认 start=0、limit=10，不带 sort 字段。,其他,unit,否
-test_cmdb_boundary.py,test_make_page_边界值透传 ×5,分页参数必须原样透传，构造层不做过滤（越界值留给服务端校验）。,其他,unit,否
-test_cmdb_boundary.py,test_查业务_条件构造自洽,search_business 传 biz_id 时，condition 结构应为 {bk_biz_id: id}。,其他,unit,否
-test_cmdb_boundary.py,test_查主机_条件构造自洽,search_host 按 host_id 查，condition 应含 host 模型 + $eq 条件。,其他,unit,否
-test_cmdb_boundary.py,test_查主机列表_fields透传,list_biz_hosts 传 fields 时原样透传，不传则不带该字段。,其他,unit,否
-test_cmdb_boundary.py,test_查模型属性_obj_id透传,search_object_attribute 的 obj_id 原样透传（默认 host）。,其他,unit,否
-test_cmdb_boundary.py,test_分页_start负数,探测型：start 传负数，账号到手后实测 CMDB 是拒绝还是静默返回空。,其他,-,是
-test_cmdb_boundary.py,test_查主机_非法biz_id,探测型：用不存在的 biz_id 查主机，账号到手后实测返回（预期空列表）。,其他,-,是
-test_cmdb_boundary.py,test_查模型_非法obj_id,探测型：查不存在的对象类型，账号到手后实测返回（预期空或报错）。,其他,-,是
-test_cmdb_core.py,test_分页参数_构造正确,make_page：默认 0 起点、10 条；传 sort 才带排序字段。,CMDB链路,unit,否
-test_cmdb_core.py,test_客户端_未配置时业务ID为空,CMDB 客户端复用 job_config 配置；未配置时 biz_id 为 None，,CMDB链路,unit,否
-test_cmdb_core.py,test_客户端_构造参数可覆盖配置,传参优先级：显式传参 > job_config。压测/多环境切换靠这个。,CMDB链路,unit,否
-test_cmdb_core.py,test_查业务_列表非空且含当前业务,对应手动步骤：CMDB 首页业务列表。,CMDB链路,-,是
-test_cmdb_core.py,test_查主机_当前业务主机列表非空,对应手动步骤：业务 → 主机页面。,CMDB链路,-,是
-test_cmdb_core.py,test_查主机详情_按ID能查到,对应手动步骤：主机详情页。按 host_id 条件查询应返回该主机。,CMDB链路,-,是
-test_cmdb_core.py,test_查拓扑_集群和模块结构完整,对应手动步骤：业务拓扑页（集群→模块两层树）。,CMDB链路,-,是
-test_cmdb_core.py,test_查模型属性_host模型字段字典非空,对应手动步骤：模型管理 → 主机模型字段。,CMDB链路,-,是
-test_cmdb_core.py,test_写业务_创建后能查到,功能链路：建业务 → 查业务（写后读，验证写接口真生效）。,CMDB链路,-,是
-test_cmdb_core.py,test_写动态分组_创建后能执行,功能链路：建动态分组 → 执行该分组（写后读，验证圈人闭环）。,CMDB链路,-,是
-test_cmdb_core.py,test_写业务_参数边界_空名,参数边界：业务名必填。探测型——账号到手后实测 CMDB 的拒绝码，,CMDB链路,-,是
-test_cmdb_core.py,test_写业务_安全_无权限写,安全：无写权限的账号创建业务应被拒绝。探测型——账号到手后,CMDB链路,-,是
-test_cmdb_core.py,test_写导主机_导入后能查到,功能链路：导入主机 → 查主机列表验证（写后读，补齐 add_host_to_biz）。,CMDB链路,-,是
-test_cmdb_security.py,test_供应商账号认证必带,CMDB 每个请求必须带 bk_supplier_account（历史参数，默认 0）。,其他,unit,否
-test_cmdb_security.py,test_写业务_参数构造自洽,create_business 拼参：bk_biz_name 和 bk_biz_maintainer 正确。,其他,unit,否
-test_cmdb_security.py,test_导主机_参数构造自洽,add_host_to_biz 拼参：host_list 原样透传。,其他,unit,否
-test_cmdb_security.py,test_查询_自动带业务ID做数据隔离,list_biz_hosts 未显式传 biz_id 时，自动用客户端的 biz_id（隔离锚点）。,其他,unit,否
-test_cmdb_security.py,test_越权_跨业务查不到本业务主机,业务隔离：用别的业务 biz_id 查主机，应查不到本业务的主机。,其他,-,是
-test_cmdb_security.py,test_写操作_无权限建业务被拒,探测型：无写权限的账号建业务应被拒。账号到手后用一个只读账号,其他,-,是
-test_docs_numbers.py,test_README用例数字与实测一致,README 的用例总数/函数数/能跑数/等账号数与代码实测一致。,L1工具·文档数字自检,unit,否
-test_docs_numbers.py,test_文档结构描述与代码一致,README 的模块数/marker 数、交接文档的文件数/模块数与代码实测一致。,L1工具·文档数字自检,unit,否
-test_envs.py,test_模板环境_列出体验与本地CMDB,envs.example.json 里应内置两个占位环境。,L1工具·多环境,unit,否
-test_envs.py,test_取不存在的环境_返回空dict,get_env 对未知环境返回空 dict，调用方用 .get 兜底，不抛异常。,L1工具·多环境,unit,否
-test_envs.py,test_local文件覆盖模板,envs.local.json 里的同名环境覆盖模板（local 优先，真凭证不入库）。,L1工具·多环境,unit,否
-test_envs.py,test_客户端_env参数读环境配置,JobClient(env=...) / CmdbClient(env=...) 从 envs 读地址与凭证。,L1工具·多环境,unit,否
-test_envs.py,test_客户端_显式参数优先于env,三级取值：显式参数 > env 配置。方便压测/调试临时覆盖单个值。,L1工具·多环境,unit,否
-test_envs.py,test_坏配置文件_不抛异常,envs.local.json 写坏了不能拖垮 import 和单测，静默跳过。,L1工具·多环境,unit,否
-test_integration.py,test_契约_JOB业务ID在CMDB业务列表里,JOB 的 bk_scope_id 就是 CMDB 的 bk_biz_id，两边必须对得上。,L3连块测·数据契约,-,是
-test_integration.py,test_契约_JOB目标主机在CMDB主机列表里,JOB 的 host_id 就是 CMDB 的 bk_host_id，主机数据同源。,L3连块测·数据契约,-,是
-test_integration.py,test_契约_动态分组圈出的主机合法,动态分组执行结果非空，且圈出的主机在当前业务主机列表里。,L3连块测·数据契约,-,是
-test_integration.py,test_契约_拓扑节点ID在CMDB拓扑里存在,第 4 种圈主机方式 topo_node 的契约一致性。,L3连块测·数据契约,-,是
-test_integration.py,test_联动_CMDB圈主机JOB执行成功,业务闭环：CMDB 圈人 → JOB 干活。,L3连块测·数据契约,-,是
-test_integration.py,test_联动_引用动态分组ID直接执行成功,业务闭环（分组直引版）：JOB 侧只传动态分组 ID，不传主机清单。,L3连块测·数据契约,-,是
-test_integration.py,test_联动_分组执行完成且日志正确,端到端全链路：分组圈的主机执行脚本 → 状态成功。,L3连块测·数据契约,-,是
-test_integration.py,test_反向_CMDB不存在的主机JOB执行被拒,跨系统边界：CMDB 查不到的主机 ID，JOB 必须拒绝执行。,L3连块测·数据契约,-,是
-test_integration.py,test_反向_动态分组ID不存在JOB执行被拒,"跨系统契约：不存在的动态分组 ID，JOB 应报""查无此分组""。",L3连块测·数据契约,-,是
-test_job_account.py,test_建Linux账号_列表能查到,对应手动步骤：新建 Linux 系统账号 → 账号列表里能看到。,JOB链路5·账号+高危,-,是
-test_job_account.py,test_建Windows账号_不传密码被拒,负面用例：Windows 账号必须传密码（坑位实测）。,JOB链路5·账号+高危,-,是
-test_job_account.py,test_删除账号_列表消失,对应手动步骤：删除账号 → 列表里查不到。,JOB链路5·账号+高危,-,是
-test_job_account.py,test_高危检测_危险命令命中,对应手动步骤：脚本内容里写了危险命令 → 检测有命中项。,JOB链路5·账号+高危,-,是
-test_job_account.py,test_自定义高危规则_启用后检测命中,对应手动步骤：建规则 → 启用 → 用含该命令的脚本做检测 → 命中。,JOB链路5·账号+高危,-,是
-test_job_account.py,test_高危规则_停用后不再命中,对应手动步骤：停用规则 → 检测不再命中（规则生命周期验证）。,JOB链路5·账号+高危,-,是
-test_job_account.py,test_高危规则列表_能查到自建规则,对应手动步骤：高危规则页 → 规则列表里能看到自建规则。,JOB链路5·账号+高危,-,是
-test_job_boundary.py,test_Base64_各种内容往返一致 ×6,边界内容编码再解码必须等于原文（空串、中文、特殊字符、长串）。,专项·参数边界,unit,否
-test_job_boundary.py,test_target_server_四种指定方式可组合,四种主机指定方式可以单独传，也可以组合传（服务端取并集）。,专项·参数边界,unit,否
-test_job_boundary.py,test_target_server_全空返回空字典,什么都不传返回空字典，调用方自己决定要不要传 target_server。,专项·参数边界,unit,否
-test_job_boundary.py,test_快速执行_内容自动Base64且互斥字段只传一个,传 script_content 时：内容被 Base64、语言自动带、script_id 不出现。,专项·参数边界,unit,否
-test_job_boundary.py,test_快速执行_传版本ID时内容被忽略,优先级契约：script_version_id 优先级最高，content 不参与。,专项·参数边界,unit,否
-test_job_boundary.py,test_快速执行_超时0也能传出去,坑位回归：timeout=0 是非法值，但必须能传给服务端让它拒绝。,专项·参数边界,unit,否
-test_job_boundary.py,test_推送配置_内容自动Base64且结构自洽,push_config_file 拼参：file_list 结构对、内容编码、无 account_id。,专项·参数边界,unit,否
-test_job_boundary.py,test_快速执行SQL_DB账号必填字段自洽,fast_execute_sql 拼参：db_account_id 在、系统账号字段不出现。,专项·参数边界,unit,否
-test_job_boundary.py,test_快速执行_超时边界值合法 ×2,边界值：1 秒（下界）和 86400 秒（上界）都是文档允许的合法值。,专项·参数边界,-,是
-test_job_boundary.py,test_快速执行_超时越界被拒 ×3,越界值：0、86401、负数都应被服务端参数校验拒绝。,专项·参数边界,-,是
-test_job_boundary.py,test_建脚本_非法语言类型被拒,非法枚举：script_language 只支持 1-6，传 9 应被服务端拒绝。,专项·参数边界,-,是
-test_job_boundary.py,test_操作作业实例_非法操作码被拒,非法枚举：operate_job_instance 只支持 1=终止，传 99 应被拒绝。,专项·参数边界,-,是
-test_job_cron.py,test_新建定时任务_默认暂停,"对应手动步骤：新建定时 → 列表里状态是""暂停""。",JOB链路4·定时任务,-,是
-test_job_cron.py,test_定时详情_表达式保存正确,对应手动步骤：定时详情页 → 能看到 crontab 表达式和引用的方案。,JOB链路4·定时任务,-,是
-test_job_cron.py,test_启动定时任务_状态变启动,"对应手动步骤：点""启动"" → 状态 2（暂停）变 1（启动）。",JOB链路4·定时任务,-,是
-test_job_cron.py,test_表达式带问号_被拒绝,负面用例：expression 不支持 `?`（坑位实测）。,JOB链路4·定时任务,-,是
-test_job_cron.py,test_表达式与执行时间_同时传被拒绝,负面用例：expression 与 execute_time 互斥，同时传应报错。,JOB链路4·定时任务,-,是
-test_job_cron.py,test_删除定时任务_列表消失,对应手动步骤：删除定时 → 列表里查不到。,JOB链路4·定时任务,-,是
-test_job_fast_exec.py,test_Base64往返_编解码一致,纯函数测试，不依赖环境（凭证没到也能先跑）。,JOB链路2·快速执行,unit,否
-test_job_fast_exec.py,test_快速执行_返回实例和步骤ID,"对应手动步骤：填脚本点""执行"" → 生成作业实例。",JOB链路2·快速执行,-,是
-test_job_fast_exec.py,test_查状态_轮询到执行结束,"对应手动步骤：执行历史里看状态从""执行中""流转到""成功/失败""。",JOB链路2·快速执行,-,是
-test_job_fast_exec.py,test_查日志_输出包含唯一标记,对应手动步骤：执行详情里点开某台主机 → 看到脚本 stdout 输出。,JOB链路2·快速执行,-,是
-test_job_fast_exec.py,test_执行账号_缺账号被拒,负面用例：不传执行账号（account_alias 和 account_id 都不传）应报错。,JOB链路2·快速执行,-,是
-test_job_fast_exec.py,test_脚本优先级_传内容同时传版本用版本,坑位实测：script_version_id > script_id > script_content。,JOB链路2·快速执行,-,是
-test_job_file_sql.py,test_配置文件内容_Base64往返一致,push_config_file 的内容要 Base64，编码后解码必须等于原文。,JOB链路6·文件+SQL,unit,否
-test_job_file_sql.py,test_推送配置文件_返回作业实例ID,"对应手动步骤：文件分发页选""配置文件"" → 填内容点执行。",JOB链路6·文件+SQL,-,是
-test_job_file_sql.py,test_推送配置文件_执行成功,推配置 → 轮询状态到成功(3)。,JOB链路6·文件+SQL,-,是
-test_job_file_sql.py,test_推送配置_缺目标路径被拒,负面用例：file_target_path 是必填项，传空应报错。,JOB链路6·文件+SQL,-,是
-test_job_file_sql.py,test_生成上传URL_返回带凭据地址,对应手动步骤：本地文件分发第1步，选文件 → 生成上传地址。,JOB链路6·文件+SQL,-,是
-test_job_file_sql.py,test_快速分发文件_服务器文件源,"对应手动步骤：文件分发页选""服务器文件"" → 选源机 → 点执行。",JOB链路6·文件+SQL,-,是
-test_job_file_sql.py,test_快速分发文件_缺执行账号被拒,负面用例：目标执行账号必填（account_alias/account_id 二选一）。,JOB链路6·文件+SQL,-,是
-test_job_file_sql.py,test_快速执行SQL_返回实例ID,对应手动步骤：快速执行 SQL 页 → 选 DB 账号 → 填 SQL 点执行。,JOB链路6·文件+SQL,-,是
-test_job_file_sql.py,test_快速执行SQL_缺DB账号被拒,负面用例：db_account_id 必填，传 0 应报参数错误。,JOB链路6·文件+SQL,-,是
-test_job_file_sql.py,test_操作步骤_对失败步骤忽略错误,"对应手动步骤：执行详情页对失败步骤点""忽略错误""（operation_code=3）。",JOB链路6·文件+SQL,-,是
-test_job_plan.py,test_模板列表_非空,对应手动步骤：作业模板页 → 能看到模板列表。,JOB链路3·作业编排,-,是
-test_job_plan.py,test_方案列表_属于对应模板,对应手动步骤：模板详情 → 方案列表里每个方案都挂着模板 ID。,JOB链路3·作业编排,-,是
-test_job_plan.py,test_方案详情_含全局变量列表,对应手动步骤：方案详情页 → 能看到方案可改的全局变量。,JOB链路3·作业编排,-,是
-test_job_plan.py,test_启动方案_执行历史可查,"对应手动步骤：点""执行"" → 执行历史里多一条记录。",JOB链路3·作业编排,-,是
-test_job_plan.py,test_实例全局变量_能查到值,对应手动步骤：执行详情 → 查看该次执行各变量的实际取值。,JOB链路3·作业编排,-,是
-test_job_plan.py,test_覆盖全局变量_执行时传值生效,坑位实测：execute_job_plan 传 global_var_list 可覆盖方案默认值。,JOB链路3·作业编排,-,是
-test_job_script.py,test_建脚本_列表能查到且内容自洽,对应手动步骤：新建脚本 → 脚本列表里能看到，内容还是我们传的那份。,JOB链路1·脚本管理,-,是
-test_job_script.py,test_建脚本_首个版本状态未上线,新建脚本自带的 v1.0 应该是 0（未上线），需要手动上线才生效。,JOB链路1·脚本管理,-,是
-test_job_script.py,test_追加版本_版本列表两条,"对应手动步骤：脚本详情页""新增版本"" → 版本列表出现 v1.0 和 v1.1。",JOB链路1·脚本管理,-,是
-test_job_script.py,test_上线版本_状态变已上线,"对应手动步骤：选中版本点""上线"" → 状态 0 变 1。",JOB链路1·脚本管理,-,是
-test_job_script.py,test_禁用版本_状态变已禁用,"对应手动步骤：版本""禁用"" → 状态变 3。",JOB链路1·脚本管理,-,是
-test_job_script.py,test_删除脚本_级联删版本,对应手动步骤：删除脚本 → 该脚本的所有版本一并消失。,JOB链路1·脚本管理,-,是
-test_security.py,test_高危检测_脚本内容自动Base64,check_script 的内容必须 Base64，危险命令也要照常编码发送。,专项·安全,unit,否
-test_security.py,test_高危检测_全局接口不带scope,check_script 是全局能力，不应带 bk_scope（否则危险检测被绑到业务上）。,专项·安全,unit,否
-test_security.py,test_高危规则_全局接口不带scope,create_dangerous_rule 也是全局资源，不带 bk_scope。,专项·安全,unit,否
-test_security.py,test_鉴权_错误token被拒,用真实 app_code/secret + 错误 token 调接口，应被服务端拒绝。,专项·安全,-,是
-test_security.py,test_越权_跨业务scope查不到本业务脚本,"业务隔离：用本业务建一个脚本，用""别的业务 scope""去查，应查不到。",专项·安全,-,是
-test_security.py,test_注入_SQL注入参数被拒,脚本参数塞 SQL 注入 payload，应被服务端参数校验 / 高危检测拦截。,专项·安全,-,是
-test_security.py,test_高危命令_rm_rf被check_script命中,check_script 对 rm -rf / 应返回命中列表（level 3 致命）。,专项·安全,-,是
-test_storage.py,test_保存运行记录后能按最近N条查回,保存两条运行记录，list_runs 按时间正序返回（旧→新），供首页折线图。,L1工具·存储,-,否
-test_storage.py,test_查询条数上限生效,list_runs 的 limit 生效：取最近 N 条（id 最大），正序返回。,L1工具·存储,-,否
-test_storage.py,test_接口调试留痕含成功失败位,log_probe 记录成功/失败位（ok 1/0），落库可查，供接口调试历史。,L1工具·存储,-,否
-test_storage.py,test_超长调试结果截断防爆库,调试结果超 500 字符被截断，防止探针日志撑爆数据库。,L1工具·存储,-,否
-test_storage.py,test_旧jsonl一次性迁移后不重复导入,旧 jsonl 迁移到 SQLite 后改 .bak，重复迁移返回 0 不重复导入。,L1工具·存储,-,否
-test_storage.py,test_迁移时表非空则跳过并备份旧文件,表已有数据时跳过迁移（防覆盖），旧文件仍备份为 .bak。,L1工具·存储,-,否
-test_storage.py,test_无旧文件迁移直接返回零,没有旧 jsonl 文件时 migrate 返回 0，不报错。,L1工具·存储,-,否
-test_webapp.py,test_首页返回平台页面,首页返回 200，内容含平台标识（Vue 挂载点或金字塔文案）。,L1工具·Web平台层,-,否
-test_webapp.py,test_用例统计接口返回全量数字,stats 返回 total/unit/env，且 total = unit + env（口径自洽）。,L1工具·Web平台层,-,否
-test_webapp.py,test_冒烟计划后台跑完并留历史,跑冒烟计划，轮询到 done，returncode=0，趋势接口能查到该条历史。,L1工具·Web平台层,-,否
-test_webapp.py,test_未知任务查询返回404,查不存在的任务 id 返回 404。,L1工具·Web平台层,-,否
-test_webapp.py,test_接口调试拒绝白名单外目标,probe 目标不在白名单（只认 job/cmdb）时返回 400 拒绝。,L1工具·Web平台层,-,否
-test_webapp.py,test_接口调试拒绝写操作只开放只读,probe 调写操作（create_script）被拒，只开放只读查询（防误操作）。,L1工具·Web平台层,-,否
-test_webapp.py,test_报告文件名白名单拒绝非法名,报告文件名不合白名单格式返回 400，防目录穿越。,L1工具·Web平台层,-,否
+﻿文件,用例名,作用/设计原因,所属层级/维度,marker,优先级,是否等账号
+test_cmdb_boundary.py,test_make_page_默认值,默认 start=0、limit=10，不带 sort 字段。,专项·参数边界,"boundary,unit",P1,否
+test_cmdb_boundary.py,test_make_page_边界值透传 ×5,分页参数必须原样透传，构造层不做过滤（越界值留给服务端校验）。,专项·参数边界,"boundary,unit",P1,否
+test_cmdb_boundary.py,test_查业务_条件构造自洽,search_business 传 biz_id 时，condition 结构应为 {bk_biz_id: id}。,专项·参数边界,"boundary,unit",P1,否
+test_cmdb_boundary.py,test_查主机_条件构造自洽,search_host 按 host_id 查，condition 应含 host 模型 + $eq 条件。,专项·参数边界,"boundary,unit",P1,否
+test_cmdb_boundary.py,test_查主机列表_fields透传,list_biz_hosts 传 fields 时原样透传，不传则不带该字段。,专项·参数边界,"boundary,unit",P1,否
+test_cmdb_boundary.py,test_查模型属性_obj_id透传,search_object_attribute 的 obj_id 原样透传（默认 host）。,专项·参数边界,"boundary,unit",P1,否
+test_cmdb_boundary.py,test_分页_start负数,探测型：start 传负数，账号到手后实测 CMDB 是拒绝还是静默返回空。,专项·参数边界,boundary,P1,是
+test_cmdb_boundary.py,test_查主机_非法biz_id,探测型：用不存在的 biz_id 查主机，账号到手后实测返回（预期空列表）。,专项·参数边界,boundary,P1,是
+test_cmdb_boundary.py,test_查模型_非法obj_id,探测型：查不存在的对象类型，账号到手后实测返回（预期空或报错）。,专项·参数边界,boundary,P1,是
+test_cmdb_core.py,test_分页参数_构造正确,make_page：默认 0 起点、10 条；传 sort 才带排序字段。,CMDB链路,"cmdb,unit",P2,否
+test_cmdb_core.py,test_客户端_未配置时业务ID为空,CMDB 客户端复用 job_config 配置；未配置时 biz_id 为 None，,CMDB链路,"cmdb,unit",P2,否
+test_cmdb_core.py,test_客户端_构造参数可覆盖配置,传参优先级：显式传参 > job_config。压测/多环境切换靠这个。,CMDB链路,"cmdb,unit",P2,否
+test_cmdb_core.py,test_查业务_列表非空且含当前业务,对应手动步骤：CMDB 首页业务列表。,CMDB链路,cmdb,P2,是
+test_cmdb_core.py,test_查主机_当前业务主机列表非空,对应手动步骤：业务 → 主机页面。,CMDB链路,cmdb,P2,是
+test_cmdb_core.py,test_查主机详情_按ID能查到,对应手动步骤：主机详情页。按 host_id 条件查询应返回该主机。,CMDB链路,cmdb,P2,是
+test_cmdb_core.py,test_查拓扑_集群和模块结构完整,对应手动步骤：业务拓扑页（集群→模块两层树）。,CMDB链路,cmdb,P2,是
+test_cmdb_core.py,test_查模型属性_host模型字段字典非空,对应手动步骤：模型管理 → 主机模型字段。,CMDB链路,cmdb,P2,是
+test_cmdb_core.py,test_写业务_创建后能查到,功能链路：建业务 → 查业务（写后读，验证写接口真生效）。,CMDB链路,cmdb,P2,是
+test_cmdb_core.py,test_写动态分组_创建后能执行,功能链路：建动态分组 → 执行该分组（写后读，验证圈人闭环）。,CMDB链路,cmdb,P2,是
+test_cmdb_core.py,test_写业务_参数边界_空名,参数边界：业务名必填。探测型——账号到手后实测 CMDB 的拒绝码，,CMDB链路,cmdb,P2,是
+test_cmdb_core.py,test_写业务_安全_无权限写,安全：无写权限的账号创建业务应被拒绝。探测型——账号到手后,CMDB链路,cmdb,P2,是
+test_cmdb_core.py,test_写导主机_导入后能查到,功能链路：导入主机 → 查主机列表验证（写后读，补齐 add_host_to_biz）。,CMDB链路,cmdb,P2,是
+test_cmdb_security.py,test_供应商账号认证必带,CMDB 每个请求必须带 bk_supplier_account（历史参数，默认 0）。,专项·安全,"security,unit",P0,否
+test_cmdb_security.py,test_写业务_参数构造自洽,create_business 拼参：bk_biz_name 和 bk_biz_maintainer 正确。,专项·安全,"security,unit",P0,否
+test_cmdb_security.py,test_导主机_参数构造自洽,add_host_to_biz 拼参：host_list 原样透传。,专项·安全,"security,unit",P0,否
+test_cmdb_security.py,test_查询_自动带业务ID做数据隔离,list_biz_hosts 未显式传 biz_id 时，自动用客户端的 biz_id（隔离锚点）。,专项·安全,"security,unit",P0,否
+test_cmdb_security.py,test_越权_跨业务查不到本业务主机,业务隔离：用别的业务 biz_id 查主机，应查不到本业务的主机。,专项·安全,security,P0,是
+test_cmdb_security.py,test_写操作_无权限建业务被拒,探测型：无写权限的账号建业务应被拒。账号到手后用一个只读账号,专项·安全,security,P0,是
+test_docs_numbers.py,test_README用例数字与实测一致,README 的用例总数/函数数/能跑数/等账号数与代码实测一致。,L1工具·文档数字自检,unit,P2,否
+test_docs_numbers.py,test_文档结构描述与代码一致,README 的模块数/marker 数、交接文档的文件数/模块数与代码实测一致。,L1工具·文档数字自检,unit,P2,否
+test_envs.py,test_模板环境_列出体验与本地CMDB,envs.example.json 里应内置两个占位环境。,L1工具·多环境,unit,P2,否
+test_envs.py,test_取不存在的环境_返回空dict,get_env 对未知环境返回空 dict，调用方用 .get 兜底，不抛异常。,L1工具·多环境,unit,P2,否
+test_envs.py,test_local文件覆盖模板,envs.local.json 里的同名环境覆盖模板（local 优先，真凭证不入库）。,L1工具·多环境,unit,P2,否
+test_envs.py,test_客户端_env参数读环境配置,JobClient(env=...) / CmdbClient(env=...) 从 envs 读地址与凭证。,L1工具·多环境,unit,P2,否
+test_envs.py,test_客户端_显式参数优先于env,三级取值：显式参数 > env 配置。方便压测/调试临时覆盖单个值。,L1工具·多环境,unit,P2,否
+test_envs.py,test_坏配置文件_不抛异常,envs.local.json 写坏了不能拖垮 import 和单测，静默跳过。,L1工具·多环境,unit,P2,否
+test_integration.py,test_契约_JOB业务ID在CMDB业务列表里,JOB 的 bk_scope_id 就是 CMDB 的 bk_biz_id，两边必须对得上。,L3连块测·数据契约,integration,P1,是
+test_integration.py,test_契约_JOB目标主机在CMDB主机列表里,JOB 的 host_id 就是 CMDB 的 bk_host_id，主机数据同源。,L3连块测·数据契约,integration,P1,是
+test_integration.py,test_契约_动态分组圈出的主机合法,动态分组执行结果非空，且圈出的主机在当前业务主机列表里。,L3连块测·数据契约,integration,P1,是
+test_integration.py,test_契约_拓扑节点ID在CMDB拓扑里存在,第 4 种圈主机方式 topo_node 的契约一致性。,L3连块测·数据契约,integration,P1,是
+test_integration.py,test_联动_CMDB圈主机JOB执行成功,业务闭环：CMDB 圈人 → JOB 干活。,L3连块测·数据契约,integration,P1,是
+test_integration.py,test_联动_引用动态分组ID直接执行成功,业务闭环（分组直引版）：JOB 侧只传动态分组 ID，不传主机清单。,L3连块测·数据契约,integration,P1,是
+test_integration.py,test_联动_分组执行完成且日志正确,端到端全链路：分组圈的主机执行脚本 → 状态成功。,L3连块测·数据契约,integration,P1,是
+test_integration.py,test_反向_CMDB不存在的主机JOB执行被拒,跨系统边界：CMDB 查不到的主机 ID，JOB 必须拒绝执行。,L3连块测·数据契约,integration,P1,是
+test_integration.py,test_反向_动态分组ID不存在JOB执行被拒,"跨系统契约：不存在的动态分组 ID，JOB 应报""查无此分组""。",L3连块测·数据契约,integration,P1,是
+test_job_account.py,test_建Linux账号_列表能查到,对应手动步骤：新建 Linux 系统账号 → 账号列表里能看到。,JOB链路5·账号+高危,account,P2,是
+test_job_account.py,test_建Windows账号_不传密码被拒,负面用例：Windows 账号必须传密码（坑位实测）。,JOB链路5·账号+高危,account,P2,是
+test_job_account.py,test_删除账号_列表消失,对应手动步骤：删除账号 → 列表里查不到。,JOB链路5·账号+高危,account,P2,是
+test_job_account.py,test_高危检测_危险命令命中,对应手动步骤：脚本内容里写了危险命令 → 检测有命中项。,JOB链路5·账号+高危,account,P2,是
+test_job_account.py,test_自定义高危规则_启用后检测命中,对应手动步骤：建规则 → 启用 → 用含该命令的脚本做检测 → 命中。,JOB链路5·账号+高危,account,P2,是
+test_job_account.py,test_高危规则_停用后不再命中,对应手动步骤：停用规则 → 检测不再命中（规则生命周期验证）。,JOB链路5·账号+高危,account,P2,是
+test_job_account.py,test_高危规则列表_能查到自建规则,对应手动步骤：高危规则页 → 规则列表里能看到自建规则。,JOB链路5·账号+高危,account,P2,是
+test_job_boundary.py,test_Base64_各种内容往返一致 ×6,边界内容编码再解码必须等于原文（空串、中文、特殊字符、长串）。,专项·参数边界,"boundary,unit",P1,否
+test_job_boundary.py,test_target_server_四种指定方式可组合,四种主机指定方式可以单独传，也可以组合传（服务端取并集）。,专项·参数边界,"boundary,unit",P1,否
+test_job_boundary.py,test_target_server_全空返回空字典,什么都不传返回空字典，调用方自己决定要不要传 target_server。,专项·参数边界,"boundary,unit",P1,否
+test_job_boundary.py,test_快速执行_内容自动Base64且互斥字段只传一个,传 script_content 时：内容被 Base64、语言自动带、script_id 不出现。,专项·参数边界,"boundary,unit",P1,否
+test_job_boundary.py,test_快速执行_传版本ID时内容被忽略,优先级契约：script_version_id 优先级最高，content 不参与。,专项·参数边界,"boundary,unit",P1,否
+test_job_boundary.py,test_快速执行_超时0也能传出去,坑位回归：timeout=0 是非法值，但必须能传给服务端让它拒绝。,专项·参数边界,"boundary,unit",P1,否
+test_job_boundary.py,test_推送配置_内容自动Base64且结构自洽,push_config_file 拼参：file_list 结构对、内容编码、无 account_id。,专项·参数边界,"boundary,unit",P1,否
+test_job_boundary.py,test_快速执行SQL_DB账号必填字段自洽,fast_execute_sql 拼参：db_account_id 在、系统账号字段不出现。,专项·参数边界,"boundary,unit",P1,否
+test_job_boundary.py,test_快速执行_超时边界值合法 ×2,边界值：1 秒（下界）和 86400 秒（上界）都是文档允许的合法值。,专项·参数边界,boundary,P1,是
+test_job_boundary.py,test_快速执行_超时越界被拒 ×3,越界值：0、86401、负数都应被服务端参数校验拒绝。,专项·参数边界,boundary,P1,是
+test_job_boundary.py,test_建脚本_非法语言类型被拒,非法枚举：script_language 只支持 1-6，传 9 应被服务端拒绝。,专项·参数边界,boundary,P1,是
+test_job_boundary.py,test_操作作业实例_非法操作码被拒,非法枚举：operate_job_instance 只支持 1=终止，传 99 应被拒绝。,专项·参数边界,boundary,P1,是
+test_job_cron.py,test_新建定时任务_默认暂停,"对应手动步骤：新建定时 → 列表里状态是""暂停""。",JOB链路4·定时任务,cron,P2,是
+test_job_cron.py,test_定时详情_表达式保存正确,对应手动步骤：定时详情页 → 能看到 crontab 表达式和引用的方案。,JOB链路4·定时任务,cron,P2,是
+test_job_cron.py,test_启动定时任务_状态变启动,"对应手动步骤：点""启动"" → 状态 2（暂停）变 1（启动）。",JOB链路4·定时任务,cron,P2,是
+test_job_cron.py,test_表达式带问号_被拒绝,负面用例：expression 不支持 `?`（坑位实测）。,JOB链路4·定时任务,cron,P2,是
+test_job_cron.py,test_表达式与执行时间_同时传被拒绝,负面用例：expression 与 execute_time 互斥，同时传应报错。,JOB链路4·定时任务,cron,P2,是
+test_job_cron.py,test_删除定时任务_列表消失,对应手动步骤：删除定时 → 列表里查不到。,JOB链路4·定时任务,cron,P2,是
+test_job_fast_exec.py,test_Base64往返_编解码一致,纯函数测试，不依赖环境（凭证没到也能先跑）。,JOB链路2·快速执行,"fast_exec,unit",P2,否
+test_job_fast_exec.py,test_快速执行_返回实例和步骤ID,"对应手动步骤：填脚本点""执行"" → 生成作业实例。",JOB链路2·快速执行,fast_exec,P2,是
+test_job_fast_exec.py,test_查状态_轮询到执行结束,"对应手动步骤：执行历史里看状态从""执行中""流转到""成功/失败""。",JOB链路2·快速执行,fast_exec,P2,是
+test_job_fast_exec.py,test_查日志_输出包含唯一标记,对应手动步骤：执行详情里点开某台主机 → 看到脚本 stdout 输出。,JOB链路2·快速执行,fast_exec,P2,是
+test_job_fast_exec.py,test_执行账号_缺账号被拒,负面用例：不传执行账号（account_alias 和 account_id 都不传）应报错。,JOB链路2·快速执行,fast_exec,P2,是
+test_job_fast_exec.py,test_脚本优先级_传内容同时传版本用版本,坑位实测：script_version_id > script_id > script_content。,JOB链路2·快速执行,fast_exec,P2,是
+test_job_file_sql.py,test_配置文件内容_Base64往返一致,push_config_file 的内容要 Base64，编码后解码必须等于原文。,JOB链路6·文件+SQL,"file,unit",P2,否
+test_job_file_sql.py,test_推送配置文件_返回作业实例ID,"对应手动步骤：文件分发页选""配置文件"" → 填内容点执行。",JOB链路6·文件+SQL,file,P2,是
+test_job_file_sql.py,test_推送配置文件_执行成功,推配置 → 轮询状态到成功(3)。,JOB链路6·文件+SQL,file,P2,是
+test_job_file_sql.py,test_推送配置_缺目标路径被拒,负面用例：file_target_path 是必填项，传空应报错。,JOB链路6·文件+SQL,file,P2,是
+test_job_file_sql.py,test_生成上传URL_返回带凭据地址,对应手动步骤：本地文件分发第1步，选文件 → 生成上传地址。,JOB链路6·文件+SQL,file,P2,是
+test_job_file_sql.py,test_快速分发文件_服务器文件源,"对应手动步骤：文件分发页选""服务器文件"" → 选源机 → 点执行。",JOB链路6·文件+SQL,file,P2,是
+test_job_file_sql.py,test_快速分发文件_缺执行账号被拒,负面用例：目标执行账号必填（account_alias/account_id 二选一）。,JOB链路6·文件+SQL,file,P2,是
+test_job_file_sql.py,test_快速执行SQL_返回实例ID,对应手动步骤：快速执行 SQL 页 → 选 DB 账号 → 填 SQL 点执行。,JOB链路6·文件+SQL,file,P2,是
+test_job_file_sql.py,test_快速执行SQL_缺DB账号被拒,负面用例：db_account_id 必填，传 0 应报参数错误。,JOB链路6·文件+SQL,file,P2,是
+test_job_file_sql.py,test_操作步骤_对失败步骤忽略错误,"对应手动步骤：执行详情页对失败步骤点""忽略错误""（operation_code=3）。",JOB链路6·文件+SQL,file,P2,是
+test_job_plan.py,test_模板列表_非空,对应手动步骤：作业模板页 → 能看到模板列表。,JOB链路3·作业编排,plan,P2,是
+test_job_plan.py,test_方案列表_属于对应模板,对应手动步骤：模板详情 → 方案列表里每个方案都挂着模板 ID。,JOB链路3·作业编排,plan,P2,是
+test_job_plan.py,test_方案详情_含全局变量列表,对应手动步骤：方案详情页 → 能看到方案可改的全局变量。,JOB链路3·作业编排,plan,P2,是
+test_job_plan.py,test_启动方案_执行历史可查,"对应手动步骤：点""执行"" → 执行历史里多一条记录。",JOB链路3·作业编排,plan,P2,是
+test_job_plan.py,test_实例全局变量_能查到值,对应手动步骤：执行详情 → 查看该次执行各变量的实际取值。,JOB链路3·作业编排,plan,P2,是
+test_job_plan.py,test_覆盖全局变量_执行时传值生效,坑位实测：execute_job_plan 传 global_var_list 可覆盖方案默认值。,JOB链路3·作业编排,plan,P2,是
+test_job_script.py,test_建脚本_列表能查到且内容自洽,对应手动步骤：新建脚本 → 脚本列表里能看到，内容还是我们传的那份。,JOB链路1·脚本管理,script,P2,是
+test_job_script.py,test_建脚本_首个版本状态未上线,新建脚本自带的 v1.0 应该是 0（未上线），需要手动上线才生效。,JOB链路1·脚本管理,script,P2,是
+test_job_script.py,test_追加版本_版本列表两条,"对应手动步骤：脚本详情页""新增版本"" → 版本列表出现 v1.0 和 v1.1。",JOB链路1·脚本管理,script,P2,是
+test_job_script.py,test_上线版本_状态变已上线,"对应手动步骤：选中版本点""上线"" → 状态 0 变 1。",JOB链路1·脚本管理,script,P2,是
+test_job_script.py,test_禁用版本_状态变已禁用,"对应手动步骤：版本""禁用"" → 状态变 3。",JOB链路1·脚本管理,script,P2,是
+test_job_script.py,test_删除脚本_级联删版本,对应手动步骤：删除脚本 → 该脚本的所有版本一并消失。,JOB链路1·脚本管理,script,P2,是
+test_security.py,test_高危检测_脚本内容自动Base64,check_script 的内容必须 Base64，危险命令也要照常编码发送。,专项·安全,"security,unit",P0,否
+test_security.py,test_高危检测_全局接口不带scope,check_script 是全局能力，不应带 bk_scope（否则危险检测被绑到业务上）。,专项·安全,"security,unit",P0,否
+test_security.py,test_高危规则_全局接口不带scope,create_dangerous_rule 也是全局资源，不带 bk_scope。,专项·安全,"security,unit",P0,否
+test_security.py,test_鉴权_错误token被拒,用真实 app_code/secret + 错误 token 调接口，应被服务端拒绝。,专项·安全,security,P0,是
+test_security.py,test_越权_跨业务scope查不到本业务脚本,"业务隔离：用本业务建一个脚本，用""别的业务 scope""去查，应查不到。",专项·安全,security,P0,是
+test_security.py,test_注入_SQL注入参数被拒,脚本参数塞 SQL 注入 payload，应被服务端参数校验 / 高危检测拦截。,专项·安全,security,P0,是
+test_security.py,test_高危命令_rm_rf被check_script命中,check_script 对 rm -rf / 应返回命中列表（level 3 致命）。,专项·安全,security,P0,是
+test_storage.py,test_保存运行记录后能按最近N条查回,保存两条运行记录，list_runs 按时间正序返回（旧→新），供首页折线图。,L1工具·存储,unit,P2,否
+test_storage.py,test_查询条数上限生效,list_runs 的 limit 生效：取最近 N 条（id 最大），正序返回。,L1工具·存储,unit,P2,否
+test_storage.py,test_接口调试留痕含成功失败位,log_probe 记录成功/失败位（ok 1/0），落库可查，供接口调试历史。,L1工具·存储,unit,P2,否
+test_storage.py,test_超长调试结果截断防爆库,调试结果超 500 字符被截断，防止探针日志撑爆数据库。,L1工具·存储,unit,P2,否
+test_storage.py,test_旧jsonl一次性迁移后不重复导入,旧 jsonl 迁移到 SQLite 后改 .bak，重复迁移返回 0 不重复导入。,L1工具·存储,unit,P2,否
+test_storage.py,test_迁移时表非空则跳过并备份旧文件,表已有数据时跳过迁移（防覆盖），旧文件仍备份为 .bak。,L1工具·存储,unit,P2,否
+test_storage.py,test_无旧文件迁移直接返回零,没有旧 jsonl 文件时 migrate 返回 0，不报错。,L1工具·存储,unit,P2,否
+test_webapp.py,test_首页返回平台页面,首页返回 200，内容含平台标识（Vue 挂载点或金字塔文案）。,L1工具·Web平台层,"platform,unit",P2,否
+test_webapp.py,test_用例统计接口返回全量数字,stats 返回 total/unit/env，且 total = unit + env（口径自洽）。,L1工具·Web平台层,"platform,unit",P2,否
+test_webapp.py,test_冒烟计划后台跑完并留历史,跑冒烟计划，轮询到 done，returncode=0，趋势接口能查到该条历史。,L1工具·Web平台层,"platform,unit",P2,否
+test_webapp.py,test_未知任务查询返回404,查不存在的任务 id 返回 404。,L1工具·Web平台层,"platform,unit",P2,否
+test_webapp.py,test_接口调试拒绝白名单外目标,probe 目标不在白名单（只认 job/cmdb）时返回 400 拒绝。,L1工具·Web平台层,"platform,unit",P2,否
+test_webapp.py,test_接口调试拒绝写操作只开放只读,probe 调写操作（create_script）被拒，只开放只读查询（防误操作）。,L1工具·Web平台层,"platform,unit",P2,否
+test_webapp.py,test_报告文件名白名单拒绝非法名,报告文件名不合白名单格式返回 400，防目录穿越。,L1工具·Web平台层,"platform,unit",P2,否

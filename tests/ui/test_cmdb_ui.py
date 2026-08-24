@@ -16,7 +16,7 @@
     - 模型（#/model）："新建模型"按钮
     - 动态分组（#/business/{id}/custom-query）：标题"动态分组"
 
-前提：本地 CMDB 已跑起来（Docker：CMDB + MongoDB + Redis + ZooKeeper，默认 admin/admin）。
+前提：本地 CMDB 已跑起来（Docker：CMDB + MongoDB + Redis + ZooKeeper，账号 bk-cmdb / blueking）。
 
 运行：
     python -m pytest tests/ui/test_cmdb_ui.py -m ui --run-ui
@@ -28,9 +28,9 @@ from playwright.sync_api import expect
 pytestmark = pytest.mark.ui
 
 # ---- 环境配置（按你的实际环境改） ----
-CMDB_URL = 'http://127.0.0.1:8080'   # CMDB 网页地址
-CMDB_USER = 'admin'                  # standalone 默认账号
-CMDB_PASSWORD = 'admin'              # standalone 默认密码
+CMDB_URL = 'http://172.28.36.15:8090'  # CMDB 网页地址（WSL2 IP；改了用 `wsl hostname -I` 查）
+CMDB_USER = 'bk-cmdb'                  # standalone 默认账号（不是 admin）
+CMDB_PASSWORD = 'blueking'             # standalone 默认密码
 # 业务 ID：进"业务"页后，左上角业务选择器显示"小洋测试业务 (3)"，括号里的数字就是 ID
 CMDB_BUSINESS_ID = 3
 
