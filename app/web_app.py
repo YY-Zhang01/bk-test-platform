@@ -384,6 +384,14 @@ INDEX_HTML = r"""<!DOCTYPE html>
   a:hover { text-decoration: underline; }
   .hint { color: var(--weak); font-size: 12px; margin-top: 8px; }
   canvas { width: 100%; }
+  .tabs { max-width: 1000px; margin: -24px auto 0; padding: 0 16px;
+          display: flex; gap: 4px; position: relative; z-index: 2; }
+  .tab-btn { background: #e9eef7; color: var(--sub); border: 1px solid var(--line);
+             border-bottom: none; border-radius: 10px 10px 0 0; padding: 9px 18px;
+             font-size: 13px; cursor: pointer; font-weight: 500; }
+  .tab-btn:hover:not(:disabled) { filter: none; }
+  .tab-btn.active { background: #fff; color: var(--blue); font-weight: 600; }
+  .tab-panel.hidden { display: none; }
 </style>
 </head>
 <body>
@@ -392,7 +400,14 @@ INDEX_HTML = r"""<!DOCTYPE html>
     <span class="badge"><span class="dot"></span>服务运行中</span></h1>
   <p class="sub">CMDB × JOB ｜ 分开测保故障隔离 · 连块测抓集成缺陷 · 一页全览</p>
 </header>
+<nav class="tabs">
+  <button class="tab-btn active" data-tab="overview">总览</button>
+  <button class="tab-btn" data-tab="run">跑测试</button>
+  <button class="tab-btn" data-tab="probe">接口调试</button>
+  <button class="tab-btn" data-tab="reports">报告</button>
+</nav>
 <main>
+  <div class="tab-panel" id="tab-overview">
   <div class="cards">
     <div class="card">
       <div class="c-ico" style="background:#e8efff;color:#2f54eb">▦</div>
@@ -440,7 +455,9 @@ INDEX_HTML = r"""<!DOCTYPE html>
       <div class="dim"><div class="d-t">安全</div><div class="d-s">鉴权 / 越权 / 注入 / 高危</div><span class="tag wait">待账号</span></div>
     </div>
   </section>
+  </div>
 
+  <div class="tab-panel hidden" id="tab-run">
   <section>
     <h2>一键跑测试（测试计划）</h2>
     <div class="btns">
@@ -456,7 +473,9 @@ INDEX_HTML = r"""<!DOCTYPE html>
     <pre id="out"></pre>
     <div id="summary"></div>
   </section>
+  </div>
 
+  <div class="tab-panel hidden" id="tab-probe">
   <section>
     <h2>接口调试（Postman 式，只读白名单）</h2>
     <div class="btns">
@@ -471,15 +490,28 @@ INDEX_HTML = r"""<!DOCTYPE html>
       placeholder='JSON 参数，如 {"limit": 10}'></textarea>
     <pre id="p-result">尚未调用。选好接口、填好参数，点"调用"。</pre>
   </section>
+  </div>
 
+  <div class="tab-panel hidden" id="tab-reports">
   <section>
     <h2>历史报告</h2>
     <table id="reports"><tbody></tbody></table>
     <div class="hint" id="report-hint"></div>
   </section>
+  </div>
 </main>
 <script>
 const $ = id => document.getElementById(id);
+
+// Tab 切换：总览 / 跑测试 / 接口调试 / 报告
+function switchTab(name) {
+  document.querySelectorAll('.tab-panel').forEach(p =>
+    p.classList.toggle('hidden', p.id !== 'tab-' + name));
+  document.querySelectorAll('.tab-btn').forEach(b =>
+    b.classList.toggle('active', b.dataset.tab === name));
+}
+document.querySelectorAll('.tab-btn').forEach(b =>
+  b.addEventListener('click', () => switchTab(b.dataset.tab)));
 // 与后端 PROBE_METHODS 白名单保持一致（只读查询）
 const PROBE_APIS = {
   job: ['get_script_list','get_script_version_list',
