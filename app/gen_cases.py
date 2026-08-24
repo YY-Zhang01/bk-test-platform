@@ -26,6 +26,7 @@ from app import job_config
 
 ROOT = Path(__file__).resolve().parent.parent
 APIDOC_DIR = ROOT / 'docs' / 'apidoc'
+APIDOC_CMDB_DIR = ROOT / 'docs' / 'apidoc_cmdb'
 OUT_DIR = ROOT / 'gen_cases'
 
 # 用例风格规范：喂给大模型的"写作要求"
@@ -44,14 +45,17 @@ STYLE_RULES = """
 
 
 def load_docs(api_filter: str) -> list:
-    """读 apidoc 目录，返回 [(接口名, 文档内容)]。"""
+    """读 apidoc（JOB）+ apidoc_cmdb（CMDB）目录，返回 [(接口名, 文档内容)]。"""
     docs = []
-    for md in sorted(APIDOC_DIR.glob('*.md')):
-        name = md.stem
-        if api_filter and api_filter not in name:
+    for d in (APIDOC_DIR, APIDOC_CMDB_DIR):
+        if not d.exists():
             continue
-        content = md.read_text(encoding='utf-8')
-        docs.append((name, content))
+        for md in sorted(d.glob('*.md')):
+            name = md.stem
+            if api_filter and api_filter not in name:
+                continue
+            content = md.read_text(encoding='utf-8')
+            docs.append((name, content))
     return docs
 
 

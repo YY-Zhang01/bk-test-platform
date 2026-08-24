@@ -239,14 +239,18 @@ def trend():
 def gen_info():
     """AI 用例生成的状态与说明（gen_cases.py，命令行工具）。"""
     from app import job_config
-    apidoc_dir = BASE_DIR / 'docs' / 'apidoc'
-    apis = sorted(p.stem for p in apidoc_dir.glob('*.md')) if apidoc_dir.exists() else []
+    dirs = [BASE_DIR / 'docs' / 'apidoc', BASE_DIR / 'docs' / 'apidoc_cmdb']
+    apis = []
+    for d in dirs:
+        if d.exists():
+            apis.extend(sorted(p.stem for p in d.glob('*.md')))
+    apis = sorted(apis)
     return {
         'key_configured': bool(job_config.LLM_API_KEY),
         'model': job_config.LLM_MODEL or 'deepseek-chat',
         'apidoc_count': len(apis),
         'apis': apis,
-        'usage': 'python gen_cases.py  # 为 apidoc 里全部接口生成用例草稿',
+        'usage': 'python gen_cases.py  # 为 apidoc/apidoc_cmdb 里全部接口生成用例草稿',
     }
 
 
