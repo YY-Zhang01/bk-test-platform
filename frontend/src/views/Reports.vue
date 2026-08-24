@@ -48,7 +48,7 @@
 import { onMounted, ref } from 'vue'
 import { Refresh } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { api } from '@/api'
+import { api, getToken } from '@/api'
 
 const reports = ref([])
 
@@ -67,7 +67,10 @@ async function load() {
 }
 
 function openReport(url) {
-  window.open(url, '_blank')
+  // 报告路径受 token 保护，window.open 新标签页不带 Authorization 头，
+  // 改用 URL query 带 token（后端从 ?token= 读）
+  const token = getToken()
+  window.open(`${url}?token=${token}`, '_blank')
 }
 
 async function remove(row) {

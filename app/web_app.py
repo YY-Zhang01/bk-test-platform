@@ -86,6 +86,10 @@ async def 登录拦截(request: Request, call_next):
     if path.startswith('/api/') or path.startswith('/report/'):
         auth = request.headers.get('Authorization', '')
         token = auth[7:] if auth.startswith('Bearer ') else ''
+        # 报告文件用 window.open 打开，新标签页不带 Authorization 头，
+        # 改从 URL 的 ?token= 参数读（前端打开报告时带上）
+        if not token and path.startswith('/report/'):
+            token = request.query_params.get('token', '')
         if token in _SESSION_TOKENS:
             return await call_next(request)
         return JSONResponse(status_code=401, content={'detail': '未登录'})
