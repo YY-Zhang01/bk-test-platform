@@ -3,9 +3,16 @@
     <!-- 统计卡片 -->
     <el-row :gutter="16">
       <el-col v-for="c in cards" :key="c.label" :xs="12" :sm="6">
-        <el-card shadow="hover" class="stat-card">
-          <div class="stat-value" :style="{ color: c.color }">{{ c.value }}</div>
-          <div class="stat-label">{{ c.label }}</div>
+        <el-card class="stat-card">
+          <div class="stat-inner">
+            <div class="stat-icon" :style="{ background: c.grad }">
+              <el-icon :size="22" color="#fff"><component :is="c.icon" /></el-icon>
+            </div>
+            <div class="stat-body">
+              <div class="stat-value">{{ c.value }}</div>
+              <div class="stat-label">{{ c.label }}</div>
+            </div>
+          </div>
         </el-card>
       </el-col>
     </el-row>
@@ -13,7 +20,7 @@
     <el-row :gutter="16" style="margin-top: 16px">
       <!-- 趋势图 -->
       <el-col :xs="24" :md="16">
-        <el-card shadow="hover">
+        <el-card>
           <template #header>
             <div class="card-head">
               <span>通过率趋势</span>
@@ -26,15 +33,16 @@
 
       <!-- 五维 -->
       <el-col :xs="24" :md="8">
-        <el-card shadow="hover">
+        <el-card>
           <template #header>
             <div class="card-head"><span>全方位测试五维</span></div>
           </template>
           <div class="dims">
-            <div v-for="d in dims" :key="d.name" class="dim-row">
+            <div v-for="(d, i) in dims" :key="d.name" class="dim-row">
+              <div class="dim-dot" :style="{ background: dotColors[i] }"></div>
               <div class="dim-name">{{ d.name }}</div>
               <div class="dim-desc">{{ d.desc }}</div>
-              <el-tag :type="d.ready ? 'success' : 'warning'" size="small">
+              <el-tag :type="d.ready ? 'success' : 'warning'" size="small" effect="light">
                 {{ d.ready ? '已落地' : '待账号' }}
               </el-tag>
             </div>
@@ -57,11 +65,13 @@ const chartRef = ref(null)
 let chart = null
 
 const cards = computed(() => [
-  { label: '用例总数', value: stats.value.total, color: '#3b82f6' },
-  { label: '测试函数', value: funcs.value, color: '#6366f1' },
-  { label: '现在能跑', value: stats.value.unit, color: '#12b76a' },
-  { label: '等账号激活', value: stats.value.env, color: '#f59e0b' },
+  { label: '用例总数', value: stats.value.total, icon: 'Odometer', grad: 'linear-gradient(135deg, #3b82f6, #60a5fa)' },
+  { label: '测试函数', value: funcs.value, icon: 'Files', grad: 'linear-gradient(135deg, #6366f1, #a78bfa)' },
+  { label: '现在能跑', value: stats.value.unit, icon: 'CircleCheck', grad: 'linear-gradient(135deg, #10b981, #34d399)' },
+  { label: '等账号激活', value: stats.value.env, icon: 'Clock', grad: 'linear-gradient(135deg, #f59e0b, #fbbf24)' },
 ])
+
+const dotColors = ['#3b82f6', '#6366f1', '#10b981', '#f59e0b', '#8b5cf6']
 
 const dims = computed(() => [
   { name: '功能', desc: `${stats.value.total} 个分层用例`, ready: true },
@@ -79,13 +89,33 @@ function renderChart() {
   const rates = items.map((i) => Math.round((i.rate || 0) * 100))
   chart.setOption({
     grid: { left: 40, right: 16, top: 20, bottom: 40 },
-    tooltip: { trigger: 'axis' },
-    xAxis: { type: 'category', data: labels, axisLabel: { rotate: 30, fontSize: 10 } },
-    yAxis: { type: 'value', min: 0, max: 100, axisLabel: { formatter: '{value}%' } },
+    tooltip: {
+      trigger: 'axis',
+      backgroundColor: 'rgba(15,23,42,.9)',
+      borderWidth: 0,
+      textStyle: { color: '#fff' },
+    },
+    xAxis: {
+      type: 'category', data: labels, boundaryGap: false,
+      axisLine: { lineStyle: { color: '#e2e8f0' } },
+      axisLabel: { rotate: 30, fontSize: 10, color: '#94a3b8' },
+    },
+    yAxis: {
+      type: 'value', min: 0, max: 100,
+      splitLine: { lineStyle: { color: '#f1f5f9' } },
+      axisLabel: { formatter: '{value}%', color: '#94a3b8' },
+    },
     series: [{
       type: 'line', smooth: true, data: rates, name: '通过率',
-      areaStyle: { opacity: 0.12 }, itemStyle: { color: '#3b82f6' },
-      lineStyle: { color: '#3b82f6' },
+      symbol: 'circle', symbolSize: 7,
+      itemStyle: { color: '#3b82f6', borderColor: '#fff', borderWidth: 2 },
+      lineStyle: { color: '#3b82f6', width: 3 },
+      areaStyle: {
+        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+          { offset: 0, color: 'rgba(59,130,246,.30)' },
+          { offset: 1, color: 'rgba(59,130,246,.02)' },
+        ]),
+      },
     }],
   })
 }
@@ -110,15 +140,36 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .stat-card {
-  text-align: center;
+  transition: transform 0.22s ease, box-shadow 0.22s ease;
+}
+.stat-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.12) !important;
+}
+.stat-inner {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.stat-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.16);
 }
 .stat-value {
-  font-size: 32px;
+  font-size: 28px;
   font-weight: 700;
+  line-height: 1.1;
+  color: #1e293b;
 }
 .stat-label {
-  margin-top: 6px;
-  color: #909399;
+  margin-top: 4px;
+  color: #94a3b8;
   font-size: 13px;
 }
 .card-head {
@@ -128,26 +179,32 @@ onBeforeUnmount(() => {
 }
 .sub {
   font-size: 12px;
-  color: #909399;
+  color: #94a3b8;
   font-weight: 400;
 }
 .dims {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 16px;
 }
 .dim-row {
   display: flex;
   align-items: center;
   gap: 10px;
 }
+.dim-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
 .dim-name {
   font-weight: 600;
-  width: 42px;
+  width: 40px;
 }
 .dim-desc {
   flex: 1;
   font-size: 13px;
-  color: #606266;
+  color: #64748b;
 }
 </style>

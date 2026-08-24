@@ -50,30 +50,32 @@ const menus = [
 }
 
 .aside {
-  background: #0b1437;
+  background: linear-gradient(180deg, #0b1437 0%, #16134d 55%, #1e1b4b 100%);
   display: flex;
   flex-direction: column;
 }
 
 .logo {
-  height: 60px;
+  height: 64px;
   display: flex;
   align-items: center;
   gap: 10px;
   padding: 0 20px;
   color: #fff;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .logo-mark {
-  width: 30px;
-  height: 30px;
-  border-radius: 6px;
-  background: #3b82f6;
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.45);
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 700;
-  font-size: 16px;
+  font-size: 17px;
 }
 
 .logo-text {
@@ -85,16 +87,33 @@ const menus = [
 .menu {
   border-right: none;
   flex: 1;
+  padding-top: 8px;
 }
 
 .menu :deep(.el-menu-item) {
-  height: 48px;
-  margin: 2px 8px;
-  border-radius: 6px;
+  height: 46px;
+  margin: 4px 12px;
+  border-radius: 10px;
+  position: relative;
+  transition: all 0.2s ease;
 }
 
 .menu :deep(.el-menu-item.is-active) {
-  background: #3b82f6;
+  background: linear-gradient(90deg, rgba(59, 130, 246, 0.9), rgba(99, 102, 241, 0.9));
+  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.35);
+  font-weight: 600;
+}
+
+.menu :deep(.el-menu-item.is-active::before) {
+  content: '';
+  position: absolute;
+  left: -6px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 18px;
+  border-radius: 2px;
+  background: #fff;
 }
 
 .menu :deep(.el-menu-item:hover) {
