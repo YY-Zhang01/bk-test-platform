@@ -311,7 +311,7 @@ INDEX_HTML = r"""<!DOCTYPE html>
   @keyframes pulse { 50% { opacity: .3; } }
   header .sub { margin-top: 8px; opacity: .78; font-size: 13px; }
   main { max-width: 1000px; margin: 0 auto 44px; padding: 0 16px; }
-  .cards { display: flex; gap: 14px; flex-wrap: wrap; margin-top: -26px;
+  .cards { display: flex; gap: 14px; flex-wrap: wrap;
            position: relative; }
   .card { flex: 1; min-width: 180px; background: var(--card);
           border-radius: 12px; padding: 18px 16px; box-shadow: var(--shadow);
@@ -384,13 +384,17 @@ INDEX_HTML = r"""<!DOCTYPE html>
   a:hover { text-decoration: underline; }
   .hint { color: var(--weak); font-size: 12px; margin-top: 8px; }
   canvas { width: 100%; }
-  .tabs { max-width: 1000px; margin: -24px auto 0; padding: 0 16px;
-          display: flex; gap: 4px; position: relative; z-index: 2; }
-  .tab-btn { background: #e9eef7; color: var(--sub); border: 1px solid var(--line);
-             border-bottom: none; border-radius: 10px 10px 0 0; padding: 9px 18px;
-             font-size: 13px; cursor: pointer; font-weight: 500; }
-  .tab-btn:hover:not(:disabled) { filter: none; }
-  .tab-btn.active { background: #fff; color: var(--blue); font-weight: 600; }
+  .layout { max-width: 1200px; margin: -26px auto 44px; padding: 0 16px;
+            display: flex; gap: 16px; align-items: flex-start; }
+  .sidebar { width: 150px; flex-shrink: 0; display: flex; flex-direction: column;
+             gap: 6px; position: sticky; top: 20px; }
+  .nav-item { text-align: left; background: var(--card); color: var(--sub);
+              border: 1px solid var(--line); border-radius: 10px; padding: 12px 16px;
+              font-size: 14px; cursor: pointer; font-weight: 500; }
+  .nav-item:hover:not(:disabled) { filter: none; background: #f0f4ff; }
+  .nav-item.active { background: var(--blue); color: #fff; font-weight: 600;
+                     box-shadow: var(--shadow); }
+  .content { flex: 1; min-width: 0; }
   .tab-panel.hidden { display: none; }
 </style>
 </head>
@@ -400,13 +404,14 @@ INDEX_HTML = r"""<!DOCTYPE html>
     <span class="badge"><span class="dot"></span>服务运行中</span></h1>
   <p class="sub">CMDB × JOB ｜ 分开测保故障隔离 · 连块测抓集成缺陷 · 一页全览</p>
 </header>
-<nav class="tabs">
-  <button class="tab-btn active" data-tab="overview">总览</button>
-  <button class="tab-btn" data-tab="run">跑测试</button>
-  <button class="tab-btn" data-tab="probe">接口调试</button>
-  <button class="tab-btn" data-tab="reports">报告</button>
-</nav>
-<main>
+<div class="layout">
+<aside class="sidebar">
+  <button class="nav-item active" data-tab="overview">总览</button>
+  <button class="nav-item" data-tab="run">跑测试</button>
+  <button class="nav-item" data-tab="probe">接口调试</button>
+  <button class="nav-item" data-tab="reports">报告</button>
+</aside>
+<main class="content">
   <div class="tab-panel" id="tab-overview">
   <div class="cards">
     <div class="card">
@@ -500,6 +505,7 @@ INDEX_HTML = r"""<!DOCTYPE html>
   </section>
   </div>
 </main>
+</div>
 <script>
 const $ = id => document.getElementById(id);
 
@@ -507,10 +513,10 @@ const $ = id => document.getElementById(id);
 function switchTab(name) {
   document.querySelectorAll('.tab-panel').forEach(p =>
     p.classList.toggle('hidden', p.id !== 'tab-' + name));
-  document.querySelectorAll('.tab-btn').forEach(b =>
+  document.querySelectorAll('.nav-item').forEach(b =>
     b.classList.toggle('active', b.dataset.tab === name));
 }
-document.querySelectorAll('.tab-btn').forEach(b =>
+document.querySelectorAll('.nav-item').forEach(b =>
   b.addEventListener('click', () => switchTab(b.dataset.tab)));
 // 与后端 PROBE_METHODS 白名单保持一致（只读查询）
 const PROBE_APIS = {
