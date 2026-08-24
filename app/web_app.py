@@ -544,9 +544,8 @@ INDEX_HTML = r"""<!DOCTYPE html>
 
     <h3 class="gen-title">示例：AI 生成的用例草稿长这样（fast_execute_script）</h3>
     <pre class="gen-sample"># -*- coding: utf-8 -*-
-"""AI 生成的用例草稿（接口 fast_execute_script）。
-本文件由 gen_cases.py 自动生成，只做骨架：需人工审阅后移入正式用例目录。
-"""
+# AI 生成的用例草稿（接口 fast_execute_script）
+# 本文件由 gen_cases.py 自动生成，只做骨架：需人工审阅后移入正式用例目录。
 import pytest
 
 from app import job_config
@@ -554,7 +553,7 @@ from app.api_client import JobError, make_target_server
 
 
 def test_快速执行_脚本执行成功(job_client, target_host):
-    """对应手动步骤：快速执行页 → 选脚本 → 选目标主机 → 执行。"""
+    # 对应手动步骤：快速执行页 → 选脚本 → 选目标主机 → 执行
     result = job_client.fast_execute_script(
         content='echo hello', language=1,
         account_alias=job_config.ACCOUNT_ALIAS,
@@ -563,7 +562,7 @@ def test_快速执行_脚本执行成功(job_client, target_host):
 
 
 def test_快速执行_空脚本内容被拒(job_client, target_host):
-    """负面用例：脚本内容为空，应被服务端参数校验拒绝。"""
+    # 负面用例：脚本内容为空，应被服务端参数校验拒绝
     with pytest.raises(JobError):
         job_client.fast_execute_script(
             content='', language=1,
