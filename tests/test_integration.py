@@ -79,6 +79,29 @@ def test_契约_动态分组圈出的主机合法(cmdb_client, 动态分组ID):
             f"分组圈出的主机 {h['bk_host_id']} 不在业务主机列表（数据异常）"
 
 
+def test_契约_拓扑节点ID在CMDB拓扑里存在(cmdb_client, job_client, unique_name):
+    """第 4 种圈主机方式 topo_node 的契约一致性。
+
+    make_target_server 支持 4 种圈主机：主机列表 / IP / 动态分组 / 拓扑节点。
+    前 3 种的数据契约已测（业务/主机/动态分组），这里补第 4 种：
+    JOB 的 topo_node.id 就是 CMDB 拓扑节点的实例 ID（bk_inst_id），
+    node_type 就是 CMDB 的对象类型（bk_obj_id，如 module/set）。
+    """
+    modules = cmdb_client.search_module(limit=200)
+    assert modules, '业务下应至少有一个模块（拓扑节点）'
+    node = modules[0]
+    # 模块的拓扑实例 ID（字段名 bk_inst_id，账号到手后以真实返回核实）
+    node_id = node.get('bk_inst_id') or node.get('bk_module_id')
+    assert node_id, f'模块数据缺拓扑实例 ID 字段: {node}'
+    result = job_client.fast_execute_script(
+        content=f'echo {unique_name}', language=1,
+        account_alias=job_config.ACCOUNT_ALIAS,
+        target_server=make_target_server(
+            topo_node_list=[{'id': node_id, 'node_type': 'module'}]),
+        task_name=f'zyy拓扑契约-{unique_name}')
+    assert result['job_instance_id'], f'JOB 引用拓扑节点执行应成功: {result}'
+
+
 # ---------- 场景B：业务联动（真执行） ----------
 
 def test_联动_CMDB圈主机JOB执行成功(cmdb_client, job_client,
