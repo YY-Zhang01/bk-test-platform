@@ -629,7 +629,7 @@ function drawTrend(items) {
   c.height = Math.round(cssH * dpr);
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   const W = cssW, H = cssH, ox = 50, oy = 30,
-        w = W - ox - 14, h = H - oy - 30;
+        w = W - ox - 46, h = H - oy - 30;
   ctx.clearRect(0, 0, W, H);
   ctx.font = '11px Consolas';
   ctx.strokeStyle = '#e6eaf2'; ctx.fillStyle = '#999';
