@@ -9,7 +9,7 @@
 ![pytest](https://img.shields.io/badge/Framework-pytest-0a9edc)
 ![SQLite](https://img.shields.io/badge/Storage-SQLite-003b57?logo=sqlite)
 ![Cases](https://img.shields.io/badge/Cases-111-blue)
-![CI](https://github.com/{GITHUB_USER}/job-test/actions/workflows/ci.yml/badge.svg)
+![CI](https://github.com/YY-Zhang01/bk-test-platform/actions/workflows/ci.yml/badge.svg)
 ![Coverage](badge.svg)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
@@ -30,7 +30,7 @@
 ## 二、目录结构
 
 ```text
-job-test/
+bk-test-platform/
 ├── app/                          产品代码（测试内核的"手"和"操作台"）
 │   ├── api_client.py             JOB ESB 客户端（38 个接口封装，三件套认证）
 │   ├── cmdb_client.py            CMDB ESB 客户端（业务/主机/拓扑/模型/分组查询 + 写操作）
@@ -214,7 +214,7 @@ CmdbClient(env='local_cmdb')
 ```bash
 # 前端先 build，再启动后端（托管前端 build 产物 + 提供 API）
 cd frontend && npm install && npm run build && cd ..
-cd job-test
+cd bk-test-platform
 PLATFORM_USER=jwkj PLATFORM_PASSWORD=jwkj nohup python3 -m uvicorn app.web_app:app \
   --host 0.0.0.0 --port 8000 > platform.log 2>&1 &
 # 然后在云服务器安全组放行 8000 端口，访问 http://<公网IP>:8000
