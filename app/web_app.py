@@ -296,7 +296,8 @@ INDEX_HTML = r"""<!DOCTYPE html>
          background: var(--bg); color: var(--ink);
          display: flex; flex-direction: column; min-height: 100vh; }
   header { background: #0f1c4d; color: #fff; padding: 16px 24px;
-           display: flex; align-items: baseline; gap: 16px; }
+           display: flex; align-items: baseline; gap: 16px; flex-shrink: 0;
+           flex-wrap: wrap; }
   header h1 { font-size: 20px; letter-spacing: 1px; }
   .badge { display: inline-block; margin-left: 14px; font-size: 12px;
            background: rgba(255,255,255,.16); border-radius: 20px;
@@ -321,7 +322,7 @@ INDEX_HTML = r"""<!DOCTYPE html>
                line-height: 1.15; }
   .card .label { font-size: 12px; color: var(--sub); margin-top: 3px; }
   section { background: var(--card); border-radius: 12px; padding: 20px 22px;
-            margin-top: 16px; box-shadow: var(--shadow); }
+            margin-top: 20px; box-shadow: var(--shadow); overflow: visible; }
   section h2 { font-size: 15px; font-weight: 600; margin-bottom: 16px;
                color: var(--ink); padding-left: 11px; position: relative; }
   section h2::before { content: ''; position: absolute; left: 0; top: 2px;
