@@ -115,7 +115,9 @@ pytest 收集 tests/
 | 诚实 skip 不造假绿 | 没账号就 skip，面试官是行家，假绿一秒穿帮且穿帮即出局 | 68 个用例等账号，暂时跑不满 |
 | `platform` marker 防递归 | Web 层测试会 subprocess 再起 pytest，不排除会无限递归（踩过 70s 超时） | 拆掉任何一半都会复发 |
 | SQLite 而非 jsonl | 结构化聚合、并发安全、零运维 | 单机文件库，不做多实例共享（够用） |
-| FastAPI 单文件内嵌 HTML | 阶段 0「有脸可用」，零构建零依赖 | 不做前端工程，复杂交互受限 |
+| 前后端分离（Vue3 + FastAPI） | 前端 Vue3/Element Plus 独立项目，后端纯 API + 托管前端 build 产物，同源部署无 CORS | 引入 Node 构建链，部署多一步 `npm run build` |
+| 登录认证（token 会话） | 公网防滥用 key 烧钱；自定义登录页 + 内存 token；报告用 `?token=` 传（window.open 不带 header） | 内存级 token，服务重启失效（够用不上生产） |
+| AI 生成限流 | 每 IP 每分钟限 8 次，防公网恶意调接口烧 DeepSeek 额度 | 内存级限流，多进程不共享 |
 | 写操作接口调试白名单拒绝 | 在线调试只开放只读，防止误操作搞脏共享体验环境 | 调试不了写接口（有需要再单开） |
 
 ## 六、目录结构

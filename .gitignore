@@ -9,6 +9,8 @@ reports/
 data/
 .run_*.log
 .coverage
+.last_result.xml
+ui_screenshots/
 results_history.jsonl
 results_history.jsonl.bak
 latest.html
