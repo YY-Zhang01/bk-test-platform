@@ -240,11 +240,12 @@ def gen_info():
     """AI 用例生成的状态与说明（gen_cases.py，命令行工具）。"""
     from app import job_config
     apidoc_dir = BASE_DIR / 'docs' / 'apidoc'
-    apidoc_count = len(list(apidoc_dir.glob('*.md'))) if apidoc_dir.exists() else 0
+    apis = sorted(p.stem for p in apidoc_dir.glob('*.md')) if apidoc_dir.exists() else []
     return {
         'key_configured': bool(job_config.LLM_API_KEY),
         'model': job_config.LLM_MODEL or 'deepseek-chat',
-        'apidoc_count': apidoc_count,
+        'apidoc_count': len(apis),
+        'apis': apis,
         'usage': 'python gen_cases.py  # 为 apidoc 里全部接口生成用例草稿',
     }
 
@@ -586,7 +587,7 @@ INDEX_HTML = r"""<!DOCTYPE html>
       <input type="password" id="gen-key" placeholder="粘贴 LLM API Key（如 DeepSeek）" style="flex:1;min-width:260px;">
     </div>
     <div class="btns">
-      <input type="text" id="gen-api" placeholder="接口名，如 fast_execute_script" style="flex:1;min-width:200px;">
+      <select id="gen-api" style="flex:1;min-width:220px;"></select>
       <button class="b-all" id="gen-go">生成草稿</button>
       <button class="b-unit" id="gen-approve" disabled>✓ 并入正式目录</button>
     </div>
@@ -710,6 +711,7 @@ async function refreshStats() {
 async function refreshGen() {
   const r = await fetch('/api/gen').then(x => x.json());
   $('gen-doc-count').textContent = r.apidoc_count;
+  $('gen-api').innerHTML = r.apis.map(a => `<option value="${a}">${a}</option>`).join('');
   $('gen-status').textContent = r.key_configured
     ? '✅ 已配置默认 key，可直接生成；也可在下方粘贴你自己的 key'
     : '⚠️ 默认 key 未配置：请在下方粘贴你的大模型密钥后生成';
