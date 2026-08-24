@@ -19,7 +19,7 @@ from playwright.sync_api import expect, sync_playwright
 pytestmark = pytest.mark.ui
 
 # 平台地址：本地跑用 127.0.0.1:8000，服务器用 http://114.55.176.42:8000
-BASE_URL = 'http://127.0.0.1:8000'
+BASE_URL = 'http://114.55.176.42:8000'
 
 # 用系统自带 Edge（channel='msedge'），免下载 chromium；
 # 若想用 Playwright 自带浏览器，去掉 channel 参数即可。
@@ -27,7 +27,8 @@ CHANNEL = 'msedge'
 
 
 def _new_browser(p):
-    return p.chromium.launch(channel=CHANNEL)
+    # headless=False：开可见窗口；slow_mo=500：每步间隔 500ms，能看清操作过程
+    return p.chromium.launch(channel=CHANNEL, headless=False, slow_mo=500)
 
 
 def test_平台首页能打开():
