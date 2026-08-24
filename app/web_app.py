@@ -395,6 +395,17 @@ INDEX_HTML = r"""<!DOCTYPE html>
   a:hover { text-decoration: underline; }
   .hint { color: var(--weak); font-size: 12px; margin-top: 8px; }
   canvas { display: block; width: 100%; height: 220px; }
+  .gen-flow { display: flex; align-items: center; gap: 8px; margin: 16px 0;
+              flex-wrap: wrap; }
+  .gen-step { background: #f0f4ff; color: var(--blue); border-radius: 8px;
+              padding: 8px 14px; font-size: 13px; }
+  .gen-arrow { color: var(--weak); }
+  .gen-title { font-size: 14px; font-weight: 600; margin: 18px 0 10px;
+               color: var(--ink); }
+  .gen-sample { background: #0d1117; color: #7ee2a8; font-family: Consolas,
+                "Courier New", monospace; font-size: 12px; padding: 14px 16px;
+                border-radius: 10px; overflow: auto; white-space: pre;
+                line-height: 1.6; }
   .layout { flex: 1; display: flex; align-items: stretch; min-height: 0; }
   .sidebar { width: 200px; flex-shrink: 0; background: #0f1c4d;
              padding: 16px 0; display: flex; flex-direction: column; gap: 2px; }
@@ -522,6 +533,43 @@ INDEX_HTML = r"""<!DOCTYPE html>
   <section>
     <h2>AI 用例生成（gen_cases.py）</h2>
     <p>把 docs/apidoc/ 里 <b id="gen-doc-count">-</b> 份接口文档喂给大模型（<span id="gen-model">DeepSeek</span>），自动产出 pytest 用例草稿，人工审阅后并入正式用例目录。</p>
+
+    <div class="gen-flow">
+      <span class="gen-step">① 选接口文档</span>
+      <span class="gen-arrow">→</span>
+      <span class="gen-step">② AI 生成草稿</span>
+      <span class="gen-arrow">→</span>
+      <span class="gen-step">③ 人工审阅并入 tests/</span>
+    </div>
+
+    <h3 class="gen-title">示例：AI 生成的用例草稿长这样（fast_execute_script）</h3>
+    <pre class="gen-sample"># -*- coding: utf-8 -*-
+"""AI 生成的用例草稿（接口 fast_execute_script）。
+本文件由 gen_cases.py 自动生成，只做骨架：需人工审阅后移入正式用例目录。
+"""
+import pytest
+
+from app import job_config
+from app.api_client import JobError, make_target_server
+
+
+def test_快速执行_脚本执行成功(job_client, target_host):
+    """对应手动步骤：快速执行页 → 选脚本 → 选目标主机 → 执行。"""
+    result = job_client.fast_execute_script(
+        content='echo hello', language=1,
+        account_alias=job_config.ACCOUNT_ALIAS,
+        target_server=make_target_server(host_id_list=[target_host]))
+    assert result['job_instance_id']
+
+
+def test_快速执行_空脚本内容被拒(job_client, target_host):
+    """负面用例：脚本内容为空，应被服务端参数校验拒绝。"""
+    with pytest.raises(JobError):
+        job_client.fast_execute_script(
+            content='', language=1,
+            account_alias=job_config.ACCOUNT_ALIAS,
+            target_server=make_target_server(host_id_list=[target_host]))</pre>
+
     <p class="hint">命令行用法：python gen_cases.py（全量）/ -i 接口名（单个）/ --collect（生成后验证可收集）。</p>
     <p class="hint" id="gen-status">加载中…</p>
   </section>
