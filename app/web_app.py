@@ -235,6 +235,20 @@ def trend():
     return {'items': storage.list_runs(20)}
 
 
+@app.get('/api/cases')
+def cases():
+    """用例库：按四大类分组返回全部用例（名字/作用/层级/是否等账号）。"""
+    from app.case_index import group_cases
+    groups = group_cases()
+    total_cases = sum(c['count'] for g in groups for c in g['cases'])
+    total_funcs = sum(len(g['cases']) for g in groups)
+    return {
+        'total': total_cases,
+        'functions': total_funcs,
+        'groups': groups,
+    }
+
+
 @app.get('/api/gen')
 def gen_info():
     """AI 用例生成的状态与说明（gen_cases.py，命令行工具）。"""
@@ -486,6 +500,13 @@ INDEX_HTML = r"""<!DOCTYPE html>
           font-size: 13px; background: #fff; color: var(--ink);
           outline: none; transition: border-color .15s; }
   input:focus { border-color: var(--blue); }
+  .case-group { margin-bottom: 18px; }
+  .case-group-title { font-size: 14px; font-weight: 600; margin-bottom: 8px;
+                      color: var(--ink); }
+  .case-item { border: 1px solid var(--line); border-radius: 8px;
+               padding: 10px 14px; margin-bottom: 6px; background: #fafbff; }
+  .case-name { font-size: 13px; font-weight: 500; color: var(--ink); }
+  .case-desc { font-size: 12px; color: var(--sub); margin-top: 2px; }
   .layout { flex: 1; display: flex; align-items: stretch; min-height: 0; }
   .sidebar { width: 200px; flex-shrink: 0; background: #0f1c4d;
              padding: 16px 0; display: flex; flex-direction: column; gap: 2px; }
@@ -514,6 +535,7 @@ INDEX_HTML = r"""<!DOCTYPE html>
   <button class="nav-item" data-tab="probe"><span class="ico">⌘</span>接口调试</button>
   <button class="nav-item" data-tab="reports"><span class="ico">▤</span>报告</button>
   <button class="nav-item" data-tab="gen"><span class="ico">✦</span>AI 生成</button>
+  <button class="nav-item" data-tab="cases"><span class="ico">☷</span>用例库</button>
 </aside>
 <main class="content">
   <div class="tab-panel" id="tab-overview">
@@ -630,6 +652,14 @@ INDEX_HTML = r"""<!DOCTYPE html>
     <div id="gen-msg" class="hint" style="margin:12px 0;"></div>
     <pre id="gen-code" class="gen-sample" style="display:none;max-height:420px;">生成的草稿会显示在这里</pre>
     <p class="hint" id="gen-status" style="margin-top:10px;">加载中…</p>
+  </section>
+  </div>
+
+  <div class="tab-panel hidden" id="tab-cases">
+  <section>
+    <h2>用例库（<span id="case-total">-</span> 个用例，按四层分类）</h2>
+    <p class="hint">每个用例的名字 + 作用 + 是否等账号，点开就能看清"98 个用例各测什么"。</p>
+    <div id="case-groups"></div>
   </section>
   </div>
 </main>
@@ -751,6 +781,17 @@ async function refreshGen() {
     ? '✅ 已配置默认 key，可直接生成；也可在下方粘贴你自己的 key'
     : '⚠️ 默认 key 未配置：请在下方粘贴你的大模型密钥后生成';
 }
+async function refreshCases() {
+  const r = await fetch('/api/cases').then(x => x.json());
+  $('case-total').textContent = r.total;
+  $('case-groups').innerHTML = r.groups.map(g => {
+    const items = g.cases.map(c =>
+      `<div class="case-item"><div class="case-name">${c.name} ` +
+      (c.env === '是' ? '<span class="tag wait">等账号</span>' : '<span class="tag ok">可跑</span>') +
+      `</div><div class="case-desc">${c.desc || ''}</div></div>`).join('');
+    return `<div class="case-group"><div class="case-group-title">${g.group}（${g.cases.length}）</div>${items}</div>`;
+  }).join('');
+}
 let genLastApi = '';
 let genValidated = false;
 $('gen-go').onclick = async () => {
@@ -845,6 +886,7 @@ $('p-go').onclick = async () => {
 fillApis();
 refreshStats();
 refreshGen();
+refreshCases();
 </script>
 </body>
 </html>
