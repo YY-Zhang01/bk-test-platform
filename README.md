@@ -60,7 +60,7 @@ bk-test-platform/
 │   ├── test_storage.py           存储层
 │   ├── test_webapp.py            Web 平台层（冒烟计划排除，防自引用）
 │   ├── test_envs.py              多环境管理单元测试
-│   └── ui/                       UI 自动化（Playwright）：测平台 / 测 CMDB / 测 JOB 骨架
+│   └── ui/                       UI 自动化（Playwright）：测自己平台（部署在服务器）/ 测 CMDB / 测 JOB 骨架
 ├── scripts/                      工具脚本
 │   ├── run_tests.py              统一测试入口（全量/链路 + HTML 报告 + --env 切环境）
 │   ├── locustfile.py             只读接口压测（Locust）
@@ -234,7 +234,7 @@ PLATFORM_USER=jwkj PLATFORM_PASSWORD=jwkj nohup python3 -m uvicorn app.web_app:a
 - **报告**：通过率标签 + 绿/红/黄数 + 删除
 - **AI 生成**：生成草稿 + 自愈闭环（生成→跑→修，参考 ghost）+ 自愈 diff + 生成历史回溯
 - **用例库**：左右分栏分组导航 + 分页 + 优先级(P0/P1/P2) + 最近执行状态 + 详情抽屉
-- **UI 自动化**：按平台/CMDB/JOB 分组、一键运行、失败自动截图 + HTML 报告
+- **UI 自动化**：左侧分组导航（测自己平台 / 测 CMDB / 测 JOB）、一键运行、失败自动截图 + HTML 报告
 - **历史留痕**：SQLite 落库（runs + probe_logs），可审计可扩展
 
 ## 八、设计取舍
