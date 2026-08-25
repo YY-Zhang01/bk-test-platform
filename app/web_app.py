@@ -89,5 +89,9 @@ def spa_fallback(full_path: str):
 
 
 if __name__ == '__main__':
+    import os
     import uvicorn
-    uvicorn.run(app, host='127.0.0.1', port=8000)
+    # 本地开发默认只监听本机；容器/服务器部署时用 HOST=0.0.0.0 让端口映射生效
+    host = os.environ.get('HOST', '127.0.0.1')
+    port = int(os.environ.get('PORT', '8000'))
+    uvicorn.run(app, host=host, port=port)

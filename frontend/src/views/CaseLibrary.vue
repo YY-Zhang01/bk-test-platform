@@ -20,7 +20,7 @@
         <el-divider direction="vertical" />
         <div class="summary-item">
           <span class="summary-num">{{ waiting }}</span>
-          <span class="summary-label">等账号激活</span>
+          <span class="summary-label">待环境</span>
         </div>
       </div>
     </el-card>
@@ -67,6 +67,7 @@
                 <el-radio-button label="all">全部</el-radio-button>
                 <el-radio-button label="否">可跑</el-radio-button>
                 <el-radio-button label="是">等账号</el-radio-button>
+                <el-radio-button label="UI">需浏览器</el-radio-button>
               </el-radio-group>
             </div>
           </div>
@@ -98,8 +99,8 @@
             </el-table-column>
             <el-table-column label="状态" width="90" align="center">
               <template #default="{ row }">
-                <el-tag :type="row.env === '否' ? 'success' : 'warning'" size="small">
-                  {{ row.env === '否' ? '可跑' : '等账号' }}
+                <el-tag :type="envType(row.env)" size="small">
+                  {{ envLabel(row.env) }}
                 </el-tag>
               </template>
             </el-table-column>
@@ -118,8 +119,8 @@
                 <el-descriptions-item label="层级">{{ detail.layer }}</el-descriptions-item>
                 <el-descriptions-item label="marker">{{ detail.marker || '-' }}</el-descriptions-item>
                 <el-descriptions-item label="状态">
-                  <el-tag :type="detail.env === '否' ? 'success' : 'warning'" size="small">
-                    {{ detail.env === '否' ? '可跑' : '等账号' }}
+                  <el-tag :type="envType(detail.env)" size="small">
+                    {{ envLabel(detail.env) }}
                   </el-tag>
                 </el-descriptions-item>
               </el-descriptions>
@@ -170,6 +171,14 @@ function showDetail(row) {
 
 function priorityType(p) {
   return { P0: 'danger', P1: 'warning', P2: 'info' }[p] || 'info'
+}
+
+function envLabel(env) {
+  return { 否: '可跑', 是: '等账号', UI: '需浏览器' }[env] || '等账号'
+}
+
+function envType(env) {
+  return { 否: 'success', 是: 'warning', UI: 'info' }[env] || 'warning'
 }
 
 const GROUP_META = {

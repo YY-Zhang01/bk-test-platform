@@ -68,16 +68,22 @@ def _pytest_collect(marker: str | None = None) -> dict:
 
 
 def _stats() -> dict:
-    """总览统计：总数 / unit 数 / 环境层数 / 报告列表。"""
+    """总览统计：总数 / unit 数 / 环境层数 / 报告列表。
+
+    口径：total = unit + env；env 是「待环境」总数，里面再拆
+    account（等账号）和 ui（需浏览器）两部分。"""
     now = time.time()
     if now - _STATS_CACHE['ts'] < 30 and _STATS_CACHE['data']:
         return _STATS_CACHE['data']
     total = _pytest_collect()
     unit = _pytest_collect(marker='unit')
+    ui = _pytest_collect(marker='ui')
     data = {
         'total': total['count'],
         'unit': unit['count'],
         'env': total['count'] - unit['count'],
+        'ui': ui['count'],
+        'account': total['count'] - unit['count'] - ui['count'],
         'reports': _list_reports(),
     }
     _STATS_CACHE['ts'] = now

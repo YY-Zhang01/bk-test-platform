@@ -9,7 +9,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 TESTS = ROOT / 'tests'
 
-# 文件 -> (所属层级/维度, 是否环境层)
+# 文件 -> (所属层级/维度, 运行前置)
+# 运行前置：False=现在能跑（unit）；True=等账号；'ui'=需浏览器（Playwright --run-ui）
 FILE_META = {
     'test_job_script.py':   ('JOB链路1·脚本管理', True),
     'test_job_fast_exec.py': ('JOB链路2·快速执行', True),
@@ -27,6 +28,9 @@ FILE_META = {
     'test_webapp.py':       ('L1工具·Web平台层', False),
     'test_envs.py':         ('L1工具·多环境', False),
     'test_docs_numbers.py': ('L1工具·文档数字自检', False),
+    'test_cmdb_ui.py':      ('UI自动化·CMDB', 'ui'),
+    'test_job_ui.py':       ('UI自动化·JOB', 'ui'),
+    'test_platform_ui.py':  ('UI自动化·平台', 'ui'),
 }
 
 
@@ -78,9 +82,13 @@ def _node_markers(node):
 
 
 def extract_cases() -> list:
-    """返回 [{file, name, desc, layer, marker, env}]，env 为 '是'/'否'。"""
+    """返回 [{file, name, desc, layer, marker, env}]。
+
+    env 三态：'否'=现在能跑，'是'=等账号，'UI'=需浏览器（--run-ui）。
+    包含 tests/ui/ 下的 UI 用例，保证与 pytest --collect-only 总数一致。
+    """
     rows = []
-    for f in sorted(TESTS.glob('test_*.py')):
+    for f in sorted(TESTS.rglob('test_*.py')):
         layer, env_default = FILE_META.get(f.name, ('其他', None))
         tree = ast.parse(f.read_text(encoding='utf-8'))
         mod_marks = _module_markers(tree)
@@ -92,7 +100,12 @@ def extract_cases() -> list:
             marks, params = _node_markers(node)
             marks = sorted(set(mod_marks + marks))  # 模块级 pytestmark + 函数级，去重排序
             is_unit = 'unit' in marks
-            env = '否' if is_unit else ('否' if env_default is False else '是')
+            if is_unit or env_default is False:
+                env = '否'
+            elif env_default == 'ui':
+                env = 'UI'
+            else:
+                env = '是'
             name = node.name
             count = params[0] if params else 1
             if params:
@@ -112,12 +125,13 @@ def extract_cases() -> list:
 
 
 def group_cases() -> list:
-    """按四大类分组：L1 / L2 / L3 / 专项。返回 [{group, cases:[...]}]。"""
+    """按五大类分组：L1 / L2 / L3 / 专项 / UI自动化。返回 [{group, cases:[...]}]。"""
     groups = [
         ('L1 工具层（现在能跑）', []),
         ('L2 用例层（分开测，等账号）', []),
         ('L3 场景层（连块测，等账号）', []),
         ('专项横切（边界 + 安全）', []),
+        ('UI 自动化（需浏览器）', []),
     ]
     for c in extract_cases():
         layer = c['layer']
@@ -127,6 +141,8 @@ def group_cases() -> list:
             groups[2][1].append(c)
         elif layer.startswith('专项'):
             groups[3][1].append(c)
+        elif layer.startswith('UI自动化'):
+            groups[4][1].append(c)
         else:
             groups[1][1].append(c)
     return [{'group': g, 'cases': cs} for g, cs in groups]

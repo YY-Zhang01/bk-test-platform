@@ -17,16 +17,19 @@ from app.case_index import extract_cases  # noqa: E402
 
 OUT = ROOT / 'docs' / '2026-08-23-用例清单.csv'
 
+_ENV_LABEL = {'否': '可跑', '是': '等账号', 'UI': '需浏览器'}
+
 
 def main():
     rows = extract_cases()
     with open(OUT, 'w', encoding='utf-8-sig', newline='') as fp:
         w = csv.writer(fp)
         w.writerow(['文件', '用例名', '作用/设计原因', '所属层级/维度',
-                    'marker', '优先级', '是否等账号'])
+                    'marker', '优先级', '运行状态'])
         for r in rows:
             w.writerow([r['file'], r['name'], r['desc'], r['layer'],
-                        r['marker'], r['priority'], r['env']])
+                        r['marker'], r['priority'],
+                        _ENV_LABEL.get(r['env'], r['env'])])
     print(f'已生成 {len(rows)} 行 -> {OUT}')
 
 

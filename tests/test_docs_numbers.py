@@ -45,12 +45,13 @@ def _count_markers(ini_text):
 
 @pytest.mark.unit
 def test_README用例数字与实测一致():
-    """README 的用例总数/函数数/能跑数/等账号数与代码实测一致。"""
+    """README 的用例总数/函数数/能跑数/等账号数/UI数与代码实测一致。"""
     cases = extract_cases()
     total = sum(c['count'] for c in cases)                 # 用例总数（参数化展开后）
     funcs = len(cases)                                     # 测试函数数
     unit = sum(c['count'] for c in cases if c['env'] == '否')  # 现在能跑的
-    env = total - unit                                     # 等账号的
+    ui = sum(c['count'] for c in cases if c['env'] == 'UI')    # 需浏览器的
+    env = total - unit - ui                                # 等账号的
 
     readme = (ROOT / 'README.md').read_text(encoding='utf-8')
     assert f'Cases-{total}' in readme, \
@@ -61,6 +62,8 @@ def test_README用例数字与实测一致():
         f'README 应写 {unit} 个 unit 用例正常跑'
     assert f'{env} 个环境层用例等账号激活' in readme, \
         f'README 应写 {env} 个环境层用例等账号激活'
+    assert f'{ui} 个 UI 用例需浏览器' in readme, \
+        f'README 应写 {ui} 个 UI 用例需浏览器'
 
 
 @pytest.mark.unit

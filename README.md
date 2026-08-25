@@ -8,7 +8,7 @@
 ![FastAPI](https://img.shields.io/badge/Web-FastAPI-009688)
 ![pytest](https://img.shields.io/badge/Framework-pytest-0a9edc)
 ![SQLite](https://img.shields.io/badge/Storage-SQLite-003b57?logo=sqlite)
-![Cases](https://img.shields.io/badge/Cases-131-blue)
+![Cases](https://img.shields.io/badge/Cases-151-blue)
 ![CI](https://github.com/YY-Zhang01/bk-test-platform/actions/workflows/ci.yml/badge.svg)
 ![Coverage](badge.svg)
 ![License](https://img.shields.io/badge/License-MIT-green)
@@ -45,7 +45,7 @@ bk-test-platform/
 │   └── job_config.py             单环境配置（真凭证走 job_config_local.py，已 gitignore）
 ├── frontend/                     Vue3 + Element Plus 前端（npm run build 后由后端托管）
 │   └── src/                      页面：总览/跑测试/接口调试/报告/AI生成/用例库/UI自动化
-├── tests/                        测试用例（131 个 / 119 函数，按 marker 分层）
+├── tests/                        测试用例（151 个 / 139 函数，含 20 个 UI 用例，按 marker 分层）
 │   ├── conftest.py               公共 fixture（job_client/cmdb_client，凭证缺失诚实 skip）
 │   ├── test_job_script.py        JOB 链路 1：脚本管理
 │   ├── test_job_fast_exec.py     JOB 链路 2：快速执行
@@ -153,7 +153,7 @@ flowchart TB
 
 | 维度 | 大白话问什么 | 载体 |
 |------|-------------|------|
-| 功能 | 对不对？ | 131 个分层用例 |
+| 功能 | 对不对？ | 151 个分层用例 |
 | 性能 | 快不快？ | `scripts/locustfile.py` 只读压测 |
 | 安全 | 漏不漏？ | `tests/test_security.py`（鉴权/越权/注入/高危） |
 | 边界 | 临界点崩不崩？ | `tests/test_job_boundary.py`（等价类/边界值/非法值） |
@@ -161,8 +161,9 @@ flowchart TB
 
 ### 3. 诚实原则
 
-未配置凭证时，环境层用例全部诚实 skip（不造假绿）：
-57 个 unit 用例正常跑，74 个环境层用例等账号激活。
+未配置凭证时，全部诚实 skip（不造假绿）：
+57 个 unit 用例正常跑，74 个环境层用例等账号激活，
+另有 20 个 UI 用例需浏览器（传 --run-ui + 系统浏览器）。
 
 ## 六、快速开始
 
@@ -176,7 +177,7 @@ pip install -r requirements.txt
 # 3. 跑测试
 python scripts/run_tests.py -m "unit and not platform"  # 冒烟 50 个，不等账号秒出
 python scripts/run_tests.py -m unit                     # unit 层 57 个（含 7 个 Web 层）
-python scripts/run_tests.py                             # 全量 131 用例 + HTML 报告
+python scripts/run_tests.py                             # 全量 151 用例 + HTML 报告
 
 # 4. 构建前端（首次或改前端后；需要 Node.js）
 cd frontend && npm install && npm run build && cd ..

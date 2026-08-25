@@ -30,7 +30,7 @@ FastAPI 后端（routers 拆分）+ Vue3/Element Plus 前端做「Web 平台」�
 
                 ▲ pytest 测试层
 ┌─────────────────────────────────────────────┐
-│  tests/ 分层用例（131 个，直接调客户端）        │
+│  tests/ 分层用例（151 个：131 核心 + 20 UI）    │
 │  conftest.py 提供 client fixture + 诚实 skip  │
 └─────────────────────────────────────────────┘
 ```
@@ -131,7 +131,7 @@ pytest 收集 tests/
 ```
 job-test/
 ├── app/                  # 产品代码（9 模块，见第二节）
-├── tests/                # 分层用例（131 个 / 119 函数）+ tests/ui/（17 个 UI 用例）
+├── tests/                # 分层用例（131 个 / 119 函数）+ tests/ui/（20 个 UI 用例）
 ├── scripts/              # 工具：run_tests 统一入口 / export_cases 导 CSV /
 │                         #       gen_api_docs 生成 API 参考 / locustfile 压测
 ├── docs/                 # 业务笔记、API 文档、架构文档、面试弹药

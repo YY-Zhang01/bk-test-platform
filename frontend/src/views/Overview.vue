@@ -113,7 +113,7 @@ const cards = computed(() => [
   { label: '用例总数', value: stats.value.total, icon: 'Odometer', grad: 'linear-gradient(135deg, #3b82f6, #60a5fa)' },
   { label: '测试函数', value: funcs.value, icon: 'Files', grad: 'linear-gradient(135deg, #6366f1, #a78bfa)' },
   { label: '现在能跑', value: stats.value.unit, icon: 'CircleCheck', grad: 'linear-gradient(135deg, #10b981, #34d399)' },
-  { label: '等账号激活', value: stats.value.env, icon: 'Clock', grad: 'linear-gradient(135deg, #f59e0b, #fbbf24)' },
+  { label: '待环境', value: stats.value.env, icon: 'Clock', grad: 'linear-gradient(135deg, #f59e0b, #fbbf24)' },
 ])
 
 const dotColors = ['#3b82f6', '#6366f1', '#10b981', '#f59e0b', '#8b5cf6']
