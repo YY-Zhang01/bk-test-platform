@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """UI 自动化（Playwright）——测 CMDB 网页（蓝鲸配置平台官方在线体验 cmdb-exp）。
 
-覆盖页面：业务列表 / 资源目录 / 主机列表 / 拓扑 / 模型 / 动态分组。
+覆盖页面：资源目录 / 主机列表 / 拓扑 / 模型 / 动态分组（cmdb-exp 无独立业务列表页，业务入口直达拓扑）。
 选择器依据：本仓库 docs/research/cmdb-pages/*.md 的实测可访问性快照（本地 standalone 与
 cmdb-exp 同是 bk-cmdb，页面结构一致）。
 
@@ -94,21 +94,6 @@ def test_CMDB进入首页(cmdb):
         expect(banner.get_by_role('link', name=name, exact=True)).to_be_visible()
 
 
-# ---------- 业务列表 ----------
-
-def test_CMDB业务列表能打开(cmdb):
-    """业务列表页应有「新建业务」按钮（业务写链路的入口）。"""
-    _nav(cmdb, '/business/index')
-    expect(cmdb.get_by_role('button', name='新建业务')).to_be_visible()
-
-
-def test_CMDB业务列表新建业务弹窗(cmdb):
-    """点「新建业务」应弹出表单，含「业务名称」输入项。"""
-    _nav(cmdb, '/business/index')
-    cmdb.get_by_role('button', name='新建业务').click()
-    expect(cmdb.get_by_text('业务名称')).to_be_visible(timeout=10000)
-
-
 # ---------- 资源目录 / 主机列表 ----------
 
 def test_CMDB资源目录能打开(cmdb):
@@ -143,7 +128,7 @@ def test_CMDB业务拓扑能打开(cmdb):
     """进入业务 → 业务拓扑：标题 + 内置"空闲机池"节点 + 主机列表标签。"""
     _nav(cmdb, f'/business/{CMDB_BUSINESS_ID}/index')
     expect(cmdb.get_by_role('heading', name='业务拓扑', level=1)).to_be_visible()
-    expect(cmdb.get_by_text('空闲机池')).to_be_visible()
+    expect(cmdb.get_by_text('空闲机池').first).to_be_visible()
     expect(cmdb.get_by_text('主机列表')).to_be_visible()
 
 

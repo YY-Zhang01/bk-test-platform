@@ -131,7 +131,7 @@ pytest 收集 tests/
 ```
 job-test/
 ├── app/                  # 产品代码（9 模块，见第二节）
-├── tests/                # 分层用例（131 个 / 119 函数）+ tests/ui/（19 个 UI 用例）
+├── tests/                # 分层用例（131 个 / 119 函数）+ tests/ui/（17 个 UI 用例）
 ├── scripts/              # 工具：run_tests 统一入口 / export_cases 导 CSV /
 │                         #       gen_api_docs 生成 API 参考 / locustfile 压测
 ├── docs/                 # 业务笔记、API 文档、架构文档、面试弹药
