@@ -26,10 +26,17 @@ def pytest_collection_modifyitems(config, items):
 
 @pytest.fixture(scope='session')
 def browser_type_launch_args(browser_type_launch_args):
-    """统一用系统 Edge，开可见窗口，每步间隔 500ms 便于观察。"""
+    """统一用系统 Edge，开可见窗口，每步间隔 500ms 便于观察。
+
+    --ignore-certificate-errors：cmdb-exp 的 SSL 证书过期，跳过证书校验，
+    否则浏览器会停在"证书错误"页面进不去。
+    """
+    args = list(browser_type_launch_args.get('args', []))
+    args.append('--ignore-certificate-errors')
     return {
         **browser_type_launch_args,
         'channel': 'msedge',
         'headless': False,
         'slow_mo': 500,
+        'args': args,
     }
