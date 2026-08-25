@@ -10,7 +10,7 @@ uvicorn==0.52.1
 pytest==9.1.1
 pytest-html==4.2.0
 pytest-cov==7.0.0
-pytest-playwright==0.7.0
+pytest-playwright==0.9.0
 playwright==1.62.0
 
 # ── ESB 接口调用 ──────────────────────────

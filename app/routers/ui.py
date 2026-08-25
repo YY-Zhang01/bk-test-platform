@@ -44,7 +44,7 @@ def ui_run():
     ui_html = REPORTS_DIR / f'ui_report_{stamp}.html'
     cmd = [sys.executable, '-m', 'pytest', 'tests/ui', '-m', 'ui',
            '--run-ui', '-q', '--tb=short',
-           '--screenshot', 'on_failure', '--output', str(shot_dir),
+           '--screenshot', 'only-on-failure', '--output', str(shot_dir),
            '--html', str(ui_html), '--self-contained-html']
     log_path = BASE_DIR / f'.run_{task_id}.log'
     log_f = open(log_path, 'w', encoding='utf-8')

@@ -5,7 +5,7 @@ UI 测试需要浏览器 + 平台在跑，不适合默认全量跑、也不适�
 默认 skip 所有 ui 测试；显式传 --run-ui 才真正执行。
 
 浏览器统一用系统 Edge（channel='msedge'），免下载 chromium；
-失败自动截图（pytest-playwright 的 --screenshot=on_failure 由 /api/ui/run 带上）。
+失败自动截图（pytest-playwright 的 --screenshot=only-on-failure 由 /api/ui/run 带上）。
 """
 import pytest
 
