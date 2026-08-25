@@ -21,7 +21,8 @@ def reports():
         stamp = (r['ts'] or '').replace('-', '').replace(':', '').replace(' ', '_')
         by_stamp[stamp] = r
     for item in items:
-        stamp = item['name'].replace('report_', '').replace('.html', '')
+        stamp = (item['name'].replace('ui_report_', '')
+                 .replace('report_', '').replace('.html', ''))
         r = by_stamp.get(stamp)
         if r:
             item['rate'] = r['rate']
@@ -34,7 +35,7 @@ def reports():
 @router.delete('/api/reports/{filename}')
 def delete_report(filename: str):
     """删除报告文件（白名单防目录穿越）。"""
-    if not re.fullmatch(r'report_\d{8}_\d{6}\.html', filename) \
+    if not re.fullmatch(r'(?:ui_)?report_\d{8}_\d{6}\.html', filename) \
             and filename != 'latest.html':
         raise HTTPException(400, '非法报告文件名')
     path = REPORTS_DIR / filename
@@ -47,7 +48,7 @@ def delete_report(filename: str):
 @router.get('/report/{filename}')
 def report_file(filename: str):
     """返回 reports/ 下的 HTML 报告（文件名白名单防目录穿越）。"""
-    if not re.fullmatch(r'report_\d{8}_\d{6}\.html', filename) \
+    if not re.fullmatch(r'(?:ui_)?report_\d{8}_\d{6}\.html', filename) \
             and filename != 'latest.html':
         raise HTTPException(400, '非法报告文件名')
     path = REPORTS_DIR / filename
