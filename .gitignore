@@ -25,3 +25,14 @@ app/envs.local.json
 .idea/
 .vscode/
 *.iml
+
+# 个人文档（仅本地保留，不提交到 GitHub）
+docs/2026-08-22-端到端测试平台建设规划.md
+docs/2026-08-22-JOB体验账号申请指引.md
+docs/2026-08-23-读代码讲义.md
+docs/2026-08-23-二面问答卡.md
+docs/2026-08-23-项目功能总结.md
+docs/2026-08-23-用例全景图.md
+docs/2026-08-23-demo视频录制脚本.md
+docs/2026-08-23-job-test进度交接.md
+docs/2026-08-24-架构升级规划.md
